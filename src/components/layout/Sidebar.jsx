@@ -1,10 +1,13 @@
 import clsx from 'clsx'
 import companyLogo from '../../assets/company-logo.png'
 import { useFormContext } from '../../context/FormContext.jsx'
+import { useLanguage } from '../../context/LanguageContext.jsx'
 import styles from './Sidebar.module.css'
 
 export const Sidebar = () => {
   const { steps, currentStep, stepStatus, StepStatus, goToStep } = useFormContext()
+  const { dictionary } = useLanguage()
+  const { navigation } = dictionary
 
   return (
     <aside className={styles.sidebar}>
@@ -14,11 +17,11 @@ export const Sidebar = () => {
         </div>
         <div className={styles.brand}>
           <div className={styles.header}>
-            <p className={styles.kicker}>Commjat Wellness</p>
-            <h1 className={styles.title}>健康風險評估</h1>
+            <p className={styles.kicker}>{navigation.kicker}</p>
+            <h1 className={styles.title}>{navigation.title}</h1>
           </div>
         </div>
-        <p className={styles.subtitle}>循序完成每個步驟即可獲得專屬報告</p>
+        <p className={styles.subtitle}>{navigation.subtitle}</p>
       </div>
 
       <nav aria-label="填寫步驟">
@@ -50,7 +53,7 @@ export const Sidebar = () => {
                   data-status={status}
                 >
                   <span className={styles.stepNumber}>{index + 1}</span>
-                  <span className={styles.stepLabel}>{step.label}</span>
+                  <span className={styles.stepLabel}>{dictionary.steps[step.key]}</span>
                   {status === StepStatus.COMPLETED ? (
                     <span className={styles.statusBadge} aria-label="已完成">
                       ✓
@@ -64,8 +67,9 @@ export const Sidebar = () => {
       </nav>
 
       <footer className={styles.footer}>
-        <span>Powered by 康緁股份有限公司</span>
-        <span>CommJat Co., Ltd.</span>
+        {navigation.poweredBy.map((line) => (
+          <span key={line}>{line}</span>
+        ))}
       </footer>
     </aside>
   )

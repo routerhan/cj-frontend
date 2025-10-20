@@ -7,11 +7,11 @@ export const StepStatus = {
 }
 
 const steps = [
-  { id: 0, key: 'welcome', label: '歡迎頁' },
-  { id: 1, key: 'basicInfo', label: '基本資料與生活習慣' },
-  { id: 2, key: 'conditions', label: '慢性疾病狀態' },
-  { id: 3, key: 'riskFactors', label: '血脂與病史' },
-  { id: 4, key: 'report', label: '風險報告' },
+  { id: 0, key: 'welcome' },
+  { id: 1, key: 'basicInfo' },
+  { id: 2, key: 'conditions' },
+  { id: 3, key: 'riskFactors' },
+  { id: 4, key: 'report' },
 ]
 
 const FormContext = createContext(undefined)

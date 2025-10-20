@@ -56,10 +56,10 @@ export const calculateBMI = (heightCm, weightKg) => {
  */
 export const getBMICategory = (bmi) => {
   if (!Number.isFinite(bmi) || bmi <= 0) return ''
-  if (bmi < 18.5) return '過輕'
-  if (bmi < 24) return '標準'
-  if (bmi < 27) return '過重'
-  return '肥胖'
+  if (bmi < 18.5) return 'underweight'
+  if (bmi < 24) return 'normal'
+  if (bmi < 27) return 'overweight'
+  return 'obese'
 }
 
 export const calculateEGFR = ({

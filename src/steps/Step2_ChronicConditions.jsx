@@ -4,19 +4,12 @@ import { Button } from '../components/ui/Button.jsx'
 import { InstantResult } from '../components/ui/InstantResult.jsx'
 import { ProgressiveCard } from '../components/ui/ProgressiveCard.jsx'
 import { useFormContext } from '../context/FormContext.jsx'
+import { useLanguage } from '../context/LanguageContext.jsx'
 import { calculateEGFR } from '../utils/calculations.js'
 import styles from './Step2_ChronicConditions.module.css'
 
-const STATUS_OPTIONS = [
-  { value: 'yes', label: '有' },
-  { value: 'no', label: '無' },
-  { value: 'unknown', label: '不知道' },
-]
-
-const YES_NO_OPTIONS = [
-  { value: 'yes', label: '有' },
-  { value: 'no', label: '無' },
-]
+const STATUS_VALUES = ['yes', 'no', 'unknown']
+const YES_NO_VALUES = ['yes', 'no']
 
 export const Step2_ChronicConditions = () => {
   const {
@@ -28,6 +21,24 @@ export const Step2_ChronicConditions = () => {
     StepStatus,
     stepStatus,
   } = useFormContext()
+  const { dictionary } = useLanguage()
+  const copy = dictionary.conditions
+  const general = dictionary.general
+
+  const statusOptions = STATUS_VALUES.map((value) => ({
+    value,
+    label:
+      value === 'unknown'
+        ? general.unknown
+        : value === 'yes'
+        ? general.yes
+        : general.no,
+  }))
+
+  const yesNoOptions = YES_NO_VALUES.map((value) => ({
+    value,
+    label: value === 'yes' ? general.yes : general.no,
+  }))
 
   const { basicInfo, conditions } = formData
   const [errors, setErrors] = useState({})

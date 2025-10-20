@@ -3,33 +3,9 @@ import { Button } from '../components/ui/Button.jsx'
 import { InstantResult } from '../components/ui/InstantResult.jsx'
 import { Tooltip } from '../components/ui/Tooltip.jsx'
 import { useFormContext } from '../context/FormContext.jsx'
+import { useLanguage } from '../context/LanguageContext.jsx'
 import { calculateAge, calculateBMI, getBMICategory } from '../utils/calculations.js'
 import styles from './Step1_BasicInfo.module.css'
-
-const BMI_SUGGESTIONS = {
-  過輕: '建議增加均衡飲食與阻力訓練，避免營養不足。',
-  標準: '維持當前生活習慣，定期追蹤體重與身體組成。',
-  過重: '適度調整飲食並增加運動量，有助降低代謝風險。',
-  肥胖: '建議諮詢營養師或醫師，制定個人化體重管理計畫。',
-}
-
-const GENDER_OPTIONS = [
-  { value: 'male', label: '男' },
-  { value: 'female', label: '女' },
-  { value: 'other', label: '其他' },
-]
-
-const SMOKING_OPTIONS = [
-  { value: 'yes', label: '有' },
-  { value: 'no', label: '無' },
-  { value: 'quit', label: '已戒' },
-]
-
-const FAMILY_HISTORY_OPTIONS = [
-  { value: 'yes', label: '有' },
-  { value: 'no', label: '無' },
-  { value: 'unknown', label: '不知道' },
-]
 
 export const Step1_BasicInfo = () => {
   const {
@@ -41,6 +17,27 @@ export const Step1_BasicInfo = () => {
     stepStatus,
     StepStatus,
   } = useFormContext()
+
+  const { dictionary } = useLanguage()
+  const copy = dictionary.basicInfo
+  const general = dictionary.general
+
+  const genderOptions = Object.entries(copy.genderOptions).map(([value, label]) => ({
+    value,
+    label,
+  }))
+
+  const smokingOptions = [
+    { value: 'yes', label: copy.smokingOptions?.yes ?? general.yes },
+    { value: 'no', label: copy.smokingOptions?.no ?? general.no },
+    { value: 'quit', label: copy.smokingOptions?.quit ?? general.quit },
+  ]
+
+  const familyHistoryOptions = [
+    { value: 'yes', label: general.yes },
+    { value: 'no', label: general.no },
+    { value: 'unknown', label: general.unknown },
+  ]
 
   const { basicInfo } = formData
   const [errors, setErrors] = useState({})
@@ -104,36 +101,36 @@ export const Step1_BasicInfo = () => {
     const nextErrors = {}
 
     if (!basicInfo.gender) {
-      nextErrors.gender = '請選擇性別'
+      nextErrors.gender = copy.errors.gender
     } else if (basicInfo.gender === 'other' && !basicInfo.genderOther) {
-      nextErrors.genderOther = '請填寫自訂性別'
+      nextErrors.genderOther = copy.errors.genderOther
     }
 
     if (!basicInfo.birthDate) {
-      nextErrors.birthDate = '請輸入出生年月日'
+      nextErrors.birthDate = copy.errors.birthDate
     } else if (age === null) {
-      nextErrors.birthDate = '請確認日期格式或是否為未來日期'
+      nextErrors.birthDate = copy.errors.birthDateFuture
     }
 
     const hasHeightValue = basicInfo.heightCm !== ''
     const hasWeightValue = basicInfo.weightKg !== ''
 
     if (!hasHeightValue) {
-      nextErrors.heightCm = '請輸入身高'
+      nextErrors.heightCm = copy.errors.height
     }
     if (!hasWeightValue) {
-      nextErrors.weightKg = '請輸入體重'
+      nextErrors.weightKg = copy.errors.weight
     }
     if (hasHeightValue && hasWeightValue && bmi === null) {
-      nextErrors.weightKg = '請確認身高與體重數值是否正確'
+      nextErrors.weightKg = copy.errors.bmi
     }
 
     if (!basicInfo.smokingStatus) {
-      nextErrors.smokingStatus = '請選擇抽煙狀況'
+      nextErrors.smokingStatus = copy.errors.smoking
     }
 
     if (!basicInfo.familyHistory) {
-      nextErrors.familyHistory = '請選擇家族史情況'
+      nextErrors.familyHistory = copy.errors.familyHistory
     }
 
     return nextErrors
@@ -150,19 +147,20 @@ export const Step1_BasicInfo = () => {
     }
   }
 
-  const ageDisplay = Number.isFinite(age) ? `${age} 歲` : '--'
+  const ageDisplay = Number.isFinite(age) ? `${age} ${general.yearsOldSuffix}` : '--'
   const bmiDisplay = Number.isFinite(bmi) ? bmi.toFixed(1) : '--'
   const bmiDescription = (() => {
-    if (!basicInfo.heightCm || !basicInfo.weightKg) return '請輸入身高與體重以計算 BMI'
-    if (!Number.isFinite(bmi)) return '請確認身高與體重數值是否正確'
-    const suggestion = BMI_SUGGESTIONS[bmiCategory] ?? '請持續關注身體變化並定期檢測'
-    return `${bmiCategory} · ${suggestion}`
+    if (!basicInfo.heightCm || !basicInfo.weightKg) return copy.instant.bmiMissing
+    if (!Number.isFinite(bmi)) return copy.instant.bmiInvalid
+    const suggestion = copy.instant.bmiSuggestions[bmiCategory] ?? copy.instant.bmiDefault
+    const label = copy.instant.bmiLabels[bmiCategory]
+    return label ? `${label} · ${suggestion}` : suggestion
   })()
 
   const ageDescription = (() => {
-    if (!basicInfo.birthDate) return '請輸入出生年月日以建立基礎資料'
-    if (!Number.isFinite(age)) return '請確認日期格式是否正確，或是否為未來日期'
-    return '系統會根據生日自動更新您的年齡'
+    if (!basicInfo.birthDate) return copy.instant.ageDesc
+    if (!Number.isFinite(age)) return copy.instant.ageInvalid
+    return copy.instant.ageDesc
   })()
 
   return (
@@ -170,22 +168,20 @@ export const Step1_BasicInfo = () => {
       <header className={styles.header}>
         <div>
           <p className={styles.kicker}>Step 1</p>
-          <h2>基本資料與生活習慣</h2>
+          <h2>{dictionary.steps.basicInfo}</h2>
         </div>
-        <p className={styles.lead}>
-          請提供您的基本身體與生活習慣資料，我們將即時計算年齡與 BMI，作為風險評估的基礎。
-        </p>
+        <p className={styles.lead}>{copy.lead}</p>
       </header>
 
       <div className={styles.body}>
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
           <section className={styles.fieldset}>
-            <h3 className={styles.sectionTitle}>個人資料</h3>
+            <h3 className={styles.sectionTitle}>{copy.sections.personal}</h3>
             <div className={styles.fieldGrid}>
               <div className={styles.field}>
-                <span className={styles.label}>性別</span>
-                <div className={styles.optionGroup} role="radiogroup" aria-label="性別">
-                  {GENDER_OPTIONS.map((option) => (
+                <span className={styles.label}>{copy.fields.gender}</span>
+                <div className={styles.optionGroup} role="radiogroup" aria-label={copy.fields.gender}>
+                  {genderOptions.map((option) => (
                     <label key={option.value} className={styles.radioLabel}>
                       <input
                         type="radio"
@@ -204,7 +200,7 @@ export const Step1_BasicInfo = () => {
                   <input
                     type="text"
                     className={styles.input}
-                    placeholder="請填寫您的認同性別"
+                    placeholder={copy.fields.genderOtherPlaceholder}
                     value={basicInfo.genderOther}
                     onChange={handleFieldChange('genderOther')}
                     aria-invalid={Boolean(errors.genderOther)}
@@ -215,7 +211,7 @@ export const Step1_BasicInfo = () => {
               </div>
 
               <label className={styles.field} htmlFor="birthDate">
-                <span className={styles.label}>出生年月日</span>
+                <span className={styles.label}>{copy.fields.birthDate}</span>
                 <input
                   id="birthDate"
                   type="date"
@@ -228,11 +224,11 @@ export const Step1_BasicInfo = () => {
               </label>
 
               <label className={styles.field} htmlFor="nationality">
-                <span className={styles.label}>國籍</span>
+                <span className={styles.label}>{copy.fields.nationality}</span>
                 <input
                   id="nationality"
                   type="text"
-                  placeholder="例如：臺灣"
+                  placeholder=""
                   value={basicInfo.nationality}
                   onChange={handleFieldChange('nationality')}
                   className={styles.input}
@@ -242,17 +238,16 @@ export const Step1_BasicInfo = () => {
           </section>
 
           <section className={styles.fieldset}>
-            <h3 className={styles.sectionTitle}>身體測量</h3>
+            <h3 className={styles.sectionTitle}>{copy.sections.measurements}</h3>
             <div className={styles.fieldGrid}>
               <label className={styles.field} htmlFor="heightCm">
-                <span className={styles.label}>身高 (cm)</span>
+                <span className={styles.label}>{copy.fields.height}</span>
                 <input
                   id="heightCm"
                   type="number"
                   inputMode="decimal"
                   step="0.1"
                   min="0"
-                  placeholder="例如：170"
                   value={basicInfo.heightCm}
                   onChange={handleFieldChange('heightCm')}
                   className={styles.input}
@@ -262,14 +257,13 @@ export const Step1_BasicInfo = () => {
               </label>
 
               <label className={styles.field} htmlFor="weightKg">
-                <span className={styles.label}>體重 (kg)</span>
+                <span className={styles.label}>{copy.fields.weight}</span>
                 <input
                   id="weightKg"
                   type="number"
                   inputMode="decimal"
                   step="0.1"
                   min="0"
-                  placeholder="例如：65"
                   value={basicInfo.weightKg}
                   onChange={handleFieldChange('weightKg')}
                   className={styles.input}
@@ -279,14 +273,13 @@ export const Step1_BasicInfo = () => {
               </label>
 
               <label className={styles.field} htmlFor="waistCm">
-                <span className={styles.label}>腰圍 (cm)</span>
+                <span className={styles.label}>{copy.fields.waist}</span>
                 <input
                   id="waistCm"
                   type="number"
                   inputMode="decimal"
                   step="0.1"
                   min="0"
-                  placeholder="例如：80"
                   value={basicInfo.waistCm}
                   onChange={handleFieldChange('waistCm')}
                   className={styles.input}
@@ -296,12 +289,12 @@ export const Step1_BasicInfo = () => {
           </section>
 
           <section className={styles.fieldset}>
-            <h3 className={styles.sectionTitle}>生活習慣與家族史</h3>
+            <h3 className={styles.sectionTitle}>{copy.sections.lifestyle}</h3>
             <div className={styles.fieldGrid}>
               <div className={styles.field}>
-                <span className={styles.label}>抽煙</span>
-                <div className={styles.optionGroup} role="radiogroup" aria-label="抽煙">
-                  {SMOKING_OPTIONS.map((option) => (
+                <span className={styles.label}>{copy.fields.smoking}</span>
+                <div className={styles.optionGroup} role="radiogroup" aria-label={copy.fields.smoking}>
+                  {smokingOptions.map((option) => (
                     <label key={option.value} className={styles.radioLabel}>
                       <input
                         type="radio"
@@ -323,14 +316,14 @@ export const Step1_BasicInfo = () => {
 
               <div className={styles.field}>
                 <span className={styles.labelWithTooltip}>
-                  家族史
+                  {copy.fields.familyHistory}
                   <Tooltip
-                    label="父親 55 歲前或母親 65 歲前發生心肌梗塞或冠心病皆視為陽性家族史。"
-                    triggerLabel="家族史說明"
+                    label={copy.familyHistoryHint}
+                    triggerLabel={copy.tooltips.family}
                   />
                 </span>
                 <div className={styles.optionGroup} role="radiogroup" aria-label="家族史">
-                  {FAMILY_HISTORY_OPTIONS.map((option) => (
+                  {familyHistoryOptions.map((option) => (
                     <label key={option.value} className={styles.radioLabel}>
                       <input
                         type="radio"
@@ -353,13 +346,13 @@ export const Step1_BasicInfo = () => {
           </section>
 
           <div className={styles.actions}>
-            <Button type="submit">下一步：慢性疾病狀態</Button>
+            <Button type="submit">{copy.buttonNext}</Button>
           </div>
         </form>
 
         <aside className={styles.results}>
-          <InstantResult label="年齡" value={ageDisplay} description={ageDescription} />
-          <InstantResult label="BMI (kg/m²)" value={bmiDisplay} description={bmiDescription} />
+          <InstantResult label={copy.instant.age} value={ageDisplay} description={ageDescription} />
+          <InstantResult label={copy.instant.bmi} value={bmiDisplay} description={bmiDescription} />
         </aside>
       </div>
     </section>
