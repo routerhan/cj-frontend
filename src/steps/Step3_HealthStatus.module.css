@@ -49,6 +49,15 @@
   gap: 1.25rem;
 }
 
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.disabled input {
+  cursor: not-allowed;
+}
+
 .optionRow {
   display: inline-flex;
   flex-wrap: wrap;

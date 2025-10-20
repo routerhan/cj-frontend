@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 import { Button } from '../components/ui/Button.jsx'
 import { InstantResult } from '../components/ui/InstantResult.jsx'
@@ -16,8 +17,6 @@ const YES_NO_OPTIONS = [
   { value: 'yes', label: '有' },
   { value: 'no', label: '無' },
 ]
-
-const shouldExpand = (status) => status === 'yes' || status === 'unknown'
 
 export const Step2_ChronicConditions = () => {
   const {
@@ -228,12 +227,7 @@ export const Step2_ChronicConditions = () => {
           <ProgressiveCard
             title="高血壓（>130/80 mmHg）"
             summary="請填寫目前控制狀況與最近一次量測"
-            isExpanded={shouldExpand(conditions.hypertension.status)}
-            onToggle={() => {
-              const next = shouldExpand(conditions.hypertension.status) ? 'no' : 'yes'
-              updateFormField(['conditions', 'hypertension', 'status'], next)
-              markInProgress()
-            }}
+            isExpanded
           >
             <div className={styles.section}>
               <div role="radiogroup" aria-label="高血壓狀態" className={styles.optionRow}>
@@ -254,67 +248,68 @@ export const Step2_ChronicConditions = () => {
                 <p className={styles.error}>{errors['hypertension.status']}</p>
               ) : null}
 
-              {shouldExpand(conditions.hypertension.status) ? (
-                <div className={styles.subSection}>
-                  <div className={styles.inlineGroup}>
-                    <span className={styles.inlineLabel}>目前有無服用降血壓藥</span>
-                    <div role="radiogroup" aria-label="降血壓藥" className={styles.optionRow}>
-                      {YES_NO_OPTIONS.map((option) => (
-                        <label key={option.value} className={styles.radioOption}>
-                          <input
-                            type="radio"
-                            name="hypertension-medication"
-                            value={option.value}
-                            checked={conditions.hypertension.medication === option.value}
-                            onChange={handleFieldChange('hypertension', 'medication')}
-                          />
-                          <span>{option.label}</span>
-                        </label>
-                      ))}
-                    </div>
+              <div
+                className={clsx(styles.subSection, {
+                  [styles.disabled]: conditions.hypertension.status !== 'yes',
+                })}
+                aria-disabled={conditions.hypertension.status !== 'yes'}
+              >
+                <div className={styles.inlineGroup}>
+                  <span className={styles.inlineLabel}>目前有無服用降血壓藥</span>
+                  <div role="radiogroup" aria-label="降血壓藥" className={styles.optionRow}>
+                    {YES_NO_OPTIONS.map((option) => (
+                      <label key={option.value} className={styles.radioOption}>
+                        <input
+                          type="radio"
+                          name="hypertension-medication"
+                          value={option.value}
+                          checked={conditions.hypertension.medication === option.value}
+                          onChange={handleFieldChange('hypertension', 'medication')}
+                          disabled={conditions.hypertension.status !== 'yes'}
+                        />
+                        <span>{option.label}</span>
+                      </label>
+                    ))}
                   </div>
-                  {errors['hypertension.medication'] ? (
-                    <p className={styles.error}>{errors['hypertension.medication']}</p>
-                  ) : null}
-
-                  <div className={styles.inlineGroup}>
-                    <span className={styles.inlineLabel}>最近一次血壓值</span>
-                    <div className={styles.bloodPressureInputs}>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        placeholder="收縮壓"
-                        value={conditions.hypertension.systolic}
-                        onChange={handleFieldChange('hypertension', 'systolic')}
-                      />
-                      <span className={styles.unit}>/</span>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        placeholder="舒張壓"
-                        value={conditions.hypertension.diastolic}
-                        onChange={handleFieldChange('hypertension', 'diastolic')}
-                      />
-                      <span className={styles.unit}>mmHg</span>
-                    </div>
-                  </div>
-                  {errors['hypertension.pressure'] ? (
-                    <p className={styles.error}>{errors['hypertension.pressure']}</p>
-                  ) : null}
                 </div>
-              ) : null}
+                {errors['hypertension.medication'] ? (
+                  <p className={styles.error}>{errors['hypertension.medication']}</p>
+                ) : null}
+
+                <div className={styles.inlineGroup}>
+                  <span className={styles.inlineLabel}>最近一次血壓值</span>
+                  <div className={styles.bloodPressureInputs}>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      placeholder="收縮壓"
+                      value={conditions.hypertension.systolic}
+                      onChange={handleFieldChange('hypertension', 'systolic')}
+                      disabled={conditions.hypertension.status !== 'yes'}
+                    />
+                    <span className={styles.unit}>/</span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      placeholder="舒張壓"
+                      value={conditions.hypertension.diastolic}
+                      onChange={handleFieldChange('hypertension', 'diastolic')}
+                      disabled={conditions.hypertension.status !== 'yes'}
+                    />
+                    <span className={styles.unit}>mmHg</span>
+                  </div>
+                </div>
+                {errors['hypertension.pressure'] ? (
+                  <p className={styles.error}>{errors['hypertension.pressure']}</p>
+                ) : null}
+              </div>
             </div>
           </ProgressiveCard>
 
           <ProgressiveCard
             title="糖尿病"
             summary="填寫藥物使用與最近一次血糖、糖化血色素"
-            isExpanded={shouldExpand(conditions.diabetes.status)}
-            onToggle={() => {
-              const next = shouldExpand(conditions.diabetes.status) ? 'no' : 'yes'
-              updateFormField(['conditions', 'diabetes', 'status'], next)
-              markInProgress()
-            }}
+            isExpanded
           >
             <div className={styles.section}>
               <div role="radiogroup" aria-label="糖尿病狀態" className={styles.optionRow}>
@@ -335,77 +330,78 @@ export const Step2_ChronicConditions = () => {
                 <p className={styles.error}>{errors['diabetes.status']}</p>
               ) : null}
 
-              {shouldExpand(conditions.diabetes.status) ? (
-                <div className={styles.subSection}>
-                  <div className={styles.inlineGroup}>
-                    <span className={styles.inlineLabel}>目前有無服用降血糖藥</span>
-                    <div role="radiogroup" aria-label="降血糖藥" className={styles.optionRow}>
-                      {YES_NO_OPTIONS.map((option) => (
-                        <label key={option.value} className={styles.radioOption}>
-                          <input
-                            type="radio"
-                            name="diabetes-medication"
-                            value={option.value}
-                            checked={conditions.diabetes.medication === option.value}
-                            onChange={handleFieldChange('diabetes', 'medication')}
-                          />
-                          <span>{option.label}</span>
-                        </label>
-                      ))}
-                    </div>
+              <div
+                className={clsx(styles.subSection, {
+                  [styles.disabled]: conditions.diabetes.status !== 'yes',
+                })}
+                aria-disabled={conditions.diabetes.status !== 'yes'}
+              >
+                <div className={styles.inlineGroup}>
+                  <span className={styles.inlineLabel}>目前有無服用降血糖藥</span>
+                  <div role="radiogroup" aria-label="降血糖藥" className={styles.optionRow}>
+                    {YES_NO_OPTIONS.map((option) => (
+                      <label key={option.value} className={styles.radioOption}>
+                        <input
+                          type="radio"
+                          name="diabetes-medication"
+                          value={option.value}
+                          checked={conditions.diabetes.medication === option.value}
+                          onChange={handleFieldChange('diabetes', 'medication')}
+                          disabled={conditions.diabetes.status !== 'yes'}
+                        />
+                        <span>{option.label}</span>
+                      </label>
+                    ))}
                   </div>
-                  {errors['diabetes.medication'] ? (
-                    <p className={styles.error}>{errors['diabetes.medication']}</p>
-                  ) : null}
-
-                  <label className={styles.inlineGroup}>
-                    <span className={styles.inlineLabel}>最近一次空腹血糖值</span>
-                    <div className={styles.inlineInput}>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        placeholder="mg/dL"
-                        value={conditions.diabetes.fastingGlucoseMgDl}
-                        onChange={handleFieldChange('diabetes', 'fastingGlucoseMgDl')}
-                      />
-                      <span className={styles.unit}>mg/dL</span>
-                    </div>
-                    {errors['diabetes.fastingGlucoseMgDl'] ? (
-                      <p className={styles.error}>{errors['diabetes.fastingGlucoseMgDl']}</p>
-                    ) : null}
-                  </label>
-
-                  <label className={styles.inlineGroup}>
-                    <span className={styles.inlineLabel}>最近一次糖化血色素值</span>
-                    <div className={styles.inlineInput}>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        step="0.1"
-                        placeholder="%"
-                        value={conditions.diabetes.hba1cPercent}
-                        onChange={handleFieldChange('diabetes', 'hba1cPercent')}
-                      />
-                      <span className={styles.unit}>%</span>
-                    </div>
-                    {errors['diabetes.hba1cPercent'] ? (
-                      <p className={styles.error}>{errors['diabetes.hba1cPercent']}</p>
-                    ) : null}
-                  </label>
                 </div>
-              ) : null}
+                {errors['diabetes.medication'] ? (
+                  <p className={styles.error}>{errors['diabetes.medication']}</p>
+                ) : null}
+
+                <label className={styles.inlineGroup}>
+                  <span className={styles.inlineLabel}>最近一次空腹血糖值</span>
+                  <div className={styles.inlineInput}>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      placeholder="mg/dL"
+                      value={conditions.diabetes.fastingGlucoseMgDl}
+                      onChange={handleFieldChange('diabetes', 'fastingGlucoseMgDl')}
+                      disabled={conditions.diabetes.status !== 'yes'}
+                    />
+                    <span className={styles.unit}>mg/dL</span>
+                  </div>
+                  {errors['diabetes.fastingGlucoseMgDl'] ? (
+                    <p className={styles.error}>{errors['diabetes.fastingGlucoseMgDl']}</p>
+                  ) : null}
+                </label>
+
+                <label className={styles.inlineGroup}>
+                  <span className={styles.inlineLabel}>最近一次糖化血色素值</span>
+                  <div className={styles.inlineInput}>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.1"
+                      placeholder="%"
+                      value={conditions.diabetes.hba1cPercent}
+                      onChange={handleFieldChange('diabetes', 'hba1cPercent')}
+                      disabled={conditions.diabetes.status !== 'yes'}
+                    />
+                    <span className={styles.unit}>%</span>
+                  </div>
+                  {errors['diabetes.hba1cPercent'] ? (
+                    <p className={styles.error}>{errors['diabetes.hba1cPercent']}</p>
+                  ) : null}
+                </label>
+              </div>
             </div>
           </ProgressiveCard>
 
           <ProgressiveCard
             title="腎臟病"
             summary="提供肌酸酐數值以評估腎絲球過濾率"
-            isExpanded={shouldExpand(conditions.kidney.status)}
-            onToggle={() => {
-              const next = shouldExpand(conditions.kidney.status) ? 'no' : 'yes'
-              updateFormField(['conditions', 'kidney', 'status'], next)
-              markInProgress()
-            }}
+            isExpanded
           >
             <div className={styles.section}>
               <div role="radiogroup" aria-label="腎臟病狀態" className={styles.optionRow}>
@@ -426,36 +422,40 @@ export const Step2_ChronicConditions = () => {
                 <p className={styles.error}>{errors['kidney.status']}</p>
               ) : null}
 
-              {shouldExpand(conditions.kidney.status) ? (
-                <div className={styles.subSection}>
-                  <label className={styles.inlineGroup}>
-                    <span className={styles.inlineLabel}>最近一次肌酸酐數值</span>
-                    <div className={styles.inlineInput}>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        step="0.01"
-                        placeholder="mg/dL"
-                        value={conditions.kidney.serumCreatinineMgDl}
-                        onChange={handleFieldChange('kidney', 'serumCreatinineMgDl')}
-                      />
-                      <span className={styles.unit}>mg/dL</span>
-                    </div>
-                  </label>
-                  {errors['kidney.serumCreatinineMgDl'] ? (
-                    <p className={styles.error}>{errors['kidney.serumCreatinineMgDl']}</p>
-                  ) : null}
+              <div
+                className={clsx(styles.subSection, {
+                  [styles.disabled]: conditions.kidney.status !== 'yes',
+                })}
+                aria-disabled={conditions.kidney.status !== 'yes'}
+              >
+                <label className={styles.inlineGroup}>
+                  <span className={styles.inlineLabel}>最近一次肌酸酐數值</span>
+                  <div className={styles.inlineInput}>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      placeholder="mg/dL"
+                      value={conditions.kidney.serumCreatinineMgDl}
+                      onChange={handleFieldChange('kidney', 'serumCreatinineMgDl')}
+                      disabled={conditions.kidney.status !== 'yes'}
+                    />
+                    <span className={styles.unit}>mg/dL</span>
+                  </div>
+                </label>
+                {errors['kidney.serumCreatinineMgDl'] ? (
+                  <p className={styles.error}>{errors['kidney.serumCreatinineMgDl']}</p>
+                ) : null}
 
-                  <InstantResult
-                    label="自動換算 eGFR"
-                    value={egfrDisplay}
-                    description={egfrDescription}
-                  />
-                  {errors['kidney.egfr'] ? (
-                    <p className={styles.error}>{errors['kidney.egfr']}</p>
-                  ) : null}
-                </div>
-              ) : null}
+                <InstantResult
+                  label="自動換算 eGFR"
+                  value={egfrDisplay}
+                  description={egfrDescription}
+                />
+                {errors['kidney.egfr'] ? (
+                  <p className={styles.error}>{errors['kidney.egfr']}</p>
+                ) : null}
+              </div>
             </div>
           </ProgressiveCard>
         </div>

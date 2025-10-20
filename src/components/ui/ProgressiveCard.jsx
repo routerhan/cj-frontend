@@ -13,16 +13,18 @@ export const ProgressiveCard = ({
         <h2 className={styles.title}>{title}</h2>
         {summary ? <p className={styles.summary}>{summary}</p> : null}
       </div>
-      <button
-        type="button"
-        className={styles.toggle}
-        aria-expanded={isExpanded}
-        onClick={onToggle}
-      >
-        {isExpanded ? '收合' : '展開'}
-      </button>
+      {onToggle ? (
+        <button
+          type="button"
+          className={styles.toggle}
+          aria-expanded={isExpanded}
+          onClick={onToggle}
+        >
+          {isExpanded ? '收合' : '展開'}
+        </button>
+      ) : null}
     </header>
-    <div className={styles.panel} data-expanded={isExpanded}>
+    <div className={styles.panel} data-expanded={onToggle ? isExpanded : true}>
       {children}
     </div>
   </section>

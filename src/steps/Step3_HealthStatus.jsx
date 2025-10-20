@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { useState } from 'react'
 import { Button } from '../components/ui/Button.jsx'
 import { ProgressiveCard } from '../components/ui/ProgressiveCard.jsx'
@@ -14,8 +15,6 @@ const YES_NO_OPTIONS = [
   { value: 'yes', label: '有' },
   { value: 'no', label: '無' },
 ]
-
-const shouldExpand = (status) => status === 'yes' || status === 'unknown'
 
 export const Step3_HealthStatus = () => {
   const {
@@ -141,12 +140,7 @@ export const Step3_HealthStatus = () => {
         <ProgressiveCard
           title="高脂血症"
           summary="掌握降血脂藥物使用與最新血脂檢驗值"
-          isExpanded={shouldExpand(riskFactors.dyslipidemia.status)}
-          onToggle={() => {
-            const next = shouldExpand(riskFactors.dyslipidemia.status) ? 'no' : 'yes'
-            updateFormField(['riskFactors', 'dyslipidemia', 'status'], next)
-            markInProgressIfNeeded()
-          }}
+          isExpanded
         >
           <div className={styles.section}>
             <div role="radiogroup" aria-label="高脂血症狀態" className={styles.optionRow}>
@@ -167,81 +161,88 @@ export const Step3_HealthStatus = () => {
               <p className={styles.error}>{errors['dyslipidemia.status']}</p>
             ) : null}
 
-            {shouldExpand(riskFactors.dyslipidemia.status) ? (
-              <div className={styles.cardGrid}>
-                <div className={styles.inlineGroup}>
-                  <span className={styles.inlineLabel}>目前有無服用降血脂藥</span>
-                  <div role="radiogroup" aria-label="降血脂藥" className={styles.optionRow}>
-                    {YES_NO_OPTIONS.map((option) => (
-                      <label key={option.value} className={styles.radioOption}>
-                        <input
-                          type="radio"
-                          name="dyslipidemia-medication"
-                          value={option.value}
-                          checked={riskFactors.dyslipidemia.medication === option.value}
-                          onChange={handleLipidsField('medication')}
-                        />
-                        <span>{option.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                  {errors['dyslipidemia.medication'] ? (
-                    <p className={styles.error}>{errors['dyslipidemia.medication']}</p>
-                  ) : null}
+            <div
+              className={clsx(styles.cardGrid, {
+                [styles.disabled]: riskFactors.dyslipidemia.status !== 'yes',
+              })}
+              aria-disabled={riskFactors.dyslipidemia.status !== 'yes'}
+            >
+              <div className={styles.inlineGroup}>
+                <span className={styles.inlineLabel}>目前有無服用降血脂藥</span>
+                <div role="radiogroup" aria-label="降血脂藥" className={styles.optionRow}>
+                  {YES_NO_OPTIONS.map((option) => (
+                    <label key={option.value} className={styles.radioOption}>
+                      <input
+                        type="radio"
+                        name="dyslipidemia-medication"
+                        value={option.value}
+                        checked={riskFactors.dyslipidemia.medication === option.value}
+                        onChange={handleLipidsField('medication')}
+                        disabled={riskFactors.dyslipidemia.status !== 'yes'}
+                      />
+                      <span>{option.label}</span>
+                    </label>
+                  ))}
                 </div>
-
-                <label className={styles.inlineGroup}>
-                  <span className={styles.inlineLabel}>最近一次低密度脂蛋白 (LDL)</span>
-                  <div className={styles.inlineInput}>
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      value={riskFactors.dyslipidemia.ldlMgDl}
-                      onChange={handleLipidsField('ldlMgDl')}
-                      placeholder="mg/dL"
-                    />
-                    <span className={styles.unit}>mg/dL</span>
-                  </div>
-                  {errors['dyslipidemia.ldlMgDl'] ? (
-                    <p className={styles.error}>{errors['dyslipidemia.ldlMgDl']}</p>
-                  ) : null}
-                </label>
-
-                <label className={styles.inlineGroup}>
-                  <span className={styles.inlineLabel}>最近一次高密度脂蛋白 (HDL)</span>
-                  <div className={styles.inlineInput}>
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      value={riskFactors.dyslipidemia.hdlMgDl}
-                      onChange={handleLipidsField('hdlMgDl')}
-                      placeholder="mg/dL"
-                    />
-                    <span className={styles.unit}>mg/dL</span>
-                  </div>
-                  {errors['dyslipidemia.hdlMgDl'] ? (
-                    <p className={styles.error}>{errors['dyslipidemia.hdlMgDl']}</p>
-                  ) : null}
-                </label>
-
-                <label className={styles.inlineGroup}>
-                  <span className={styles.inlineLabel}>最近一次空腹三酸甘油酯 (TG)</span>
-                  <div className={styles.inlineInput}>
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      value={riskFactors.dyslipidemia.triglycerideMgDl}
-                      onChange={handleLipidsField('triglycerideMgDl')}
-                      placeholder="mg/dL"
-                    />
-                    <span className={styles.unit}>mg/dL</span>
-                  </div>
-                  {errors['dyslipidemia.triglycerideMgDl'] ? (
-                    <p className={styles.error}>{errors['dyslipidemia.triglycerideMgDl']}</p>
-                  ) : null}
-                </label>
+                {errors['dyslipidemia.medication'] ? (
+                  <p className={styles.error}>{errors['dyslipidemia.medication']}</p>
+                ) : null}
               </div>
-            ) : null}
+
+              <label className={styles.inlineGroup}>
+                <span className={styles.inlineLabel}>最近一次低密度脂蛋白 (LDL)</span>
+                <div className={styles.inlineInput}>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={riskFactors.dyslipidemia.ldlMgDl}
+                    onChange={handleLipidsField('ldlMgDl')}
+                    disabled={riskFactors.dyslipidemia.status !== 'yes'}
+                    placeholder="mg/dL"
+                  />
+                  <span className={styles.unit}>mg/dL</span>
+                </div>
+                {errors['dyslipidemia.ldlMgDl'] ? (
+                  <p className={styles.error}>{errors['dyslipidemia.ldlMgDl']}</p>
+                ) : null}
+              </label>
+
+              <label className={styles.inlineGroup}>
+                <span className={styles.inlineLabel}>最近一次高密度脂蛋白 (HDL)</span>
+                <div className={styles.inlineInput}>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={riskFactors.dyslipidemia.hdlMgDl}
+                    onChange={handleLipidsField('hdlMgDl')}
+                    disabled={riskFactors.dyslipidemia.status !== 'yes'}
+                    placeholder="mg/dL"
+                  />
+                  <span className={styles.unit}>mg/dL</span>
+                </div>
+                {errors['dyslipidemia.hdlMgDl'] ? (
+                  <p className={styles.error}>{errors['dyslipidemia.hdlMgDl']}</p>
+                ) : null}
+              </label>
+
+              <label className={styles.inlineGroup}>
+                <span className={styles.inlineLabel}>最近一次空腹三酸甘油酯 (TG)</span>
+                <div className={styles.inlineInput}>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={riskFactors.dyslipidemia.triglycerideMgDl}
+                    onChange={handleLipidsField('triglycerideMgDl')}
+                    disabled={riskFactors.dyslipidemia.status !== 'yes'}
+                    placeholder="mg/dL"
+                  />
+                  <span className={styles.unit}>mg/dL</span>
+                </div>
+                {errors['dyslipidemia.triglycerideMgDl'] ? (
+                  <p className={styles.error}>{errors['dyslipidemia.triglycerideMgDl']}</p>
+                ) : null}
+              </label>
+            </div>
           </div>
         </ProgressiveCard>
 
