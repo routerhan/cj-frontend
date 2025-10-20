@@ -17,18 +17,18 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
-  color: #1d4ed8;
+  color: var(--color-primary-light);
 }
 
 .header h2 {
   margin: 0;
   font-size: 2rem;
-  color: #1f2937;
+  color: var(--color-text);
 }
 
 .lead {
   max-width: 480px;
-  color: #475569;
+  color: var(--color-muted);
   font-size: 1rem;
   line-height: 1.65;
 }
@@ -47,6 +47,20 @@
   display: grid;
   gap: 1.25rem;
   padding: 1.5rem 0 0;
+}
+
+.fieldLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.fieldHint {
+  font-size: 0.85rem;
+  color: var(--color-muted);
 }
 
 .subSection {
@@ -75,8 +89,8 @@
   gap: 0.4rem;
   padding: 0.5rem 1rem;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  background: rgba(248, 250, 252, 0.85);
+  border: 1px solid rgba(47, 79, 102, 0.25);
+  background: rgba(143, 198, 199, 0.16);
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
@@ -90,10 +104,10 @@
 }
 
 .radioOption:has(input:checked) {
-  border-color: #1d4ed8;
-  background: rgba(59, 130, 246, 0.16);
-  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2);
-  color: #1d4ed8;
+  border-color: var(--color-primary);
+  background: rgba(111, 168, 179, 0.28);
+  box-shadow: 0 8px 18px rgba(35, 55, 74, 0.18);
+  color: var(--color-primary-dark);
 }
 
 .inlineGroup {
@@ -104,7 +118,7 @@
 .inlineLabel {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-text);
 }
 
 .inlineInput {
@@ -117,8 +131,9 @@
   width: 110px;
   padding: 0.65rem 0.9rem;
   border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
+  border: 1px solid rgba(47, 79, 102, 0.22);
   font-size: 0.95rem;
+  background: var(--color-surface);
 }
 
 .bloodPressureInputs {
@@ -131,12 +146,13 @@
   width: 90px;
   padding: 0.65rem 0.9rem;
   border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
+  border: 1px solid rgba(47, 79, 102, 0.22);
   font-size: 0.95rem;
+  background: var(--color-surface);
 }
 
 .unit {
-  color: #64748b;
+  color: var(--color-muted);
   font-weight: 500;
 }
 

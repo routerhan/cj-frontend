@@ -17,18 +17,18 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
-  color: #1d4ed8;
+  color: var(--color-primary-light);
 }
 
 .header h2 {
   margin: 0;
   font-size: 2rem;
-  color: #1f2937;
+  color: var(--color-text);
 }
 
 .lead {
   max-width: 420px;
-  color: #475569;
+  color: var(--color-muted);
   font-size: 1rem;
   line-height: 1.65;
 }
@@ -50,15 +50,15 @@
   gap: 1.5rem;
   padding: 1.75rem;
   border-radius: 20px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.8) 0%, #ffffff 100%);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--color-border);
+  background: linear-gradient(180deg, rgba(143, 198, 199, 0.12) 0%, var(--color-surface) 100%);
+  box-shadow: 0 12px 26px var(--color-shadow);
 }
 
 .sectionTitle {
   margin: 0;
   font-size: 1.15rem;
-  color: #1f2937;
+  color: var(--color-text);
   font-weight: 600;
 }
 
@@ -77,23 +77,23 @@
 .label {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-text);
 }
 
 .input {
   padding: 0.75rem 1rem;
   font-size: 1rem;
   border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  background: #ffffff;
+  border: 1px solid rgba(47, 79, 102, 0.2);
+  background: var(--color-surface);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .input:focus,
 .input:focus-visible {
   outline: none;
-  border-color: #1d4ed8;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(111, 168, 179, 0.35);
 }
 
 .optionGroup {
@@ -108,19 +108,19 @@
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
+  border: 1px solid rgba(47, 79, 102, 0.25);
   cursor: pointer;
-  background: rgba(248, 250, 252, 0.7);
+  background: rgba(143, 198, 199, 0.14);
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .radioInput {
-  accent-color: #1d4ed8;
+  accent-color: var(--color-primary);
 }
 
 .radioLabel:has(.radioInput:checked) {
-  border-color: #1d4ed8;
-  background: rgba(59, 130, 246, 0.12);
+  border-color: var(--color-primary);
+  background: rgba(111, 168, 179, 0.28);
 }
 
 .labelWithTooltip {
@@ -129,7 +129,7 @@
   gap: 0.5rem;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-text);
 }
 
 .error {
@@ -149,10 +149,11 @@
   gap: 1.25rem;
   padding: 1.5rem;
   border-radius: 20px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  background: #ffffff;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   position: sticky;
   top: 96px;
+  box-shadow: 0 12px 28px var(--color-shadow);
 }
 
 @media (max-width: 1024px) {

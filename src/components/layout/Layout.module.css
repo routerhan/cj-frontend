@@ -2,8 +2,8 @@
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr);
   min-height: 100vh;
-  background-color: #f7fafc;
-  color: #1f2933;
+  background-color: var(--color-background);
+  color: var(--color-text);
 }
 
 .contentArea {

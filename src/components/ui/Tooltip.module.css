@@ -10,15 +10,15 @@
   height: 24px;
   border-radius: 50%;
   border: none;
-  background: rgba(37, 99, 235, 0.18);
-  color: #1d4ed8;
+  background: rgba(111, 168, 179, 0.25);
+  color: var(--color-primary);
   font-weight: 700;
   cursor: pointer;
 }
 
 .trigger:hover,
 .trigger:focus-visible {
-  background: rgba(37, 99, 235, 0.28);
+  background: rgba(111, 168, 179, 0.4);
   outline: none;
 }
 
@@ -28,8 +28,8 @@
   transform: translate(-50%, -12px);
   padding: 0.75rem 1rem;
   border-radius: 12px;
-  background: #1f2937;
-  color: #f8fafc;
+  background: var(--color-primary-dark);
+  color: #f4fbfc;
   font-size: 0.85rem;
   line-height: 1.4;
   width: max-content;

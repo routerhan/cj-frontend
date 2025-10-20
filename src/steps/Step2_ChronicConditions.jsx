@@ -230,6 +230,10 @@ export const Step2_ChronicConditions = () => {
             isExpanded
           >
             <div className={styles.section}>
+              <label className={styles.fieldLabel}>
+                是否有高血壓？
+                <span className={styles.fieldHint}>(&gt;130/80 mmHg)</span>
+              </label>
               <div role="radiogroup" aria-label="高血壓狀態" className={styles.optionRow}>
                 {STATUS_OPTIONS.map((option) => (
                   <label key={option.value} className={styles.radioOption}>
@@ -312,6 +316,7 @@ export const Step2_ChronicConditions = () => {
             isExpanded
           >
             <div className={styles.section}>
+              <label className={styles.fieldLabel}>是否有糖尿病？</label>
               <div role="radiogroup" aria-label="糖尿病狀態" className={styles.optionRow}>
                 {STATUS_OPTIONS.map((option) => (
                   <label key={option.value} className={styles.radioOption}>
@@ -404,6 +409,7 @@ export const Step2_ChronicConditions = () => {
             isExpanded
           >
             <div className={styles.section}>
+              <label className={styles.fieldLabel}>是否有腎臟病？</label>
               <div role="radiogroup" aria-label="腎臟病狀態" className={styles.optionRow}>
                 {STATUS_OPTIONS.map((option) => (
                   <label key={option.value} className={styles.radioOption}>

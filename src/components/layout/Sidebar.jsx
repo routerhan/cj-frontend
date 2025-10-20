@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import companyLogo from '../../assets/company-logo.png'
 import { useFormContext } from '../../context/FormContext.jsx'
 import styles from './Sidebar.module.css'
 
@@ -7,9 +8,16 @@ export const Sidebar = () => {
 
   return (
     <aside className={styles.sidebar}>
-      <div className={styles.header}>
-        <p className={styles.kicker}>Cardio Risk</p>
-        <h1 className={styles.title}>健康風險評估</h1>
+      <div>
+        <div className={styles.logoBadge}>
+          <img src={companyLogo} alt="Commjat" />
+        </div>
+        <div className={styles.brand}>
+          <div className={styles.header}>
+            <p className={styles.kicker}>Commjat Wellness</p>
+            <h1 className={styles.title}>健康風險評估</h1>
+          </div>
+        </div>
         <p className={styles.subtitle}>循序完成每個步驟即可獲得專屬報告</p>
       </div>
 
@@ -54,6 +62,11 @@ export const Sidebar = () => {
           })}
         </ol>
       </nav>
+
+      <footer className={styles.footer}>
+        <span>Powered by 康緁股份有限公司</span>
+        <span>CommJat Co., Ltd.</span>
+      </footer>
     </aside>
   )
 }

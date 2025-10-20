@@ -143,6 +143,7 @@ export const Step3_HealthStatus = () => {
           isExpanded
         >
           <div className={styles.section}>
+            <label className={styles.fieldLabel}>是否有高脂血症？</label>
             <div role="radiogroup" aria-label="高脂血症狀態" className={styles.optionRow}>
               {STATUS_OPTIONS.map((option) => (
                 <label key={option.value} className={styles.radioOption}>
