@@ -1,0 +1,26 @@
+.container {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(37, 99, 235, 0.16);
+}
+
+.label {
+  font-size: 0.85rem;
+  color: #1f2a37;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
+.description {
+  font-size: 0.95rem;
+  color: #475569;
+}

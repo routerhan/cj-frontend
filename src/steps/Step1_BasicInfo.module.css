@@ -1,0 +1,197 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding: 2.5rem 3rem;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.kicker {
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  color: #1d4ed8;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #1f2937;
+}
+
+.lead {
+  max-width: 420px;
+  color: #475569;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(260px, 1fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.form {
+  display: grid;
+  gap: 2rem;
+}
+
+.fieldset {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1.75rem;
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.8) 0%, #ffffff 100%);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.input {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus,
+.input:focus-visible {
+  outline: none;
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.optionGroup {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.radioLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  cursor: pointer;
+  background: rgba(248, 250, 252, 0.7);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.radioInput {
+  accent-color: #1d4ed8;
+}
+
+.radioLabel:has(.radioInput:checked) {
+  border-color: #1d4ed8;
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.labelWithTooltip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #dc2626;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.results {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: #ffffff;
+  position: sticky;
+  top: 96px;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 2rem;
+  }
+
+  .body {
+    grid-template-columns: 1fr;
+  }
+
+  .results {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+
+  .body {
+    gap: 1.5rem;
+  }
+
+  .fieldset {
+    padding: 1.25rem;
+  }
+
+  .fieldGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .optionGroup {
+    flex-wrap: wrap;
+  }
+}

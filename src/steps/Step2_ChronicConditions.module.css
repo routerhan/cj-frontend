@@ -1,0 +1,164 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding: 2.5rem 3rem;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.kicker {
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  color: #1d4ed8;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #1f2937;
+}
+
+.lead {
+  max-width: 480px;
+  color: #475569;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.form {
+  display: grid;
+  gap: 2rem;
+}
+
+.cards {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.section {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.5rem 0 0;
+}
+
+.subSection {
+  display: grid;
+  gap: 1rem;
+}
+
+.optionRow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.radioOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: rgba(248, 250, 252, 0.85);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.radioOption input {
+  appearance: none;
+  width: 1px;
+  height: 1px;
+  position: absolute;
+  opacity: 0;
+}
+
+.radioOption:has(input:checked) {
+  border-color: #1d4ed8;
+  background: rgba(59, 130, 246, 0.16);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2);
+  color: #1d4ed8;
+}
+
+.inlineGroup {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.inlineLabel {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.inlineInput {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inlineInput input {
+  width: 110px;
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  font-size: 0.95rem;
+}
+
+.bloodPressureInputs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bloodPressureInputs input {
+  width: 90px;
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  font-size: 0.95rem;
+}
+
+.unit {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.error {
+  margin: 0;
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+}

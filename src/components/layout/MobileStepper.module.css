@@ -1,0 +1,55 @@
+.mobileStepper {
+  display: none;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stepIndex {
+  font-weight: 600;
+  color: #1d4ed8;
+}
+
+.progressValue {
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.progressTrack {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.3);
+  margin: 0.75rem 0;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-radius: inherit;
+  transition: width 0.25s ease;
+}
+
+.stepLabel {
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+@media (max-width: 768px) {
+  .mobileStepper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1.5rem 1rem 0.75rem;
+    background: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 0 12px 18px rgba(15, 23, 42, 0.05);
+  }
+}

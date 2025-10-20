@@ -1,0 +1,175 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding: 2.5rem 3rem;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.kicker {
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  color: #1d4ed8;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #1f2937;
+}
+
+.lead {
+  max-width: 480px;
+  color: #475569;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.form {
+  display: grid;
+  gap: 2rem;
+}
+
+.section {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.5rem 0 0;
+}
+
+.cardGrid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.optionRow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.radioOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: rgba(248, 250, 252, 0.85);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.radioOption input {
+  appearance: none;
+  width: 1px;
+  height: 1px;
+  position: absolute;
+  opacity: 0;
+}
+
+.radioOption:has(input:checked) {
+  border-color: #1d4ed8;
+  background: rgba(59, 130, 246, 0.16);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2);
+  color: #1d4ed8;
+}
+
+.inlineGroup {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.inlineLabel {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.inlineInput {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inlineInput input {
+  width: 110px;
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  font-size: 0.95rem;
+}
+
+.unit {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.historyCard {
+  display: grid;
+  gap: 1rem;
+  padding: 1.75rem;
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.85) 0%, #ffffff 100%);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.historyHint {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.notesField {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.notesField textarea {
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #dc2626;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,47 @@
+.wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.trigger {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(37, 99, 235, 0.18);
+  color: #1d4ed8;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.trigger:hover,
+.trigger:focus-visible {
+  background: rgba(37, 99, 235, 0.28);
+  outline: none;
+}
+
+.tooltip {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -12px);
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: #1f2937;
+  color: #f8fafc;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  width: max-content;
+  max-width: 240px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+  z-index: 10;
+}
+
+.tooltip[data-visible='true'] {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -20px);
+}

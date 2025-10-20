@@ -1,0 +1,29 @@
+.container {
+  display: grid;
+  gap: 1.25rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.heading {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.description {
+  font-size: 1rem;
+  color: #475569;
+  max-width: 560px;
+  justify-self: center;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem 1rem;
+  }
+
+  .heading {
+    font-size: 1.6rem;
+  }
+}

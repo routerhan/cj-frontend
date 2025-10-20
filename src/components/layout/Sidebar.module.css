@@ -1,0 +1,112 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2.5rem 2rem 2rem;
+  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+  color: #f8fafc;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.kicker {
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.subtitle {
+  opacity: 0.85;
+  font-weight: 300;
+}
+
+.stepList {
+  margin: 0;
+  margin-top: 2.5rem;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+}
+
+.stepItem {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  border: none;
+  background: rgba(15, 23, 42, 0.1);
+  color: inherit;
+  text-align: left;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.stepItem:hover,
+.stepItem:focus-visible {
+  outline: none;
+  transform: translateY(-2px);
+  background: rgba(15, 23, 42, 0.18);
+}
+
+.stepNumber {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(241, 245, 249, 0.25);
+  font-weight: 600;
+}
+
+.stepLabel {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.statusBadge {
+  font-size: 1rem;
+}
+
+.completed {
+  background: rgba(241, 245, 249, 0.25);
+}
+
+.disabled {
+  background: rgba(15, 23, 42, 0.12);
+}
+
+.active {
+  background: #f8fafc;
+  color: #1d4ed8;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+}
+
+.stepItem:not(:disabled) {
+  cursor: pointer;
+}
+
+.stepItem:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+}
