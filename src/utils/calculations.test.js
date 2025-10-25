@@ -39,10 +39,10 @@ describe('calculateBMI', () => {
 
 describe('getBMICategory', () => {
   it('回傳對應的 BMI 分類', () => {
-    expect(getBMICategory(17)).toBe('過輕')
-    expect(getBMICategory(22)).toBe('標準')
-    expect(getBMICategory(25)).toBe('過重')
-    expect(getBMICategory(30)).toBe('肥胖')
+    expect(getBMICategory(17)).toBe('underweight')
+    expect(getBMICategory(22)).toBe('normal')
+    expect(getBMICategory(25)).toBe('overweight')
+    expect(getBMICategory(30)).toBe('obese')
   })
 
   it('處理無效數值', () => {

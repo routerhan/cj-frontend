@@ -8,7 +8,7 @@ describe('FormContext', () => {
   it('提供初始狀態與步驟資訊', () => {
     const { result } = renderHook(() => useFormContext(), { wrapper })
 
-    expect(result.current.steps).toHaveLength(5)
+    expect(result.current.steps).toHaveLength(7)
     expect(result.current.currentStep).toBe(0)
     expect(result.current.stepStatus.welcome).toBe(StepStatus.IN_PROGRESS)
     expect(result.current.stepStatus.basicInfo).toBe(StepStatus.PENDING)
@@ -56,7 +56,7 @@ describe('FormContext', () => {
       result.current.goToStep(2)
     })
     expect(result.current.currentStep).toBe(2)
-    expect(result.current.stepStatus.conditions).toBe(StepStatus.IN_PROGRESS)
+    expect(result.current.stepStatus.hypertensionDiabetes).toBe(StepStatus.IN_PROGRESS)
 
     act(() => {
       result.current.goToNext()

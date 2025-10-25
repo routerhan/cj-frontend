@@ -1,9 +1,15 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { FormProvider } from '../context/FormContext.jsx'
+import { LanguageProvider } from '../context/LanguageContext.jsx'
 import { Step1_BasicInfo } from './Step1_BasicInfo.jsx'
 
-const renderWithProvider = (ui) => render(<FormProvider>{ui}</FormProvider>)
+const renderWithProvider = (ui) =>
+  render(
+    <LanguageProvider>
+      <FormProvider>{ui}</FormProvider>
+    </LanguageProvider>,
+  )
 
 describe('Step1_BasicInfo', () => {
   it('即時顯示年齡與 BMI', () => {
@@ -31,7 +37,7 @@ describe('Step1_BasicInfo', () => {
   it('表單驗證未通過時顯示錯誤訊息', () => {
     renderWithProvider(<Step1_BasicInfo />)
 
-    fireEvent.click(screen.getByRole('button', { name: '下一步：慢性疾病狀態' }))
+    fireEvent.click(screen.getByRole('button', { name: '下一步：血壓與血糖' }))
 
     expect(screen.getByText('請選擇性別')).toBeInTheDocument()
     expect(screen.getByText('請輸入出生年月日')).toBeInTheDocument()

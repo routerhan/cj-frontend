@@ -1,11 +1,9 @@
 import clsx from 'clsx'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '../components/ui/Button.jsx'
-import { InstantResult } from '../components/ui/InstantResult.jsx'
 import { ProgressiveCard } from '../components/ui/ProgressiveCard.jsx'
 import { useFormContext } from '../context/FormContext.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
-import { calculateEGFR } from '../utils/calculations.js'
 import styles from './Step2_ChronicConditions.module.css'
 
 const STATUS_VALUES = ['yes', 'no', 'unknown']
@@ -20,10 +18,12 @@ export const Step2_ChronicConditions = () => {
     setStepStatus,
     StepStatus,
     stepStatus,
+    steps,
   } = useFormContext()
+
   const { dictionary } = useLanguage()
-  const copy = dictionary.conditions
   const general = dictionary.general
+  const stepCopy = dictionary.hypertensionDiabetes ?? {}
 
   const statusOptions = STATUS_VALUES.map((value) => ({
     value,
@@ -40,12 +40,12 @@ export const Step2_ChronicConditions = () => {
     label: value === 'yes' ? general.yes : general.no,
   }))
 
-  const { basicInfo, conditions } = formData
+  const { conditions } = formData
   const [errors, setErrors] = useState({})
 
   const markInProgress = () => {
-    if (stepStatus.conditions === StepStatus.COMPLETED) {
-      setStepStatus('conditions', StepStatus.IN_PROGRESS)
+    if (stepStatus.hypertensionDiabetes === StepStatus.COMPLETED) {
+      setStepStatus('hypertensionDiabetes', StepStatus.IN_PROGRESS)
     }
   }
 
@@ -85,7 +85,13 @@ export const Step2_ChronicConditions = () => {
         diastolic: '',
       })
     }
-  }, [conditions.hypertension.status, updateFormField])
+  }, [
+    conditions.hypertension.diastolic,
+    conditions.hypertension.medication,
+    conditions.hypertension.systolic,
+    conditions.hypertension.status,
+    updateFormField,
+  ])
 
   useEffect(() => {
     if (
@@ -101,47 +107,13 @@ export const Step2_ChronicConditions = () => {
         hba1cPercent: '',
       })
     }
-  }, [conditions.diabetes.status, updateFormField])
-
-  useEffect(() => {
-    if (
-      conditions.kidney.status === 'no' &&
-      (conditions.kidney.serumCreatinineMgDl || conditions.kidney.egfr !== null)
-    ) {
-      updateFormField(['conditions', 'kidney'], {
-        status: 'no',
-        serumCreatinineMgDl: '',
-        egfr: null,
-      })
-    }
-  }, [conditions.kidney.status, updateFormField])
-
-  const eGFRResult = useMemo(() => {
-    if (!conditions.kidney.serumCreatinineMgDl) {
-      return { gfr: null, bsa: null, egfrBsaAdjusted: null }
-    }
-
-    return calculateEGFR({
-      serumCreatinineMgDl: conditions.kidney.serumCreatinineMgDl,
-      gender: basicInfo.gender,
-      ageYears: basicInfo.ageYears,
-      heightCm: basicInfo.heightCm,
-      weightKg: basicInfo.weightKg,
-    })
   }, [
-    conditions.kidney.serumCreatinineMgDl,
-    basicInfo.gender,
-    basicInfo.ageYears,
-    basicInfo.heightCm,
-    basicInfo.weightKg,
+    conditions.diabetes.fastingGlucoseMgDl,
+    conditions.diabetes.hba1cPercent,
+    conditions.diabetes.medication,
+    conditions.diabetes.status,
+    updateFormField,
   ])
-
-  useEffect(() => {
-    if (eGFRResult.egfrBsaAdjusted !== conditions.kidney.egfr) {
-      updateFormField(['conditions', 'kidney', 'egfr'], eGFRResult.egfrBsaAdjusted)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eGFRResult.egfrBsaAdjusted])
 
   const validate = () => {
     const nextErrors = {}
@@ -171,20 +143,6 @@ export const Step2_ChronicConditions = () => {
       }
     }
 
-    if (!conditions.kidney.status) {
-      nextErrors['kidney.status'] = '請選擇是否有腎臟病'
-    } else if (conditions.kidney.status === 'yes') {
-      if (!conditions.kidney.serumCreatinineMgDl) {
-        nextErrors['kidney.serumCreatinineMgDl'] = '請填寫最近一次肌酸酐數值'
-      }
-      if (
-        conditions.kidney.serumCreatinineMgDl &&
-        !Number.isFinite(eGFRResult.egfrBsaAdjusted)
-      ) {
-        nextErrors['kidney.egfr'] = '請確認輸入資料完整以計算 eGFR'
-      }
-    }
-
     return nextErrors
   }
 
@@ -199,37 +157,39 @@ export const Step2_ChronicConditions = () => {
     }
   }
 
-  const isPrimaryFieldsFilled =
+  const currentStepIndex = steps.findIndex((step) => step.key === 'hypertensionDiabetes')
+  const stepLabel = `Step ${currentStepIndex + 1}`
+  const nextStepKey = steps[currentStepIndex + 1]?.key
+  const nextStepLabel = nextStepKey ? dictionary.steps[nextStepKey] : ''
+
+  const isHypertensionSectionInvalid =
+    conditions.hypertension.status === 'yes' &&
+    (!conditions.hypertension.medication ||
+      !conditions.hypertension.systolic ||
+      !conditions.hypertension.diastolic)
+
+  const isDiabetesSectionInvalid =
+    conditions.diabetes.status === 'yes' &&
+    (!conditions.diabetes.medication ||
+      !conditions.diabetes.fastingGlucoseMgDl ||
+      !conditions.diabetes.hba1cPercent)
+
+  const isReady =
     conditions.hypertension.status &&
     conditions.diabetes.status &&
-    conditions.kidney.status
-
-  const egfrDisplay = Number.isFinite(eGFRResult.egfrBsaAdjusted)
-    ? `${Math.round(eGFRResult.egfrBsaAdjusted)} ml/min/1.73m²`
-    : '--'
-
-  const egfrDescription = (() => {
-    if (!conditions.kidney.serumCreatinineMgDl) {
-      return '請填寫肌酸酐數值以估算腎絲球過濾率'
-    }
-    if (!Number.isFinite(eGFRResult.egfrBsaAdjusted)) {
-      return '請確認已填寫年齡、身高、體重與正確的肌酸酐數值'
-    }
-    if (eGFRResult.egfrBsaAdjusted >= 90) return '腎功能正常'
-    if (eGFRResult.egfrBsaAdjusted >= 60) return '腎功能輕度下降，請定期追蹤'
-    if (eGFRResult.egfrBsaAdjusted >= 30) return '腎功能中度下降，建議諮詢腎臟專科'
-    return '腎功能顯著下降，請儘速就醫評估'
-  })()
+    !isHypertensionSectionInvalid &&
+    !isDiabetesSectionInvalid
 
   return (
     <section className={styles.container}>
       <header className={styles.header}>
         <div>
-          <p className={styles.kicker}>Step 2</p>
-          <h2>慢性疾病狀態</h2>
+          <p className={styles.kicker}>{stepLabel}</p>
+          <h2>{stepCopy.title ?? '血壓與血糖監測'}</h2>
         </div>
         <p className={styles.lead}>
-          請確認高血壓、糖尿病與腎臟病的狀態，我們會依據最新檢驗數據進行風險評估。
+          {stepCopy.lead ??
+            '請確認高血壓與糖尿病的控制狀態，並提供最新量測與用藥資訊，以利後續風險評估。'}
         </p>
       </header>
 
@@ -246,7 +206,7 @@ export const Step2_ChronicConditions = () => {
                 <span className={styles.fieldHint}>(&gt;130/80 mmHg)</span>
               </label>
               <div role="radiogroup" aria-label="高血壓狀態" className={styles.optionRow}>
-                {STATUS_OPTIONS.map((option) => (
+                {statusOptions.map((option) => (
                   <label key={option.value} className={styles.radioOption}>
                     <input
                       type="radio"
@@ -272,7 +232,7 @@ export const Step2_ChronicConditions = () => {
                 <div className={styles.inlineGroup}>
                   <span className={styles.inlineLabel}>目前有無服用降血壓藥</span>
                   <div role="radiogroup" aria-label="降血壓藥" className={styles.optionRow}>
-                    {YES_NO_OPTIONS.map((option) => (
+                    {yesNoOptions.map((option) => (
                       <label key={option.value} className={styles.radioOption}>
                         <input
                           type="radio"
@@ -329,7 +289,7 @@ export const Step2_ChronicConditions = () => {
             <div className={styles.section}>
               <label className={styles.fieldLabel}>是否有糖尿病？</label>
               <div role="radiogroup" aria-label="糖尿病狀態" className={styles.optionRow}>
-                {STATUS_OPTIONS.map((option) => (
+                {statusOptions.map((option) => (
                   <label key={option.value} className={styles.radioOption}>
                     <input
                       type="radio"
@@ -355,7 +315,7 @@ export const Step2_ChronicConditions = () => {
                 <div className={styles.inlineGroup}>
                   <span className={styles.inlineLabel}>目前有無服用降血糖藥</span>
                   <div role="radiogroup" aria-label="降血糖藥" className={styles.optionRow}>
-                    {YES_NO_OPTIONS.map((option) => (
+                    {yesNoOptions.map((option) => (
                       <label key={option.value} className={styles.radioOption}>
                         <input
                           type="radio"
@@ -413,73 +373,11 @@ export const Step2_ChronicConditions = () => {
               </div>
             </div>
           </ProgressiveCard>
-
-          <ProgressiveCard
-            title="腎臟病"
-            summary="提供肌酸酐數值以評估腎絲球過濾率"
-            isExpanded
-          >
-            <div className={styles.section}>
-              <label className={styles.fieldLabel}>是否有腎臟病？</label>
-              <div role="radiogroup" aria-label="腎臟病狀態" className={styles.optionRow}>
-                {STATUS_OPTIONS.map((option) => (
-                  <label key={option.value} className={styles.radioOption}>
-                    <input
-                      type="radio"
-                      name="kidney-status"
-                      value={option.value}
-                      checked={conditions.kidney.status === option.value}
-                      onChange={handleStatusChange('kidney')}
-                    />
-                    <span>{option.label}</span>
-                  </label>
-                ))}
-              </div>
-              {errors['kidney.status'] ? (
-                <p className={styles.error}>{errors['kidney.status']}</p>
-              ) : null}
-
-              <div
-                className={clsx(styles.subSection, {
-                  [styles.disabled]: conditions.kidney.status !== 'yes',
-                })}
-                aria-disabled={conditions.kidney.status !== 'yes'}
-              >
-                <label className={styles.inlineGroup}>
-                  <span className={styles.inlineLabel}>最近一次肌酸酐數值</span>
-                  <div className={styles.inlineInput}>
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      step="0.01"
-                      placeholder="mg/dL"
-                      value={conditions.kidney.serumCreatinineMgDl}
-                      onChange={handleFieldChange('kidney', 'serumCreatinineMgDl')}
-                      disabled={conditions.kidney.status !== 'yes'}
-                    />
-                    <span className={styles.unit}>mg/dL</span>
-                  </div>
-                </label>
-                {errors['kidney.serumCreatinineMgDl'] ? (
-                  <p className={styles.error}>{errors['kidney.serumCreatinineMgDl']}</p>
-                ) : null}
-
-                <InstantResult
-                  label="自動換算 eGFR"
-                  value={egfrDisplay}
-                  description={egfrDescription}
-                />
-                {errors['kidney.egfr'] ? (
-                  <p className={styles.error}>{errors['kidney.egfr']}</p>
-                ) : null}
-              </div>
-            </div>
-          </ProgressiveCard>
         </div>
 
         <div className={styles.actions}>
-          <Button type="submit" disabled={!isPrimaryFieldsFilled}>
-            下一步：血脂與病史
+          <Button type="submit" disabled={!isReady}>
+            {nextStepLabel ? `下一步：${nextStepLabel}` : '下一步'}
           </Button>
         </div>
       </form>

@@ -10,8 +10,10 @@ export const translations = {
     steps: {
       welcome: '歡迎頁',
       basicInfo: '基本資料與生活習慣',
-      conditions: '慢性疾病狀態',
-      riskFactors: '血脂與病史',
+      hypertensionDiabetes: '血壓與血糖',
+      kidney: '腎臟功能',
+      lipids: '血脂檢驗',
+      cardioHistory: '心血管病史',
       report: '風險報告',
     },
     general: {
@@ -99,6 +101,22 @@ export const translations = {
         female: '女',
         other: '其他',
       },
+    },
+    hypertensionDiabetes: {
+      title: '血壓與血糖監測',
+      lead: '請確認高血壓與糖尿病的控制狀態，並提供最新量測與用藥資訊，以利後續風險評估。',
+    },
+    kidney: {
+      title: '腎臟功能',
+      lead: '提供肌酸酐數值以估算腎絲球過濾率（eGFR），協助評估腎臟健康與整體風險。',
+    },
+    lipidsStep: {
+      title: '血脂檢驗資訊',
+      lead: '請填寫血脂異常的用藥與檢驗數值，協助我們評估膽固醇相關的心血管危險。',
+    },
+    cardioHistoryStep: {
+      title: '心血管臨床病史',
+      lead: '請確認是否曾經歷重大心血管事件，以及影像檢查是否顯示顯著的動脈硬化負擔。',
     },
     conditions: {
       lead:
@@ -254,8 +272,10 @@ export const translations = {
     steps: {
       welcome: 'Welcome',
       basicInfo: 'Basic Information & Lifestyle',
-      conditions: 'Chronic Conditions',
-      riskFactors: 'Lipid Profile & History',
+      hypertensionDiabetes: 'Hypertension & Diabetes',
+      kidney: 'Kidney Function',
+      lipids: 'Lipid Profile',
+      cardioHistory: 'Cardiovascular History',
       report: 'Risk Report',
     },
     general: {
@@ -343,6 +363,22 @@ export const translations = {
         female: 'F',
         other: 'Other',
       },
+    },
+    hypertensionDiabetes: {
+      title: 'Hypertension & Diabetes',
+      lead: 'Confirm current control status and medication use for hypertension and diabetes to support downstream risk assessment.',
+    },
+    kidney: {
+      title: 'Kidney Function',
+      lead: 'Share recent serum creatinine values so we can estimate eGFR and evaluate renal health.',
+    },
+    lipidsStep: {
+      title: 'Lipid Profile Details',
+      lead: 'Enter lipid medication usage and the latest lab values to assess cholesterol-related risks.',
+    },
+    cardioHistoryStep: {
+      title: 'Cardiovascular History',
+      lead: 'Review prior cardiovascular events and imaging findings to capture residual atherosclerotic burden.',
     },
     conditions: {
       lead:

@@ -3,8 +3,13 @@ import { describe, expect, it } from 'vitest'
 import { useEffect } from 'react'
 import { MobileStepper } from './MobileStepper.jsx'
 import { FormProvider, useFormContext } from '../../context/FormContext.jsx'
+import { LanguageProvider } from '../../context/LanguageContext.jsx'
 
-const wrapper = ({ children }) => <FormProvider>{children}</FormProvider>
+const wrapper = ({ children }) => (
+  <LanguageProvider>
+    <FormProvider>{children}</FormProvider>
+  </LanguageProvider>
+)
 
 describe('MobileStepper', () => {
   it('顯示當前步驟與總進度', () => {
@@ -20,7 +25,7 @@ describe('MobileStepper', () => {
 
     render(<Harness />, { wrapper })
 
-    expect(screen.getByText(/步驟 3 \/ 5/)).toBeInTheDocument()
-    expect(screen.getByText(/60%/)).toBeInTheDocument()
+    expect(screen.getByText(/步驟 3 \/ 7/)).toBeInTheDocument()
+    expect(screen.getByText(/43%/)).toBeInTheDocument()
   })
 })

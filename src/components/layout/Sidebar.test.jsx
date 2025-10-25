@@ -3,8 +3,13 @@ import { describe, expect, it } from 'vitest'
 import { useEffect } from 'react'
 import { Sidebar } from './Sidebar.jsx'
 import { FormProvider, StepStatus, useFormContext } from '../../context/FormContext.jsx'
+import { LanguageProvider } from '../../context/LanguageContext.jsx'
 
-const wrapper = ({ children }) => <FormProvider>{children}</FormProvider>
+const wrapper = ({ children }) => (
+  <LanguageProvider>
+    <FormProvider>{children}</FormProvider>
+  </LanguageProvider>
+)
 
 const CurrentStepIndicator = () => {
   const { currentStep } = useFormContext()

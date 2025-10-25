@@ -9,9 +9,11 @@ export const StepStatus = {
 const steps = [
   { id: 0, key: 'welcome' },
   { id: 1, key: 'basicInfo' },
-  { id: 2, key: 'conditions' },
-  { id: 3, key: 'riskFactors' },
-  { id: 4, key: 'report' },
+  { id: 2, key: 'hypertensionDiabetes' },
+  { id: 3, key: 'kidney' },
+  { id: 4, key: 'lipids' },
+  { id: 5, key: 'cardioHistory' },
+  { id: 6, key: 'report' },
 ]
 
 const FormContext = createContext(undefined)
@@ -83,12 +85,30 @@ const createInitialFormData = () => ({
     cardiovascularHistory: {
       hasHistory: '',
       notes: '',
+      hasCad: '',
+      miWithin1Year: '',
+      miHistoryCount: '0',
+      hasMultivesselObstruction: '',
+      hasAcsWithDiabetes: '',
+      hasPad: '',
+      hasCarotidStenosis: '',
+      hasStrokeWithAtherosclerosis: '',
+      hasSignificantPlaque: '',
+      cacScore: '',
     },
   },
   report: {
-    riskScore: null,
-    riskLevel: '',
-    factors: [],
+    level: '',
+    levelCode: '',
+    matchedRules: [],
+    riskFactorCount: null,
+    riskFactors: [],
+    metabolicSyndrome: {
+      count: 0,
+      components: {},
+    },
+    recommendations: [],
+    evaluatedAt: '',
   },
 })
 

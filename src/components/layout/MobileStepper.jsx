@@ -1,9 +1,13 @@
 import { useFormContext } from '../../context/FormContext.jsx'
+import { useLanguage } from '../../context/LanguageContext.jsx'
 import styles from './MobileStepper.module.css'
 
 export const MobileStepper = () => {
   const { steps, currentStep, totalSteps } = useFormContext()
-  const stepDisplay = steps[currentStep]?.label ?? ''
+  const { dictionary } = useLanguage()
+
+  const currentKey = steps[currentStep]?.key
+  const stepDisplay = currentKey ? dictionary.steps[currentKey] ?? '' : ''
   const progress =
     totalSteps > 0 ? Math.round(((currentStep + 1) / totalSteps) * 100) : 0
 

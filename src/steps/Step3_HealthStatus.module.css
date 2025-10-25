@@ -55,6 +55,17 @@
   gap: 1.25rem;
 }
 
+.followUp {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.clinicalGrid {
+  display: grid;
+  gap: 1.25rem;
+}
+
 .disabled {
   opacity: 0.5;
   pointer-events: none;
@@ -62,6 +73,11 @@
 
 .disabled input {
   cursor: not-allowed;
+}
+
+.followUp.disabled,
+.disabled .historyHint {
+  opacity: 0.8;
 }
 
 .optionRow {
@@ -145,6 +161,12 @@
   line-height: 1.6;
 }
 
+.compactHint {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin: 0;
+}
+
 .notesField {
   display: grid;
   gap: 0.75rem;
@@ -187,5 +209,9 @@
 
   .header {
     flex-direction: column;
+  }
+
+  .clinicalGrid {
+    gap: 1rem;
   }
 }

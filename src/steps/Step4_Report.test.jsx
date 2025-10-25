@@ -3,16 +3,30 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useEffect } from 'react'
 import { FormProvider, useFormContext } from '../context/FormContext.jsx'
 import { Step4_Report } from './Step4_Report.jsx'
-import { calculateRisk } from '../utils/mockApi.js'
+import { requestRiskAssessment } from '../utils/riskApi.js'
 
-vi.mock('../utils/mockApi.js', () => ({
-  calculateRisk: vi.fn().mockResolvedValue({
-    riskScore: 14.2,
-    riskLevel: '中',
-    factors: ['高血壓', '血脂異常'],
-    populationAverage: 8.5,
-    relativeDifference: 5.7,
-    recommendations: ['定期追蹤血壓', '維持運動習慣'],
+vi.mock('../utils/riskApi.js', () => ({
+  requestRiskAssessment: vi.fn().mockResolvedValue({
+    level: '中',
+    levelCode: 'medium',
+    matchedRules: [{ code: 'risk_factor_count', label: '心血管危險因子達兩項以上' }],
+    riskFactorCount: 2,
+    riskFactors: [
+      { code: 'hypertension', label: '高血壓', present: true },
+      { code: 'smoking', label: '抽菸', present: false },
+    ],
+    metabolicSyndrome: {
+      count: 2,
+      components: {
+        abdominalObesity: true,
+        elevatedBloodPressure: true,
+        elevatedGlucose: false,
+        elevatedTriglyceride: false,
+        lowHdl: false,
+      },
+    },
+    recommendations: ['維持規律運動與均衡飲食'],
+    evaluatedAt: '2025-01-01T08:00:00.000Z',
   }),
 }))
 
@@ -29,7 +43,7 @@ const Harness = () => {
   useEffect(() => {
     updateFormField(['basicInfo', 'gender'], 'male')
     updateFormField(['basicInfo', 'ageYears'], 45)
-    goToStep(4)
+    goToStep(6)
   }, [goToStep, updateFormField])
 
   return (
@@ -45,28 +59,28 @@ beforeEach(() => {
 })
 
 describe('Step4_Report', () => {
-  it('載入時顯示讀取，完成後呈現風險分數', async () => {
+  it('載入時顯示讀取，完成後呈現風險層級與重點資訊', async () => {
     renderInProvider(<Harness />)
 
     expect(screen.getByText('正在計算您的風險...')).toBeInTheDocument()
 
-    const percentages = await screen.findAllByText(/14\.2%/)
-    expect(percentages.length).toBeGreaterThan(0)
+    await screen.findByText('此次評估結果')
 
-    expect(screen.getAllByText('中度風險')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('中')[0]).toBeInTheDocument()
+    expect(screen.getByText('心血管危險因子')).toBeInTheDocument()
     expect(screen.getByText('高血壓')).toBeInTheDocument()
-    expect(screen.getByText('定期追蹤血壓')).toBeInTheDocument()
+    expect(screen.getByText('維持規律運動與均衡飲食')).toBeInTheDocument()
   })
 
   it('重新計算會再次呼叫 API', async () => {
     renderInProvider(<Harness />)
 
-    await screen.findAllByText(/14\.2%/)
+    await screen.findByText('此次評估結果')
 
     fireEvent.click(screen.getByRole('button', { name: '重新計算' }))
 
     await waitFor(() => {
-      expect(calculateRisk).toHaveBeenCalledTimes(2)
+      expect(requestRiskAssessment).toHaveBeenCalledTimes(2)
     })
   })
 })

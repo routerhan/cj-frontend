@@ -1,8 +1,9 @@
 import clsx from 'clsx'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '../components/ui/Button.jsx'
 import { ProgressiveCard } from '../components/ui/ProgressiveCard.jsx'
 import { useFormContext } from '../context/FormContext.jsx'
+import { useLanguage } from '../context/LanguageContext.jsx'
 import styles from './Step3_HealthStatus.module.css'
 
 const STATUS_OPTIONS = [
@@ -16,7 +17,7 @@ const YES_NO_OPTIONS = [
   { value: 'no', label: '無' },
 ]
 
-export const Step3_HealthStatus = () => {
+export const Step4_LipidProfile = () => {
   const {
     formData,
     updateFormField,
@@ -25,14 +26,19 @@ export const Step3_HealthStatus = () => {
     setStepStatus,
     StepStatus,
     stepStatus,
+    steps,
   } = useFormContext()
+
+  const { dictionary } = useLanguage()
+  const copy = dictionary.riskFactors
+  const stepCopy = dictionary.lipidsStep ?? {}
 
   const { riskFactors } = formData
   const [errors, setErrors] = useState({})
 
   const markInProgressIfNeeded = () => {
-    if (stepStatus.riskFactors === StepStatus.COMPLETED) {
-      setStepStatus('riskFactors', StepStatus.IN_PROGRESS)
+    if (stepStatus.lipids === StepStatus.COMPLETED) {
+      setStepStatus('lipids', StepStatus.IN_PROGRESS)
     }
   }
 
@@ -67,44 +73,24 @@ export const Step3_HealthStatus = () => {
     markInProgressIfNeeded()
   }
 
-  const handleHistoryChange = (event) => {
-    const { value } = event.target
-    updateFormField(['riskFactors', 'cardiovascularHistory', 'hasHistory'], value)
-    setErrors((prev) => {
-      const next = { ...prev }
-      delete next['cardiovascularHistory.hasHistory']
-      return next
-    })
-    markInProgressIfNeeded()
-  }
-
-  const handleHistoryNotesChange = (event) => {
-    updateFormField(['riskFactors', 'cardiovascularHistory', 'notes'], event.target.value)
-    markInProgressIfNeeded()
-  }
-
   const validate = () => {
     const nextErrors = {}
 
     if (!riskFactors.dyslipidemia.status) {
-      nextErrors['dyslipidemia.status'] = '請選擇是否有高脂血症'
+      nextErrors['dyslipidemia.status'] = copy.errors.status
     } else if (riskFactors.dyslipidemia.status === 'yes') {
       if (!riskFactors.dyslipidemia.medication) {
-        nextErrors['dyslipidemia.medication'] = '請選擇是否服用降血脂藥'
+        nextErrors['dyslipidemia.medication'] = copy.errors.medication
       }
       if (!riskFactors.dyslipidemia.ldlMgDl) {
-        nextErrors['dyslipidemia.ldlMgDl'] = '請填寫最近一次 LDL 數值'
+        nextErrors['dyslipidemia.ldlMgDl'] = copy.errors.ldl
       }
       if (!riskFactors.dyslipidemia.hdlMgDl) {
-        nextErrors['dyslipidemia.hdlMgDl'] = '請填寫最近一次 HDL 數值'
+        nextErrors['dyslipidemia.hdlMgDl'] = copy.errors.hdl
       }
       if (!riskFactors.dyslipidemia.triglycerideMgDl) {
-        nextErrors['dyslipidemia.triglycerideMgDl'] = '請填寫最近一次三酸甘油酯數值'
+        nextErrors['dyslipidemia.triglycerideMgDl'] = copy.errors.tg
       }
-    }
-
-    if (!riskFactors.cardiovascularHistory.hasHistory) {
-      nextErrors['cardiovascularHistory.hasHistory'] = '請回答是否曾發生心血管疾病'
     }
 
     return nextErrors
@@ -121,29 +107,43 @@ export const Step3_HealthStatus = () => {
     }
   }
 
-  const isReady =
-    riskFactors.dyslipidemia.status && riskFactors.cardiovascularHistory.hasHistory
+  const currentStepIndex = steps.findIndex((step) => step.key === 'lipids')
+  const stepLabel = `Step ${currentStepIndex + 1}`
+  const nextStepKey = steps[currentStepIndex + 1]?.key
+  const nextStepLabel = nextStepKey ? dictionary.steps[nextStepKey] : ''
+
+  const isReady = useMemo(() => {
+    if (!riskFactors.dyslipidemia.status) return false
+    if (riskFactors.dyslipidemia.status !== 'yes') return true
+    return (
+      riskFactors.dyslipidemia.medication &&
+      riskFactors.dyslipidemia.ldlMgDl &&
+      riskFactors.dyslipidemia.hdlMgDl &&
+      riskFactors.dyslipidemia.triglycerideMgDl
+    )
+  }, [riskFactors.dyslipidemia])
 
   return (
     <section className={styles.container}>
       <header className={styles.header}>
         <div>
-          <p className={styles.kicker}>Step 3</p>
-          <h2>血脂與病史</h2>
+          <p className={styles.kicker}>{stepLabel}</p>
+          <h2>{stepCopy.title ?? '血脂檢驗資訊'}</h2>
         </div>
         <p className={styles.lead}>
-          請填寫血脂異常的用藥與檢驗數值，並確認是否曾經歷重大心血管事件。
+          {stepCopy.lead ??
+            '請填寫血脂異常的用藥與檢驗數值，協助我們評估膽固醇相關的心血管危險。'}
         </p>
       </header>
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         <ProgressiveCard
-          title="高脂血症"
+          title={copy.dyslipidemiaTitle}
           summary="掌握降血脂藥物使用與最新血脂檢驗值"
           isExpanded
         >
           <div className={styles.section}>
-            <label className={styles.fieldLabel}>是否有高脂血症？</label>
+            <label className={styles.fieldLabel}>{copy.dyslipidemiaTitle}</label>
             <div role="radiogroup" aria-label="高脂血症狀態" className={styles.optionRow}>
               {STATUS_OPTIONS.map((option) => (
                 <label key={option.value} className={styles.radioOption}>
@@ -169,7 +169,7 @@ export const Step3_HealthStatus = () => {
               aria-disabled={riskFactors.dyslipidemia.status !== 'yes'}
             >
               <div className={styles.inlineGroup}>
-                <span className={styles.inlineLabel}>目前有無服用降血脂藥</span>
+                <span className={styles.inlineLabel}>{copy.meds}</span>
                 <div role="radiogroup" aria-label="降血脂藥" className={styles.optionRow}>
                   {YES_NO_OPTIONS.map((option) => (
                     <label key={option.value} className={styles.radioOption}>
@@ -191,7 +191,7 @@ export const Step3_HealthStatus = () => {
               </div>
 
               <label className={styles.inlineGroup}>
-                <span className={styles.inlineLabel}>最近一次低密度脂蛋白 (LDL)</span>
+                <span className={styles.inlineLabel}>{copy.fields.ldl}</span>
                 <div className={styles.inlineInput}>
                   <input
                     type="number"
@@ -209,7 +209,7 @@ export const Step3_HealthStatus = () => {
               </label>
 
               <label className={styles.inlineGroup}>
-                <span className={styles.inlineLabel}>最近一次高密度脂蛋白 (HDL)</span>
+                <span className={styles.inlineLabel}>{copy.fields.hdl}</span>
                 <div className={styles.inlineInput}>
                   <input
                     type="number"
@@ -227,7 +227,7 @@ export const Step3_HealthStatus = () => {
               </label>
 
               <label className={styles.inlineGroup}>
-                <span className={styles.inlineLabel}>最近一次空腹三酸甘油酯 (TG)</span>
+                <span className={styles.inlineLabel}>{copy.fields.tg}</span>
                 <div className={styles.inlineInput}>
                   <input
                     type="number"
@@ -247,51 +247,9 @@ export const Step3_HealthStatus = () => {
           </div>
         </ProgressiveCard>
 
-        <section className={styles.historyCard}>
-          <h3>過去是否發生重大心血管疾病</h3>
-          <p className={styles.historyHint}>
-            包含：心肌梗塞、梗塞性腦中風、暫時性腦缺血或顱頸血管 &ge; 50% 狹窄、周邊動脈
-            &ge; 50% 狹窄、冠心症（冠狀動脈 &ge; 50% 狹窄或曾接受支架／氣球擴張）。
-          </p>
-
-          <div
-            role="radiogroup"
-            aria-label="曾發生心血管疾病"
-            className={styles.optionRow}
-          >
-            {STATUS_OPTIONS.slice(0, 3).map((option) => (
-              <label key={option.value} className={styles.radioOption}>
-                <input
-                  type="radio"
-                  name="cardio-history"
-                  value={option.value}
-                  checked={riskFactors.cardiovascularHistory.hasHistory === option.value}
-                  onChange={handleHistoryChange}
-                />
-                <span>{option.label}</span>
-              </label>
-            ))}
-          </div>
-          {errors['cardiovascularHistory.hasHistory'] ? (
-            <p className={styles.error}>{errors['cardiovascularHistory.hasHistory']}</p>
-          ) : null}
-
-          {riskFactors.cardiovascularHistory.hasHistory === 'yes' ? (
-            <label className={styles.notesField}>
-              <span className={styles.inlineLabel}>可補充事件年份或治療方式（選填）</span>
-              <textarea
-                rows={3}
-                value={riskFactors.cardiovascularHistory.notes}
-                onChange={handleHistoryNotesChange}
-                placeholder="例如：2022 年心肌梗塞，已置放冠狀動脈支架"
-              />
-            </label>
-          ) : null}
-        </section>
-
         <div className={styles.actions}>
           <Button type="submit" disabled={!isReady}>
-            下一步：風險報告
+            {nextStepLabel ? `下一步：${nextStepLabel}` : '下一步'}
           </Button>
         </div>
       </form>

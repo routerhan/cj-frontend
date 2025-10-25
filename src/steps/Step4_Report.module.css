@@ -27,7 +27,7 @@
 }
 
 .lead {
-  max-width: 480px;
+  max-width: 520px;
   color: var(--color-muted);
   font-size: 1rem;
   line-height: 1.65;
@@ -35,9 +35,9 @@
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 2.5fr) minmax(240px, 1fr);
-  gap: 2.5rem;
-  align-items: start;
+  grid-template-columns: minmax(0, 2.6fr) minmax(240px, 1fr);
+  gap: 2.25rem;
+  align-items: flex-start;
 }
 
 .main {
@@ -69,59 +69,214 @@
   color: #b91c1c;
 }
 
-.scoreCard {
+.summaryCard {
   display: grid;
   gap: 1rem;
   padding: 2rem;
   border-radius: 24px;
-  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 50%, var(--color-primary-light) 100%);
+  background: linear-gradient(135deg, rgba(35, 55, 74, 0.98) 0%, rgba(35, 55, 74, 0.88) 100%);
   color: #f4fbfc;
   box-shadow: 0 20px 40px rgba(35, 55, 74, 0.28);
 }
 
-.scoreValue {
+.summaryHeader {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
   gap: 1rem;
 }
 
-.scoreNumber {
-  font-size: 3rem;
-  font-weight: 700;
-}
-
-.scoreLevel {
-  font-size: 1.25rem;
+.levelLabel {
+  font-size: 0.95rem;
   font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  opacity: 0.85;
 }
 
-.scoreSummary {
+.levelChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1.1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.levelChipCritical {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  color: #fff5f5;
+}
+
+.levelChipSevere {
+  background: linear-gradient(135deg, #b91c1c 0%, #f97316 100%);
+  color: #fff7ed;
+}
+
+.levelChipHigh {
+  background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%);
+  color: #fff8eb;
+}
+
+.levelChipMedium {
+  background: linear-gradient(135deg, #2563eb 0%, #38bdf8 100%);
+  color: #f0f9ff;
+}
+
+.levelChipLow {
+  background: linear-gradient(135deg, #0f766e 0%, #22c55e 100%);
+  color: #ecfdf5;
+}
+
+.levelChipNeutral {
+  background: rgba(148, 163, 184, 0.25);
+  color: #e2e8f0;
+}
+
+.levelDescription {
   margin: 0;
   font-size: 1rem;
-  line-height: 1.75;
+  line-height: 1.7;
   opacity: 0.9;
 }
 
-.generatedAt {
-  margin: 0;
-  font-size: 0.85rem;
-  opacity: 0.75;
+.ruleSection {
+  display: grid;
+  gap: 0.75rem;
 }
 
-.comparison {
+.ruleSection h3 {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 600;
+}
+
+.ruleList {
+  margin: 0;
+  padding-left: 1.25rem;
+  line-height: 1.7;
+  color: #e2e8f0;
+}
+
+.ruleFallback {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.evaluatedAt {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.65;
+}
+
+.detailGrid {
   display: grid;
-  gap: 1.25rem;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.detailCard {
+  display: grid;
+  gap: 1rem;
   padding: 1.75rem;
   border-radius: 20px;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
-  box-shadow: 0 10px 24px var(--color-shadow);
+  box-shadow: 0 12px 28px var(--color-shadow);
 }
 
-.comparison h3,
-.factors h3,
+.detailCard header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.detailCard h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.countBadge {
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(143, 198, 199, 0.2);
+  color: var(--color-primary-dark);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.factorGrid {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.factorActive,
+.factorMuted {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 14px;
+  border: 1px solid rgba(47, 79, 102, 0.18);
+  font-size: 0.95rem;
+}
+
+.factorActive {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #166534;
+  font-weight: 600;
+}
+
+.factorMuted {
+  background: rgba(148, 163, 184, 0.12);
+  color: #475569;
+}
+
+.factorStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: rgba(35, 55, 74, 0.1);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.emphasisText {
+  margin: 0;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.fallbackText {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.recommendations {
+  display: grid;
+  gap: 1.1rem;
+  padding: 1.9rem;
+  border-radius: 22px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: 0 14px 32px var(--color-shadow);
+}
+
 .recommendations h3 {
   margin: 0;
   font-size: 1.2rem;
@@ -129,81 +284,11 @@
   color: #1f2937;
 }
 
-.barGroup {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.barLabel {
-  display: flex;
-  justify-content: space-between;
-  color: var(--color-muted);
-  font-size: 0.95rem;
-}
-
-.barLabel strong {
-  color: var(--color-text);
-}
-
-.barTrack {
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(47, 79, 102, 0.18);
-  overflow: hidden;
-}
-
-.barUser {
-  height: 100%;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
-  border-radius: inherit;
-}
-
-.barAvg {
-  height: 100%;
-  background: rgba(47, 79, 102, 0.35);
-  border-radius: inherit;
-}
-
-.difference {
-  margin: 0;
-  font-size: 0.95rem;
-  color: var(--color-muted);
-}
-
-.factors,
-.recommendations {
-  display: grid;
-  gap: 1rem;
-  padding: 1.75rem;
-  border-radius: 20px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  box-shadow: 0 10px 24px var(--color-shadow);
-}
-
-.factorList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.factorItem {
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  border: 1px solid rgba(47, 79, 102, 0.25);
-  color: var(--color-primary);
-  background: rgba(143, 198, 199, 0.22);
-  font-weight: 500;
-}
-
 .recommendations ul {
   margin: 0;
   padding-left: 1.25rem;
   color: #475569;
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
 .sidebar {
@@ -239,7 +324,7 @@
     flex-direction: column;
   }
 
-  .scoreValue {
+  .summaryHeader {
     flex-direction: column;
     align-items: flex-start;
   }

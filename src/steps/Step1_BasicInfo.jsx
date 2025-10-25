@@ -16,6 +16,7 @@ export const Step1_BasicInfo = () => {
     setStepStatus,
     stepStatus,
     StepStatus,
+    steps,
   } = useFormContext()
 
   const { dictionary } = useLanguage()
@@ -163,11 +164,16 @@ export const Step1_BasicInfo = () => {
     return copy.instant.ageDesc
   })()
 
+  const currentStepIndex = steps.findIndex((step) => step.key === 'basicInfo')
+  const stepLabel = `Step ${currentStepIndex + 1}`
+  const nextStepKey = steps[currentStepIndex + 1]?.key
+  const nextStepLabel = nextStepKey ? dictionary.steps[nextStepKey] : ''
+
   return (
     <section className={styles.container}>
       <header className={styles.header}>
         <div>
-          <p className={styles.kicker}>Step 1</p>
+          <p className={styles.kicker}>{stepLabel}</p>
           <h2>{dictionary.steps.basicInfo}</h2>
         </div>
         <p className={styles.lead}>{copy.lead}</p>
@@ -346,7 +352,9 @@ export const Step1_BasicInfo = () => {
           </section>
 
           <div className={styles.actions}>
-            <Button type="submit">{copy.buttonNext}</Button>
+            <Button type="submit">
+              {nextStepLabel ? `下一步：${nextStepLabel}` : copy.buttonNext ?? '下一步'}
+            </Button>
           </div>
         </form>
 
