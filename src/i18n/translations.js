@@ -257,8 +257,7 @@ export const translations = {
       },
       buttons: {
         recalc: '重新計算',
-        download: '下載 PDF 報告',
-      },
+              },
     },
     buttons: {
       toggleLabel: 'EN',
@@ -523,8 +522,7 @@ export const translations = {
       },
       buttons: {
         recalc: 'Recalculate',
-        download: 'Download PDF Report',
-      },
+              },
     },
     buttons: {
       toggleLabel: '中文',

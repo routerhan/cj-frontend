@@ -30,6 +30,7 @@ export const Step4_Report = () => {
     formData,
     updateFormSection,
     markCurrentStepCompleted,
+    resetForm,
     StepStatus,
     stepStatus,
     setStepStatus,
@@ -66,6 +67,11 @@ export const Step4_Report = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleExitReport = () => {
+    hasRequestedRef.current = false
+    resetForm()
   }
 
   useEffect(() => {
@@ -259,11 +265,8 @@ export const Step4_Report = () => {
         <aside className={styles.sidebar}>
           <InstantResult label="即時狀態" value={instantValue} description={instantDescription} />
           <div className={styles.sidebarActions}>
-            <Button onClick={() => runCalculation(true)} variant="secondary" disabled={loading}>
-              重新計算
-            </Button>
-            <Button type="button" disabled={loading || !hasData(report.level)}>
-              下載 PDF 報告
+            <Button type="button" variant="ghost" onClick={handleExitReport} disabled={loading}>
+              退出報告
             </Button>
           </div>
         </aside>

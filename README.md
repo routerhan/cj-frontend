@@ -54,8 +54,7 @@ sqlite3 backend/dev.db "SELECT id, level_code, risk_factor_count FROM assessment
 sqlite3 backend/dev.db "SELECT code, present FROM assessment_factors WHERE assessment_id = <上一步的 id>;"
 
 # 5. 打開醫師儀表板檢視資料（新分頁輸入）
-# - 前端介面（需 npm run dev）: http://127.0.0.1:5173/dashboard
-# - 後端靜態頁（僅需後端執行）: http://127.0.0.1:8000/api/admin/dashboard
+# http://127.0.0.1:8000/api/admin/dashboard
 
 # 6. 選擇性：執行測試
 cd backend && pytest
@@ -88,11 +87,10 @@ npm run test -- Step4_LipidProfile
 
 ## 醫師儀表板
 
-- 前端 SPA：`http://127.0.0.1:5173/dashboard`（或 `?view=dashboard`），適合與主要問卷一同展示。
-- 後端提供的純 HTML 儀表板：`http://127.0.0.1:8000/api/admin/dashboard`，無需啟動前端即可快速檢視。
-- 皆透過 `/api/admin/assessments` 取得評估紀錄與統計，可用 `limit` 參數調整載入筆數。
-- 呈現總評估次數、平均危險因子數、層級分佈、命中規則與原始 payload JSON，方便醫師理解資料。
-- 若後端部署於不同網域，請於前端環境變數設定 `VITE_API_BASE_URL` 指向 API 來源。
+- 後端提供的純 HTML 儀表板：`http://127.0.0.1:8000/api/admin/dashboard`，不需啟動前端即可快速檢視。
+- 透過 `/api/admin/assessments` 取得評估紀錄與統計，可用 `limit` 參數調整載入筆數。
+- 呈現總評估次數、平均危險因子數、層級分佈（皆為全資料庫統計）、命中規則與原始 payload JSON，方便醫師理解資料。
+- 若部署在雲端，請確保外部能存取此路徑（建議加上身分驗證／IP 白名單）。
 
 ---
 

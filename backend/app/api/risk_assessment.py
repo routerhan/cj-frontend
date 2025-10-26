@@ -1,12 +1,12 @@
 """風險評估 API 與後台資料檢視路由。"""
 
-from collections import Counter
-
 from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import HTMLResponse
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..db.session import get_session
+from ..models import Assessment, AssessmentFactor
 from ..repositories import AssessmentRepository
 from ..schemas import (
     AssessmentListResponse,
@@ -53,7 +53,6 @@ async def list_assessments(
     assessments = repository.list_recent_assessments(limit=limit)
 
     records: list[AssessmentRecord] = []
-    total_risk_factors = 0
 
     for assessment in assessments:
         response_model = RiskAssessmentResponse.model_validate(assessment.result)
@@ -73,16 +72,28 @@ async def list_assessments(
                 payload=payload_model,
             )
         )
-        total_risk_factors += response_model.riskFactorCount
 
-    by_level_counter = Counter(record.levelCode for record in records)
-    by_level = {level: by_level_counter.get(level, 0) for level in RiskLevelCodeEnum}
+    total_count = session.scalar(select(func.count()).select_from(Assessment)) or 0
+    average_risk_factor = session.scalar(
+        select(func.avg(Assessment.risk_factor_count))
+    )
+    level_rows = session.execute(
+        select(Assessment.level_code, func.count())
+        .group_by(Assessment.level_code)
+    ).all()
+    global_by_level = {
+        (code if code is not None else RiskLevelCodeEnum.UNDEFINED.value): count
+        for code, count in level_rows
+    }
 
     stats = AssessmentStats(
-        totalAssessments=len(records),
-        byLevel=by_level,
+        totalAssessments=total_count,
+        byLevel={
+            level: global_by_level.get(level.value, 0)
+            for level in RiskLevelCodeEnum
+        },
         averageRiskFactorCount=(
-            total_risk_factors / len(records) if records else None
+            float(average_risk_factor) if average_risk_factor is not None else None
         ),
         latestAssessmentAt=records[0].createdAt if records else None,
     )
@@ -383,7 +394,7 @@ DASHBOARD_HTML = """
 
           const metabolicTags = Object.entries(record.metabolicSyndrome?.components || {})
             .filter(([, present]) => present)
-            .map(([key]) => `<span class="tag">${key}</span>`)
+            .map(([key]) => `<span class="tag">${(key === "abdominalObesity" ? "腹部肥胖" : key === "elevatedBloodPressure" ? "血壓偏高或治療中" : key === "elevatedGlucose" ? "空腹血糖偏高或使用降糖藥" : key === "elevatedTriglyceride" ? "三酸甘油酯偏高或治療中" : key === "lowHdl" ? "HDL-C 偏低" : key)}</span>`)
             .join('');
 
           return `
