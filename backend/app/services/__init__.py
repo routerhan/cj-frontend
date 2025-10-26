@@ -1,14 +1,13 @@
-"""Service layer interfaces and placeholder implementations."""
+"""Service layer interfaces and implementations."""
 
 from .risk_assessment import (
-    DummyRiskAssessmentService,
+    RiskAssessmentService,
     RiskAssessmentServiceProtocol,
     get_risk_assessment_service,
 )
 
 __all__ = [
-    "DummyRiskAssessmentService",
+    "RiskAssessmentService",
     "RiskAssessmentServiceProtocol",
     "get_risk_assessment_service",
 ]
-

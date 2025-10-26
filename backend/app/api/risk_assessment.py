@@ -18,10 +18,8 @@ async def create_risk_assessment(
     service: RiskAssessmentServiceProtocol = Depends(get_risk_assessment_service),
 ) -> RiskAssessmentResponse:
     """
-    接收前端送出的心血管風險評估資料，回傳符合契約的評估結果。
-
-    目前透過暫時性的服務回傳假資料，後續會由實際商業邏輯替換。
+    接收前端送出的心血管風險評估資料，回傳符合契約的評估結果，
+    並將請求與運算結果儲存至資料庫。
     """
 
     return service.evaluate(payload)
-

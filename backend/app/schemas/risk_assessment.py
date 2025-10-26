@@ -31,9 +31,7 @@ class MatchedRule(BaseModel):
     code: str = Field(..., min_length=1, description="規則識別碼，對齊前端 riskRules.js")
     label: str = Field(..., min_length=1, description="規則對應的顯示文字")
 
-    class Config:
-        anystr_strip_whitespace = True
-        extra = "forbid"
+    model_config = dict(str_strip_whitespace=True, extra="forbid")
 
 
 class RiskFactorItem(BaseModel):
@@ -43,9 +41,7 @@ class RiskFactorItem(BaseModel):
     label: str = Field(..., min_length=1)
     present: bool = Field(..., description="該危險因子是否成立")
 
-    class Config:
-        anystr_strip_whitespace = True
-        extra = "forbid"
+    model_config = dict(str_strip_whitespace=True, extra="forbid")
 
 
 class MetabolicComponents(BaseModel):
@@ -57,8 +53,7 @@ class MetabolicComponents(BaseModel):
     elevatedTriglyceride: bool = False
     lowHdl: bool = False
 
-    class Config:
-        extra = "forbid"
+    model_config = dict(extra="forbid")
 
 
 class MetabolicSyndromeResult(BaseModel):
@@ -73,8 +68,7 @@ class MetabolicSyndromeResult(BaseModel):
         description="各構成項目的布林狀態",
     )
 
-    class Config:
-        extra = "forbid"
+    model_config = dict(extra="forbid")
 
 
 class RiskAssessmentResponse(BaseModel):
@@ -101,9 +95,7 @@ class RiskAssessmentResponse(BaseModel):
         ..., description="ISO-8601 格式的評估時間字串"
     )
 
-    class Config:
-        anystr_strip_whitespace = True
-        extra = "forbid"
+    model_config = dict(str_strip_whitespace=True, extra="forbid")
 
 
 class RiskAssessmentRequest(BaseModel):
@@ -216,7 +208,4 @@ class RiskAssessmentRequest(BaseModel):
             return None
         return str(value).lower()
 
-    class Config:
-        extra = "forbid"
-        anystr_strip_whitespace = True
-
+    model_config = dict(extra="forbid", str_strip_whitespace=True)
