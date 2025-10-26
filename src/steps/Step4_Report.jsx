@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../components/ui/Button.jsx'
 import { LoadingSpinner } from '../components/ui/LoadingSpinner.jsx'
 import { InstantResult } from '../components/ui/InstantResult.jsx'
@@ -37,6 +37,7 @@ export const Step4_Report = () => {
   } = useFormContext()
 
   const report = formData.report ?? {}
+  const hasRequestedRef = useRef(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -46,7 +47,11 @@ export const Step4_Report = () => {
     }
   }
 
-  const runCalculation = async () => {
+  const runCalculation = async (force = false) => {
+    if (loading) return
+    if (!force && hasRequestedRef.current) return
+    hasRequestedRef.current = true
+
     try {
       ensureStepInProgress()
       setLoading(true)
@@ -56,6 +61,7 @@ export const Step4_Report = () => {
       markCurrentStepCompleted()
       setStepStatus('report', StepStatus.COMPLETED)
     } catch (err) {
+      hasRequestedRef.current = false
       setError(err.message || '計算風險時發生問題，請稍後再試。')
     } finally {
       setLoading(false)
@@ -63,7 +69,7 @@ export const Step4_Report = () => {
   }
 
   useEffect(() => {
-    if (!report?.level && !loading) {
+    if (!report?.level && !loading && !hasRequestedRef.current) {
       runCalculation()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -253,7 +259,7 @@ export const Step4_Report = () => {
         <aside className={styles.sidebar}>
           <InstantResult label="即時狀態" value={instantValue} description={instantDescription} />
           <div className={styles.sidebarActions}>
-            <Button onClick={runCalculation} variant="secondary" disabled={loading}>
+            <Button onClick={() => runCalculation(true)} variant="secondary" disabled={loading}>
               重新計算
             </Button>
             <Button type="button" disabled={loading || !hasData(report.level)}>

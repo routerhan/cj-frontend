@@ -17,6 +17,12 @@ const YES_NO_OPTIONS = [
   { value: 'no', label: '無' },
 ]
 
+const LIPID_LIMITS = {
+  ldlMgDl: { min: 0, max: 400, errorKey: 'ldlRange' },
+  hdlMgDl: { min: 0, max: 200, errorKey: 'hdlRange' },
+  triglycerideMgDl: { min: 0, max: 2000, errorKey: 'tgRange' },
+}
+
 export const Step4_LipidProfile = () => {
   const {
     formData,
@@ -67,6 +73,17 @@ export const Step4_LipidProfile = () => {
     updateFormField(['riskFactors', 'dyslipidemia', field], value)
     setErrors((prev) => {
       const next = { ...prev }
+      const limits = LIPID_LIMITS[field]
+      if (limits && value !== '') {
+        const numericValue = Number.parseFloat(value)
+        if (
+          Number.isFinite(numericValue) &&
+          (numericValue < limits.min || numericValue > limits.max)
+        ) {
+          next[`dyslipidemia.${field}`] = copy.errors[limits.errorKey]
+          return next
+        }
+      }
       delete next[`dyslipidemia.${field}`]
       return next
     })
@@ -84,12 +101,41 @@ export const Step4_LipidProfile = () => {
       }
       if (!riskFactors.dyslipidemia.ldlMgDl) {
         nextErrors['dyslipidemia.ldlMgDl'] = copy.errors.ldl
+      } else {
+        const limits = LIPID_LIMITS.ldlMgDl
+        const numericValue = Number.parseFloat(riskFactors.dyslipidemia.ldlMgDl)
+        if (
+          Number.isFinite(numericValue) &&
+          (numericValue < limits.min || numericValue > limits.max)
+        ) {
+          nextErrors['dyslipidemia.ldlMgDl'] = copy.errors[limits.errorKey]
+        }
       }
       if (!riskFactors.dyslipidemia.hdlMgDl) {
         nextErrors['dyslipidemia.hdlMgDl'] = copy.errors.hdl
+      } else {
+        const limits = LIPID_LIMITS.hdlMgDl
+        const numericValue = Number.parseFloat(riskFactors.dyslipidemia.hdlMgDl)
+        if (
+          Number.isFinite(numericValue) &&
+          (numericValue < limits.min || numericValue > limits.max)
+        ) {
+          nextErrors['dyslipidemia.hdlMgDl'] = copy.errors[limits.errorKey]
+        }
       }
       if (!riskFactors.dyslipidemia.triglycerideMgDl) {
         nextErrors['dyslipidemia.triglycerideMgDl'] = copy.errors.tg
+      } else {
+        const limits = LIPID_LIMITS.triglycerideMgDl
+        const numericValue = Number.parseFloat(
+          riskFactors.dyslipidemia.triglycerideMgDl,
+        )
+        if (
+          Number.isFinite(numericValue) &&
+          (numericValue < limits.min || numericValue > limits.max)
+        ) {
+          nextErrors['dyslipidemia.triglycerideMgDl'] = copy.errors[limits.errorKey]
+        }
       }
     }
 
@@ -119,9 +165,10 @@ export const Step4_LipidProfile = () => {
       riskFactors.dyslipidemia.medication &&
       riskFactors.dyslipidemia.ldlMgDl &&
       riskFactors.dyslipidemia.hdlMgDl &&
-      riskFactors.dyslipidemia.triglycerideMgDl
+      riskFactors.dyslipidemia.triglycerideMgDl &&
+      Object.keys(errors).length === 0
     )
-  }, [riskFactors.dyslipidemia])
+  }, [errors, riskFactors.dyslipidemia])
 
   return (
     <section className={styles.container}>

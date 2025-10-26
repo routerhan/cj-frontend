@@ -66,4 +66,26 @@ describe('Step4_LipidProfile', () => {
     fireEvent.click(nextButton)
     expect(screen.getByTestId('current-step')).toHaveTextContent('5')
   })
+
+  it('數值超出範圍時顯示錯誤並禁止下一步', () => {
+    renderWithProvider(<Harness />)
+
+    const dyslipidemiaGroup = screen.getByRole('radiogroup', { name: '高脂血症狀態' })
+    fireEvent.click(within(dyslipidemiaGroup).getByText('有'))
+
+    const lipidMedicationGroup = screen.getByRole('radiogroup', { name: '降血脂藥' })
+    fireEvent.click(within(lipidMedicationGroup).getByText('無'))
+
+    const ldlField = within(
+      screen.getByText('最近一次低密度脂蛋白 (LDL)').closest('label'),
+    ).getByPlaceholderText('mg/dL')
+    fireEvent.change(ldlField, { target: { value: '450' } })
+
+    expect(
+      screen.getByText('LDL 數值需介於 0 至 400 mg/dL'),
+    ).toBeInTheDocument()
+
+    const nextButton = screen.getByRole('button', { name: '下一步：心血管病史' })
+    expect(nextButton).toBeDisabled()
+  })
 })
