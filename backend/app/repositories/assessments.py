@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from typing import Iterable
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, selectinload
 
 from app.models import Assessment, AssessmentFactor
 from app.schemas import RiskAssessmentRequest, RiskAssessmentResponse
@@ -58,3 +59,14 @@ class AssessmentRepository:
         """Return all factors associated with an assessment."""
 
         return assessment.factors
+
+    def list_recent_assessments(self, limit: int = 50) -> list[Assessment]:
+        """Fetch the most recent assessments with factors preloaded."""
+
+        stmt = (
+            select(Assessment)
+            .options(selectinload(Assessment.factors))
+            .order_by(Assessment.created_at.desc())
+            .limit(limit)
+        )
+        return list(self.session.execute(stmt).scalars().all())

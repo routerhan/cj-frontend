@@ -1,6 +1,9 @@
 """Pydantic schema definitions for the risk assessment API."""
 
 from .risk_assessment import (
+    AssessmentListResponse,
+    AssessmentRecord,
+    AssessmentStats,
     GenderEnum,
     MatchedRule,
     MetabolicComponents,
@@ -12,6 +15,9 @@ from .risk_assessment import (
 )
 
 __all__ = [
+    "AssessmentListResponse",
+    "AssessmentRecord",
+    "AssessmentStats",
     "GenderEnum",
     "MatchedRule",
     "MetabolicComponents",

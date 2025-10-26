@@ -50,10 +50,14 @@ cd /path/to/cj-frontend
 npm run dev
 
 # 4. 走完整個表單流程後，可在 backend/ 終端驗證資料
-sqlite3 backend/dev.db "SELECT id, level_code, risk_factor_count FROM assessments ORDER BY id DESC LIMIT 1;"
+sqlite3 backend/dev.db "SELECT id, level_code, risk_factor_count FROM assessments ORDER BY id DESC;"
 sqlite3 backend/dev.db "SELECT code, present FROM assessment_factors WHERE assessment_id = <上一步的 id>;"
 
-# 5. 選擇性：執行測試
+# 5. 打開醫師儀表板檢視資料（新分頁輸入）
+# - 前端介面（需 npm run dev）: http://127.0.0.1:5173/dashboard
+# - 後端靜態頁（僅需後端執行）: http://127.0.0.1:8000/api/admin/dashboard
+
+# 6. 選擇性：執行測試
 cd backend && pytest
 npm run test -- Step4_LipidProfile
 ```
@@ -79,6 +83,16 @@ npm run test -- Step4_LipidProfile
 |------|--------|------|-------------|
 | `DATABASE_URL` | `sqlite:///./dev.db` | SQLAlchemy 連線字串 | 改成正式資料庫，如 `postgresql+psycopg://user:password@host/db` |
 | `VITE_API_BASE_URL` (選用) | 空字串 | 若未設定會由 Vite proxy 轉送；部署在同網域外時用於指定 API 來源 | 部署到不同網域時要設為 API 實際 URL |
+
+---
+
+## 醫師儀表板
+
+- 前端 SPA：`http://127.0.0.1:5173/dashboard`（或 `?view=dashboard`），適合與主要問卷一同展示。
+- 後端提供的純 HTML 儀表板：`http://127.0.0.1:8000/api/admin/dashboard`，無需啟動前端即可快速檢視。
+- 皆透過 `/api/admin/assessments` 取得評估紀錄與統計，可用 `limit` 參數調整載入筆數。
+- 呈現總評估次數、平均危險因子數、層級分佈、命中規則與原始 payload JSON，方便醫師理解資料。
+- 若後端部署於不同網域，請於前端環境變數設定 `VITE_API_BASE_URL` 指向 API 來源。
 
 ---
 

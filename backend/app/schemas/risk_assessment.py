@@ -1,9 +1,10 @@
 """Pydantic models describing the risk assessment API contract."""
 
+from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field, conint, confloat, validator
+from pydantic import BaseModel, Field, confloat, conint, validator
 
 
 class GenderEnum(str, Enum):
@@ -209,3 +210,44 @@ class RiskAssessmentRequest(BaseModel):
         return str(value).lower()
 
     model_config = dict(extra="forbid", str_strip_whitespace=True)
+
+
+class AssessmentRecord(BaseModel):
+    """提供醫療儀表板使用的評估紀錄摘要。"""
+
+    id: int = Field(..., description="資料庫評估紀錄主鍵")
+    createdAt: datetime = Field(..., description="評估建立時間")
+    level: str = Field(..., description="風險層級中文描述")
+    levelCode: RiskLevelCodeEnum = Field(..., description="風險層級代碼")
+    riskFactorCount: conint(ge=0) = Field(..., description="命中的危險因子數")
+    matchedRules: List[MatchedRule] = Field(default_factory=list)
+    recommendations: List[str] = Field(default_factory=list)
+    riskFactors: List[RiskFactorItem] = Field(default_factory=list)
+    metabolicSyndrome: MetabolicSyndromeResult
+    payload: RiskAssessmentRequest = Field(..., description="原始請求資料")
+
+    model_config = dict(extra="forbid")
+
+
+class AssessmentStats(BaseModel):
+    """儀表板用整體統計資訊。"""
+
+    totalAssessments: int = Field(..., ge=0)
+    byLevel: Dict[RiskLevelCodeEnum, int] = Field(default_factory=dict)
+    averageRiskFactorCount: Optional[float] = Field(
+        None, description="平均危險因子數（若無資料則為 None）"
+    )
+    latestAssessmentAt: Optional[datetime] = Field(
+        None, description="最近一次評估時間（若無資料則為 None）"
+    )
+
+    model_config = dict(extra="forbid")
+
+
+class AssessmentListResponse(BaseModel):
+    """後端回傳醫師儀表板所需資料。"""
+
+    stats: AssessmentStats
+    assessments: List[AssessmentRecord] = Field(default_factory=list)
+
+    model_config = dict(extra="forbid")
