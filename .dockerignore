@@ -1,0 +1,13 @@
+.git
+.gitignore
+node_modules
+dist
+dist-ssr
+*.log
+*.pyc
+__pycache__/
+*.sqlite3
+*.db
+coverage/
+.pytest_cache/
+.DS_Store

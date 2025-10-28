@@ -82,6 +82,52 @@ npm run test -- Step4_LipidProfile
 |------|--------|------|-------------|
 | `DATABASE_URL` | `sqlite:///./dev.db` | SQLAlchemy 連線字串 | 改成正式資料庫，如 `postgresql+psycopg://user:password@host/db` |
 | `VITE_API_BASE_URL` (選用) | 空字串 | 若未設定會由 Vite proxy 轉送；部署在同網域外時用於指定 API 來源 | 部署到不同網域時要設為 API 實際 URL |
+| `ADMIN_JWT_SECRET` | 無預設（必填） | 管理者登入使用的 JWT 金鑰 | 各環境請使用不同的高熵字串並妥善保護 |
+| `ADMIN_TOKEN_TTL_MINUTES` | `60` | 管理者登入 token 有效時間（分鐘） | 可依安全需求調整；更換後舊 token 會失效 |
+
+---
+
+## 使用 Podman 啟動整合環境
+
+專案提供 `podman-compose.yml` 與範例環境檔協助在本地模擬 Cloud Run 佈署：
+
+1. 複製環境檔並調整需要的設定：
+   ```bash
+   cp .env.podman.example .podmanenv
+   ```
+2. 啟動所有服務（前端、後端、PostgreSQL）：
+   ```bash
+   podman compose -f podman-compose.yml --env-file .podmanenv up --build
+   ```
+3. 服務啟動後可造訪：
+   - 前端問卷：<http://localhost:5173>
+   - API/Swagger：<http://localhost:8000/docs>
+   - 醫師儀表板：<http://localhost:8000/api/admin/dashboard>
+
+更多細節與排錯指南見 `docs/container-local.md`。
+
+### 常用 Podman 指令
+
+```bash
+# 以 .podmanenv 啟動整個 stack（前端 / 後端 / PostgreSQL）
+podman compose -f podman-compose.yml --env-file .podmanenv up --build -d
+
+# 查看服務狀態
+podman compose -f podman-compose.yml ps
+
+# 進入後端容器建立管理者帳號
+podman compose -f podman-compose.yml exec backend \
+  python -m scripts.create_admin admin@example.com --password 'StrongPass123!'
+
+# 在後端容器內執行測試
+podman compose -f podman-compose.yml exec backend pytest
+
+# 停止並移除服務（保留資料卷）
+podman compose -f podman-compose.yml down
+
+# 停止服務並刪除 volume / 映像
+podman compose -f podman-compose.yml down --volumes --rmi all
+```
 
 ---
 
