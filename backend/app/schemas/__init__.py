@@ -1,5 +1,6 @@
-"""Pydantic schema definitions for the risk assessment API."""
+"""Pydantic schema definitions for the API."""
 
+from .admin import AdminLoginRequest, AdminLoginResponse, AdminProfile
 from .risk_assessment import (
     AssessmentListResponse,
     AssessmentRecord,
@@ -15,6 +16,9 @@ from .risk_assessment import (
 )
 
 __all__ = [
+    "AdminLoginRequest",
+    "AdminLoginResponse",
+    "AdminProfile",
     "AssessmentListResponse",
     "AssessmentRecord",
     "AssessmentStats",

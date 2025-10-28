@@ -6,6 +6,13 @@ from sqlalchemy import select
 from app.models import Assessment, AssessmentFactor
 
 
+def _login_and_get_token(client: TestClient, credentials: dict[str, str]) -> str:
+    response = client.post("/api/admin/login", json=credentials)
+    assert response.status_code == 200
+    data = response.json()
+    return data["accessToken"]
+
+
 def test_api_returns_medium_level_when_two_risk_factors(client: TestClient, db_session):
     payload = {
         "age": 60,
@@ -103,7 +110,11 @@ def test_api_validation_error_for_invalid_age(client: TestClient):
     assert any(item["loc"][-1] == "age" for item in detail)
 
 
-def test_admin_dashboard_lists_recent_assessments(client: TestClient):
+def test_admin_dashboard_lists_recent_assessments(
+    client: TestClient,
+    admin_account,
+    admin_credentials,
+):
     """確保儀表板 API 可回傳統計與評估紀錄。"""
 
     base_payload = {
@@ -144,7 +155,12 @@ def test_admin_dashboard_lists_recent_assessments(client: TestClient):
     second_payload = {**base_payload, "ldl_c": 190, "has_diabetes": True}
     client.post("/api/risk-assessment", json=second_payload)
 
-    response = client.get("/api/admin/assessments?limit=5")
+    token = _login_and_get_token(client, admin_credentials)
+
+    response = client.get(
+        "/api/admin/assessments?limit=5",
+        headers={"Authorization": f"Bearer {token}"},
+    )
     assert response.status_code == 200
 
     data = response.json()

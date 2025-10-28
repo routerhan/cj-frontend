@@ -4,4 +4,3 @@ pydantic
 psycopg[binary]
 SQLAlchemy
 uvicorn[standard]
-

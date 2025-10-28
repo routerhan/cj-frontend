@@ -11,7 +11,8 @@ from sqlalchemy.pool import StaticPool
 from app import models  # noqa: F401  # ensure models are registered with metadata
 from app.db import Base, get_session
 from app.main import create_app
-from app.services import RiskAssessmentService
+from app.models import AdminAccount
+from app.services import RiskAssessmentService, get_password_hash
 
 
 @pytest.fixture
@@ -50,6 +51,7 @@ def app(db_session):
     def override_get_session():
         try:
             yield db_session
+            db_session.commit()
         finally:
             db_session.rollback()
 
@@ -70,3 +72,36 @@ def risk_service() -> RiskAssessmentService:
     """Provide a real risk assessment service instance without persistence."""
 
     return RiskAssessmentService()
+
+
+@pytest.fixture
+def admin_credentials() -> dict[str, str]:
+    """Default admin login credentials for tests."""
+
+    return {
+        "email": "admin@example.com",
+        "password": "SecurePass123!",
+    }
+
+
+@pytest.fixture
+def admin_account(db_session: Session, admin_credentials: dict[str, str]) -> AdminAccount:
+    """Create a persisted admin account for authentication tests."""
+
+    admin = AdminAccount(
+        email=admin_credentials["email"],
+        hashed_password=get_password_hash(admin_credentials["password"]),
+        is_active=True,
+    )
+    db_session.add(admin)
+    db_session.commit()
+    db_session.refresh(admin)
+    return admin
+
+
+@pytest.fixture(autouse=True)
+def _configure_admin_env(monkeypatch: pytest.MonkeyPatch):
+    """Ensure authentication secrets are available during tests."""
+
+    monkeypatch.setenv("ADMIN_JWT_SECRET", "test-secret-key")
+    monkeypatch.setenv("ADMIN_TOKEN_TTL_MINUTES", "30")
