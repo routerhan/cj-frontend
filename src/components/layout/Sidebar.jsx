@@ -12,9 +12,9 @@ export const Sidebar = () => {
   return (
     <aside className={styles.sidebar}>
       <div>
-        <div className={styles.logoBadge}>
+        {/* <div className={styles.logoBadge}>
           <img src={companyLogo} alt="Commjat" />
-        </div>
+        </div> */}
         <div className={styles.brand}>
           <div className={styles.header}>
             <p className={styles.kicker}>{navigation.kicker}</p>
