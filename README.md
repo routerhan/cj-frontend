@@ -91,7 +91,9 @@ npm run test -- Step4_LipidProfile
 
 專案提供 `podman-compose.yml` 與範例環境檔協助在本地模擬 Cloud Run 佈署：
 
-1. 複製環境檔並調整需要的設定：
+### 第一次使用
+
+1. 複製環境檔並調整需要的設定（只需做一次）：
    ```bash
    cp .env.podman.example .podmanenv
    ```
@@ -103,6 +105,12 @@ npm run test -- Step4_LipidProfile
    - 前端問卷：<http://localhost:5173>
    - API/Swagger：<http://localhost:8000/docs>
    - 醫師儀表板：<http://localhost:8000/api/admin/dashboard>
+4. 建立第一個管理者帳號（僅首次需要）：
+   ```bash
+   podman compose -f podman-compose.yml exec backend \
+     python -m scripts.create_admin admin@example.com --password 'StrongPass123!'
+   ```
+   後續如需新增或重設帳號，可重複這個指令。
 
 更多細節與排錯指南見 `docs/container-local.md`。
 
