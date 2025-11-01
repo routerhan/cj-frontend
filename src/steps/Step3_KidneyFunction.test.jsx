@@ -13,49 +13,56 @@ const renderWithProvider = (ui) =>
   )
 
 const Harness = () => {
-  const { goToStep, updateFormField } = useFormContext()
+  const { goToStep, getStepIndex, updateFormField, currentStep } = useFormContext()
 
   useEffect(() => {
-    updateFormField(['basicInfo', 'gender'], 'female')
-    updateFormField(['basicInfo', 'ageYears'], 52)
-    updateFormField(['basicInfo', 'heightCm'], '162')
-    updateFormField(['basicInfo', 'weightKg'], '58')
-    goToStep(3)
-  }, [goToStep, updateFormField])
+    updateFormField(['kidney', 'hasCkdDiagnosis'], '')
+    updateFormField(['kidney', 'egfr'], '')
+    updateFormField(['kidney', 'uacr'], '')
+    goToStep(getStepIndex('kidney'))
+  }, [goToStep, getStepIndex, updateFormField])
 
   return (
     <>
       <Step3_KidneyFunction />
-      <div data-testid="current-step">{useFormContext().currentStep}</div>
+      <div data-testid="current-step">{currentStep}</div>
     </>
   )
 }
 
 describe('Step3_KidneyFunction', () => {
-  it('未選擇狀態時無法前往下一步', () => {
+  it('收集 CKD 資訊並可填寫選填檢驗值', async () => {
     renderWithProvider(<Harness />)
 
-    const nextButton = screen.getByRole('button', { name: '下一步：血脂檢驗' })
-    expect(nextButton).toBeDisabled()
-  })
+    const diagnosisGroup = screen.getByRole('radiogroup', { name: /慢性腎臟病/ })
+    fireEvent.click(within(diagnosisGroup).getByText('否'))
 
-  it('輸入肌酸酐後顯示 eGFR 並可前往下一步', async () => {
-    renderWithProvider(<Harness />)
+    fireEvent.change(screen.getByLabelText(/eGFR/), { target: { value: '58.4' } })
+    fireEvent.change(screen.getByLabelText(/UACR/), { target: { value: '35' } })
 
-    const statusGroup = screen.getByRole('radiogroup', { name: '腎臟病狀態' })
-    fireEvent.click(within(statusGroup).getByText('有'))
-
-    const creatinineInput = screen.getByPlaceholderText('mg/dL')
-    fireEvent.change(creatinineInput, { target: { value: '1.1' } })
+    fireEvent.click(screen.getByRole('button', { name: /下一步/ }))
 
     await waitFor(() => {
-      expect(screen.getByText(/ml\/min\/1\.73m²/)).not.toHaveTextContent('--')
+      expect(screen.getByTestId('current-step')).toHaveTextContent('5')
     })
+  })
 
-    const nextButton = screen.getByRole('button', { name: '下一步：血脂檢驗' })
-    expect(nextButton).not.toBeDisabled()
+  it('驗證診斷問題必填與檢驗數值格式', () => {
+    renderWithProvider(<Harness />)
 
-    fireEvent.click(nextButton)
-    expect(screen.getByTestId('current-step')).toHaveTextContent('4')
+    fireEvent.click(screen.getByRole('button', { name: /下一步/ }))
+
+    expect(screen.getByText('請選擇是否被診斷 CKD')).toBeInTheDocument()
+
+    const diagnosisGroup = screen.getByRole('radiogroup', { name: /慢性腎臟病/ })
+    fireEvent.click(within(diagnosisGroup).getByText('是'))
+
+    fireEvent.change(screen.getByLabelText(/eGFR/), { target: { value: '-5' } })
+    fireEvent.change(screen.getByLabelText(/UACR/), { target: { value: '-3' } })
+
+    fireEvent.click(screen.getByRole('button', { name: /下一步/ }))
+
+    expect(screen.getByText('請輸入有效的 eGFR 數值')).toBeInTheDocument()
+    expect(screen.getByText('請輸入有效的 UACR 數值')).toBeInTheDocument()
   })
 })

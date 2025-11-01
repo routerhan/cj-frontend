@@ -27,10 +27,10 @@
 }
 
 .lead {
-  max-width: 420px;
+  max-width: 480px;
   color: var(--color-muted);
   font-size: 1rem;
-  line-height: 1.65;
+  line-height: 1.6;
 }
 
 .form {
@@ -40,59 +40,25 @@
 
 .fieldset {
   display: grid;
-  gap: 1.5rem;
+  gap: 1rem;
   padding: 1.75rem;
   border-radius: 20px;
   border: 1px solid var(--color-border);
   background: linear-gradient(180deg, rgba(143, 198, 199, 0.12) 0%, var(--color-surface) 100%);
-  box-shadow: 0 12px 26px var(--color-shadow);
+  box-shadow: 0 12px 28px var(--color-shadow);
 }
 
 .sectionTitle {
   margin: 0;
   font-size: 1.15rem;
-  color: var(--color-text);
   font-weight: 600;
+  color: var(--color-text);
 }
 
-.fieldGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.hint {
+.description {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--color-muted);
-}
-
-.label {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.input {
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border-radius: 14px;
-  border: 1px solid rgba(47, 79, 102, 0.2);
-  background: var(--color-surface);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.input:focus,
-.input:focus-visible {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(111, 168, 179, 0.35);
 }
 
 .optionGroup {
@@ -107,10 +73,10 @@
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border-radius: 999px;
-  border: 1px solid rgba(47, 79, 102, 0.25);
-  cursor: pointer;
+  border: 1px solid rgba(47, 79, 102, 0.24);
   background: rgba(143, 198, 199, 0.14);
-  transition: border-color 0.2s ease, background 0.2s ease;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .radioInput {
@@ -120,6 +86,46 @@
 .radioLabel:has(.radioInput:checked) {
   border-color: var(--color-primary);
   background: rgba(111, 168, 179, 0.28);
+  box-shadow: 0 8px 18px rgba(35, 55, 74, 0.18);
+  color: var(--color-primary-dark);
+}
+
+.inputGroup {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.inlineInput {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.input {
+  width: 160px;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(47, 79, 102, 0.2);
+  font-size: 1rem;
+  background: var(--color-surface);
+}
+
+.input:focus,
+.input:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(111, 168, 179, 0.35);
+}
+
+.unit {
+  color: var(--color-muted);
+  font-weight: 500;
 }
 
 .error {
@@ -131,7 +137,6 @@
 .actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 0.5rem;
 }
 
 @media (max-width: 1024px) {
@@ -150,14 +155,6 @@
   }
 
   .fieldset {
-    padding: 1.25rem;
-  }
-
-  .fieldGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .optionGroup {
-    flex-wrap: wrap;
+    padding: 1.35rem;
   }
 }

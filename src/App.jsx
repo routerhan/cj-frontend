@@ -3,18 +3,18 @@ import { Layout } from './components/layout/Layout.jsx'
 import { useFormContext } from './context/FormContext.jsx'
 import { Welcome } from './steps/Welcome.jsx'
 import { Step1_BasicInfo } from './steps/Step1_BasicInfo.jsx'
-import { Step2_ChronicConditions } from './steps/Step2_ChronicConditions.jsx'
+import { Step2_BpLipids } from './steps/Step2_BpLipids.jsx'
+import { Step3_Diabetes } from './steps/Step3_Diabetes.jsx'
 import { Step3_KidneyFunction } from './steps/Step3_KidneyFunction.jsx'
-import { Step4_LipidProfile } from './steps/Step4_LipidProfile.jsx'
 import { Step5_CardiovascularHistory } from './steps/Step5_CardiovascularHistory.jsx'
 import { Step4_Report } from './steps/Step4_Report.jsx'
 
 const STEP_COMPONENTS = [
   Welcome,
   Step1_BasicInfo,
-  Step2_ChronicConditions,
+  Step2_BpLipids,
+  Step3_Diabetes,
   Step3_KidneyFunction,
-  Step4_LipidProfile,
   Step5_CardiovascularHistory,
   Step4_Report,
 ]

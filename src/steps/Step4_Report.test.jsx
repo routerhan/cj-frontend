@@ -10,18 +10,22 @@ vi.mock('../utils/riskApi.js', () => ({
     level: '中',
     levelCode: 'medium',
     matchedRules: [{ code: 'risk_factor_count', label: '心血管危險因子達兩項以上' }],
-    riskFactorCount: 2,
+    riskFactorCount: 3,
     riskFactors: [
       { code: 'hypertension', label: '高血壓', present: true },
+      { code: 'age', label: '年齡達風險閾值', present: true },
+      { code: 'low_hdl', label: 'HDL-C 偏低', present: true },
       { code: 'smoking', label: '抽菸', present: false },
+      { code: 'family_history', label: '早發性冠心病家族史', present: false },
+      { code: 'metabolic_syndrome', label: '代謝症候群 (≥3 項構成條件)', present: false },
     ],
     metabolicSyndrome: {
-      count: 2,
+      count: 3,
       components: {
         abdominalObesity: true,
         elevatedBloodPressure: true,
         elevatedGlucose: false,
-        elevatedTriglyceride: false,
+        elevatedTriglyceride: true,
         lowHdl: false,
       },
     },
@@ -41,8 +45,37 @@ const Harness = () => {
   const { goToStep, updateFormField } = useFormContext()
 
   useEffect(() => {
-    updateFormField(['basicInfo', 'gender'], 'male')
-    updateFormField(['basicInfo', 'ageYears'], 45)
+    updateFormField(['basic', 'sex'], 'male')
+    updateFormField(['basic', 'birthDate'], '1985-01-01')
+    updateFormField(['basic', 'heightCm'], '175')
+    updateFormField(['basic', 'weightKg'], '72')
+    updateFormField(['basic', 'waistCm'], '94')
+    updateFormField(['basic', 'currentSmoker'], 'yes')
+    updateFormField(['basic', 'familyHistoryEarlyChd'], 'no')
+
+    updateFormField(['bpAndLipids', 'usesHypertensionMedication'], 'yes')
+    updateFormField(['bpAndLipids', 'systolic'], '138')
+    updateFormField(['bpAndLipids', 'diastolic'], '86')
+    updateFormField(['bpAndLipids', 'ldlMgDl'], '135')
+    updateFormField(['bpAndLipids', 'hdlMgDl'], '42')
+    updateFormField(['bpAndLipids', 'triglycerideMgDl'], '220')
+    updateFormField(['bpAndLipids', 'usesTriglycerideMedication'], 'no')
+
+    updateFormField(['diabetes', 'hasDiagnosis'], 'no')
+    updateFormField(['diabetes', 'usesMedication'], 'no')
+    updateFormField(['diabetes', 'fastingGlucoseMgDl'], '110')
+
+    updateFormField(['kidney', 'hasCkdDiagnosis'], 'no')
+    updateFormField(['kidney', 'egfr'], '92')
+    updateFormField(['kidney', 'uacr'], '18')
+
+    updateFormField(['history', 'cacScore'], '120')
+    updateFormField(['history', 'hasSignificantPlaque'], 'no')
+    updateFormField(['history', 'hasAscvdDiagnosis'], 'no')
+    updateFormField(['history', 'vascularDiseases', 'cad'], false)
+    updateFormField(['history', 'vascularDiseases', 'pad'], false)
+    updateFormField(['history', 'vascularDiseases', 'carotidStenosis'], false)
+
     goToStep(6)
   }, [goToStep, updateFormField])
 
@@ -64,18 +97,23 @@ describe('Step4_Report', () => {
 
     expect(screen.getByText('正在計算您的風險...')).toBeInTheDocument()
 
-    await screen.findByText('此次評估結果')
+    await screen.findByText('主要結果')
 
-    expect(screen.getAllByText('中')[0]).toBeInTheDocument()
-    expect(screen.getByText('心血管危險因子')).toBeInTheDocument()
+    expect(screen.getByText('您的心血管風險等級為：【中】')).toBeInTheDocument()
+    expect(
+      screen.getByText('根據指引，您的 LDL-C (低密度脂蛋白) 建議目標為：【<115 mg/dL】'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('您符合 3 項心血管危險因子：')).toBeInTheDocument()
     expect(screen.getByText('高血壓')).toBeInTheDocument()
-    expect(screen.getByText('維持規律運動與均衡飲食')).toBeInTheDocument()
+    expect(screen.getByText('數據總覽')).toBeInTheDocument()
+    expect(screen.getByText('後續建議')).toBeInTheDocument()
+    expect(screen.getByText('免責聲明')).toBeInTheDocument()
   })
 
   it('重新計算會再次呼叫 API', async () => {
     renderInProvider(<Harness />)
 
-    await screen.findByText('此次評估結果')
+    await screen.findByText('主要結果')
 
     fireEvent.click(screen.getByRole('button', { name: '重新計算' }))
 

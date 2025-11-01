@@ -2,12 +2,12 @@
 重新設計表單資料結構與步驟設定，支援新的先易後難流程與計算欄位。
 
 ## Why
-客戶希望以「收集獨立事實、後端嚴謹分類」為核心，原有資料模型與步驟定義無法對應新題目與即時計算需求。
+客戶希望以「收集獨立事實、後端嚴謹分類」為核心，原有資料模型與步驟定義無法對應新題目，也需要為後端計算提供一致欄位。
 
 ## Scope
 - 更新 `FormContext` 的初始 state 與 `steps` 定義，使流程依序為：基本資料 → 血壓與血脂 → 糖尿病 → 腎臟病 → 心血管病史。
-- 加入新的欄位（出生年月日、腰圍、用藥狀態、病史等），並提供 helper 計算年齡、BMI 與性別對應判斷所需資訊。
-- 讓 context 提供即時回傳欄位（ageInYears、bmi、waistIsObese 等）供各步驟使用。
+- 加入新的欄位（出生年月日、腰圍、用藥狀態、病史等），並提供 helper 計算年齡、BMI 與性別對應判斷所需資訊，供後端評估與報告使用。
+- 讓 context 提供衍生欄位（ageInYears、bmi、waistIsObese 等），即使前端不顯示，也能於後端與報告階段引用。
 
 ## Out-of-Scope
 - 不處理任何 UI 呈現或提示文字。
@@ -16,7 +16,7 @@
 ## Acceptance Criteria
 - `useFormContext()` 暴露的 `formData` 包含 rework.md 列出的所有新事實欄位。
 - `steps` 順序與名稱符合新流程，狀態管理（IN_PROGRESS、COMPLETED 等）仍可運作。
-- Context 提供 `getAge`, `getBmi`, `getWaistStatus` 等 helper，其他步驟可用來驅動即時提示。
+- Context 提供 `getAge`, `getBmi`, `getWaistStatus` 等 helper，以便後端計算或報告階段使用（前端填寫時不需顯示）。
 
 ## Implementation Steps
 1. 調整 `FormContext` 內的初始 `formData`，加入所有新欄位並移除不再使用的欄位。

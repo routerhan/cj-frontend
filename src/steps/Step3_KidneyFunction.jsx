@@ -1,14 +1,16 @@
-import clsx from 'clsx'
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '../components/ui/Button.jsx'
-import { InstantResult } from '../components/ui/InstantResult.jsx'
-import { ProgressiveCard } from '../components/ui/ProgressiveCard.jsx'
 import { useFormContext } from '../context/FormContext.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
-import { calculateEGFR } from '../utils/calculations.js'
-import styles from './Step2_ChronicConditions.module.css'
+import styles from './Step3_KidneyFunction.module.css'
 
-const STATUS_VALUES = ['yes', 'no', 'unknown']
+const parseNonNegativeNumber = (value) => {
+  if (value === null || value === undefined || value === '') {
+    return null
+  }
+  const parsed = Number.parseFloat(value)
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null
+}
 
 export const Step3_KidneyFunction = () => {
   const {
@@ -20,114 +22,57 @@ export const Step3_KidneyFunction = () => {
     StepStatus,
     stepStatus,
     steps,
+    getStepIndex,
   } = useFormContext()
 
   const { dictionary } = useLanguage()
   const general = dictionary.general
-  const copy = dictionary.conditions
-  const kidneyCopy = dictionary.kidney ?? {}
+  const copy = dictionary.kidneyStep ?? dictionary.kidney ?? {}
 
-  const { basicInfo, conditions } = formData
+  const kidney = formData.kidney
   const [errors, setErrors] = useState({})
 
-  const statusOptions = STATUS_VALUES.map((value) => ({
-    value,
-    label:
-      value === 'unknown'
-        ? general.unknown
-        : value === 'yes'
-        ? general.yes
-        : general.no,
-  }))
-
-  const markInProgress = () => {
+  const markInProgressIfNeeded = () => {
     if (stepStatus.kidney === StepStatus.COMPLETED) {
       setStepStatus('kidney', StepStatus.IN_PROGRESS)
     }
   }
 
-  const handleStatusChange = (event) => {
+  const clearError = (key) => {
+    setErrors((prev) => {
+      if (!prev[key]) return prev
+      const next = { ...prev }
+      delete next[key]
+      return next
+    })
+  }
+
+  const handleDiagnosisChange = (event) => {
     const { value } = event.target
-    updateFormField(['conditions', 'kidney', 'status'], value)
-    setErrors((prev) => {
-      const next = { ...prev }
-      delete next['kidney.status']
-      return next
-    })
-    markInProgress()
+    updateFormField(['kidney', 'hasCkdDiagnosis'], value)
+    clearError('hasCkdDiagnosis')
+    markInProgressIfNeeded()
   }
 
-  const handleCreatinineChange = (event) => {
-    updateFormField(['conditions', 'kidney', 'serumCreatinineMgDl'], event.target.value)
-    setErrors((prev) => {
-      const next = { ...prev }
-      delete next['kidney.serumCreatinineMgDl']
-      delete next['kidney.egfr']
-      return next
-    })
-    markInProgress()
+  const handleInputChange = (field) => (event) => {
+    updateFormField(['kidney', field], event.target.value)
+    clearError(field)
+    markInProgressIfNeeded()
   }
-
-  useEffect(() => {
-    if (
-      conditions.kidney.status === 'no' &&
-      (conditions.kidney.serumCreatinineMgDl || conditions.kidney.egfr !== null)
-    ) {
-      updateFormField(['conditions', 'kidney'], {
-        status: 'no',
-        serumCreatinineMgDl: '',
-        egfr: null,
-      })
-    }
-  }, [
-    conditions.kidney.egfr,
-    conditions.kidney.serumCreatinineMgDl,
-    conditions.kidney.status,
-    updateFormField,
-  ])
-
-  const eGFRResult = useMemo(() => {
-    if (!conditions.kidney.serumCreatinineMgDl) {
-      return { gfr: null, bsa: null, egfrBsaAdjusted: null }
-    }
-
-    return calculateEGFR({
-      serumCreatinineMgDl: conditions.kidney.serumCreatinineMgDl,
-      gender: basicInfo.gender,
-      ageYears: basicInfo.ageYears,
-      heightCm: basicInfo.heightCm,
-      weightKg: basicInfo.weightKg,
-    })
-  }, [
-    conditions.kidney.serumCreatinineMgDl,
-    basicInfo.gender,
-    basicInfo.ageYears,
-    basicInfo.heightCm,
-    basicInfo.weightKg,
-  ])
-
-  useEffect(() => {
-    if (eGFRResult.egfrBsaAdjusted !== conditions.kidney.egfr) {
-      updateFormField(['conditions', 'kidney', 'egfr'], eGFRResult.egfrBsaAdjusted)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eGFRResult.egfrBsaAdjusted])
 
   const validate = () => {
     const nextErrors = {}
 
-    if (!conditions.kidney.status) {
-      nextErrors['kidney.status'] = '請選擇是否有腎臟病'
-    } else if (conditions.kidney.status === 'yes') {
-      if (!conditions.kidney.serumCreatinineMgDl) {
-        nextErrors['kidney.serumCreatinineMgDl'] = '請填寫最近一次肌酸酐數值'
-      }
-      if (
-        conditions.kidney.serumCreatinineMgDl &&
-        !Number.isFinite(eGFRResult.egfrBsaAdjusted)
-      ) {
-        nextErrors['kidney.egfr'] = '請確認輸入資料完整以計算 eGFR'
-      }
+    if (!kidney.hasCkdDiagnosis) {
+      nextErrors.hasCkdDiagnosis = copy.errors?.hasCkdDiagnosis ?? '請選擇是否被診斷 CKD'
+    }
+
+    if (kidney.egfr !== '' && parseNonNegativeNumber(kidney.egfr) === null) {
+      nextErrors.egfr = copy.errors?.egfr ?? '請輸入有效的 eGFR 數值'
+    }
+
+    if (kidney.uacr !== '' && parseNonNegativeNumber(kidney.uacr) === null) {
+      nextErrors.uacr = copy.errors?.uacr ?? '請輸入有效的 UACR 數值'
     }
 
     return nextErrors
@@ -144,114 +89,105 @@ export const Step3_KidneyFunction = () => {
     }
   }
 
-  const currentStepIndex = steps.findIndex((step) => step.key === 'kidney')
-  const stepLabel = `Step ${currentStepIndex + 1}`
-  const nextStepKey = steps[currentStepIndex + 1]?.key
-  const nextStepLabel = nextStepKey ? dictionary.steps[nextStepKey] : ''
-
-  const egfrDisplay = Number.isFinite(eGFRResult.egfrBsaAdjusted)
-    ? `${Math.round(eGFRResult.egfrBsaAdjusted)} ml/min/1.73m²`
-    : '--'
-
-  const egfrDescription = (() => {
-    if (!conditions.kidney.serumCreatinineMgDl) {
-      return copy.instant.egfrMissing
-    }
-    if (!Number.isFinite(eGFRResult.egfrBsaAdjusted)) {
-      return copy.instant.egfrInvalid
-    }
-    if (eGFRResult.egfrBsaAdjusted >= 90) return copy.instant.egfrNormal
-    if (eGFRResult.egfrBsaAdjusted >= 60) return copy.instant.egfrMild
-    if (eGFRResult.egfrBsaAdjusted >= 30) return copy.instant.egfrModerate
-    return copy.instant.egfrSevere
-  })()
-
-  const isReady =
-    conditions.kidney.status &&
-    (conditions.kidney.status !== 'yes' ||
-      (conditions.kidney.serumCreatinineMgDl &&
-        Number.isFinite(eGFRResult.egfrBsaAdjusted)))
+  const stepIndex = getStepIndex('kidney')
+  const stepLabel = stepIndex >= 0 ? `Step ${stepIndex + 1}` : ''
+  const nextStepKey = steps[stepIndex + 1]?.key
+  const nextStepLabel = nextStepKey ? dictionary.steps[nextStepKey] ?? '' : ''
+  const stepTitle = copy.title ?? dictionary.steps.kidney ?? '腎臟功能'
 
   return (
     <section className={styles.container}>
       <header className={styles.header}>
         <div>
           <p className={styles.kicker}>{stepLabel}</p>
-          <h2>{kidneyCopy.title ?? '腎臟功能'}</h2>
+          <h2>{stepTitle}</h2>
         </div>
         <p className={styles.lead}>
-          {kidneyCopy.lead ?? '提供肌酸酐數值以估算腎絲球過濾率（eGFR），協助評估腎臟健康與整體風險。'}
+          {copy.lead ??
+            '透過兩個問題確認是否被診斷慢性腎臟病，並可選填近期檢驗數據供後端使用。'}
         </p>
       </header>
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
-        <div className={styles.cards}>
-          <ProgressiveCard
-            title="腎臟病"
-            summary="提供肌酸酐數值以評估腎絲球過濾率"
-            isExpanded
+        <section className={styles.fieldset}>
+          <h3 className={styles.sectionTitle}>{copy.sections?.diagnosis ?? '腎臟病診斷'}</h3>
+          <p className={styles.description}>
+            {copy.descriptions?.diagnosis ?? '請確認是否曾被醫師診斷為慢性腎臟病 (CKD)。'}
+          </p>
+          <div
+            className={styles.optionGroup}
+            role="radiogroup"
+            aria-label={copy.questions?.diagnosis ?? '您是否曾被醫師診斷為慢性腎臟病 (CKD)？'}
           >
-            <div className={styles.section}>
-              <label className={styles.fieldLabel}>{copy.titles.kidney}</label>
-              <div role="radiogroup" aria-label="腎臟病狀態" className={styles.optionRow}>
-                {statusOptions.map((option) => (
-                  <label key={option.value} className={styles.radioOption}>
-                    <input
-                      type="radio"
-                      name="kidney-status"
-                      value={option.value}
-                      checked={conditions.kidney.status === option.value}
-                      onChange={handleStatusChange}
-                    />
-                    <span>{option.label}</span>
-                  </label>
-                ))}
-              </div>
-              {errors['kidney.status'] ? (
-                <p className={styles.error}>{errors['kidney.status']}</p>
-              ) : null}
-
-              <div
-                className={clsx(styles.subSection, {
-                  [styles.disabled]: conditions.kidney.status !== 'yes',
-                })}
-                aria-disabled={conditions.kidney.status !== 'yes'}
-              >
-                <label className={styles.inlineGroup}>
-                  <span className={styles.inlineLabel}>最近一次肌酸酐數值</span>
-                  <div className={styles.inlineInput}>
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      step="0.01"
-                      placeholder="mg/dL"
-                      value={conditions.kidney.serumCreatinineMgDl}
-                      onChange={handleCreatinineChange}
-                      disabled={conditions.kidney.status !== 'yes'}
-                    />
-                    <span className={styles.unit}>mg/dL</span>
-                  </div>
-                </label>
-                {errors['kidney.serumCreatinineMgDl'] ? (
-                  <p className={styles.error}>{errors['kidney.serumCreatinineMgDl']}</p>
-                ) : null}
-
-                <InstantResult
-                  label={copy.instant.egfrLabel}
-                  value={egfrDisplay}
-                  description={egfrDescription}
+            {['yes', 'no'].map((value) => (
+              <label key={value} className={styles.radioLabel}>
+                <input
+                  type="radio"
+                  name="hasCkdDiagnosis"
+                  value={value}
+                  checked={kidney.hasCkdDiagnosis === value}
+                  onChange={handleDiagnosisChange}
+                  className={styles.radioInput}
                 />
-                {errors['kidney.egfr'] ? (
-                  <p className={styles.error}>{errors['kidney.egfr']}</p>
-                ) : null}
-              </div>
+                <span>{copy.options?.[value] ?? general[value] ?? value}</span>
+              </label>
+            ))}
+          </div>
+          {errors.hasCkdDiagnosis ? <p className={styles.error}>{errors.hasCkdDiagnosis}</p> : null}
+        </section>
+
+        <section className={styles.fieldset}>
+          <h3 className={styles.sectionTitle}>{copy.sections?.labs ?? '腎功能檢驗 (選填)'}</h3>
+          <p className={styles.description}>
+            {copy.descriptions?.labs ?? '若手邊有近期的 eGFR 或 UACR 結果，可一併提供。'}
+          </p>
+
+          <label className={styles.inputGroup} htmlFor="egfr">
+            <span className={styles.label}>
+              {copy.labels?.egfr ?? '估計腎絲球過濾率 (eGFR)'}
+            </span>
+            <div className={styles.inlineInput}>
+              <input
+                id="egfr"
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="0.1"
+                value={kidney.egfr}
+                onChange={handleInputChange('egfr')}
+                className={styles.input}
+                placeholder={copy.placeholders?.egfr ?? 'mL/min/1.73m²'}
+              />
+              <span className={styles.unit}>{copy.units?.egfr ?? 'mL/min/1.73m²'}</span>
             </div>
-          </ProgressiveCard>
-        </div>
+          </label>
+          {errors.egfr ? <p className={styles.error}>{errors.egfr}</p> : null}
+
+          <label className={styles.inputGroup} htmlFor="uacr">
+            <span className={styles.label}>
+              {copy.labels?.uacr ?? '尿白蛋白/肌酸酐比值 (UACR)'}
+            </span>
+            <div className={styles.inlineInput}>
+              <input
+                id="uacr"
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="0.1"
+                value={kidney.uacr}
+                onChange={handleInputChange('uacr')}
+                className={styles.input}
+                placeholder={copy.placeholders?.uacr ?? 'mg/g'}
+              />
+              <span className={styles.unit}>{copy.units?.uacr ?? 'mg/g'}</span>
+            </div>
+          </label>
+          {errors.uacr ? <p className={styles.error}>{errors.uacr}</p> : null}
+        </section>
 
         <div className={styles.actions}>
-          <Button type="submit" disabled={!isReady}>
-            {nextStepLabel ? `下一步：${nextStepLabel}` : '下一步'}
+          <Button type="submit" variant="primary">
+            {copy.buttonNext ?? `下一步：${nextStepLabel}`}
           </Button>
         </div>
       </form>

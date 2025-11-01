@@ -113,7 +113,7 @@ class RiskAssessmentRequest(BaseModel):
     family_history_early_chd: bool = Field(
         False, description="是否有早發性冠心病家族史"
     )
-    hdl_c: Optional[confloat(ge=0, le=200)] = Field(
+    hdl_c: Optional[confloat(ge=0)] = Field(
         None, description="HDL-C 數值，單位 mg/dL"
     )
     is_smoker: bool = Field(False, description="是否為吸菸者")
@@ -122,7 +122,7 @@ class RiskAssessmentRequest(BaseModel):
     )
     has_diabetes: bool = Field(False, description="是否已診斷糖尿病")
     has_ckd: bool = Field(False, description="是否有慢性腎臟病或 eGFR < 60")
-    ldl_c: Optional[confloat(ge=0, le=400)] = Field(
+    ldl_c: Optional[confloat(ge=0)] = Field(
         None, description="LDL-C 數值，單位 mg/dL"
     )
     cac_score: Optional[conint(ge=0)] = Field(
@@ -140,29 +140,23 @@ class RiskAssessmentRequest(BaseModel):
     has_multivessel_obstruction: bool = Field(
         False, description="是否存在多支血管阻塞"
     )
-    has_acs_with_diabetes: bool = Field(
-        False, description="是否曾有急性冠心症合併糖尿病"
-    )
     has_pad: bool = Field(False, description="是否有周邊動脈疾病 (PAD)")
     has_carotid_stenosis: bool = Field(
         False, description="是否有頸動脈狹窄"
     )
-    has_stroke_with_atherosclerosis: bool = Field(
-        False, description="是否有伴隨動脈硬化的缺血性中風 / TIA"
-    )
-    waist_cm: Optional[confloat(ge=0, le=200)] = Field(
+    waist_cm: Optional[confloat(ge=0)] = Field(
         None, description="腰圍，單位公分"
     )
-    systolic: Optional[confloat(ge=0, le=300)] = Field(
+    systolic: Optional[confloat(ge=0)] = Field(
         None, description="收縮壓，單位 mmHg"
     )
-    diastolic: Optional[confloat(ge=0, le=200)] = Field(
+    diastolic: Optional[confloat(ge=0)] = Field(
         None, description="舒張壓，單位 mmHg"
     )
-    fasting_glucose: Optional[confloat(ge=0, le=1000)] = Field(
+    fasting_glucose: Optional[confloat(ge=0)] = Field(
         None, description="空腹血糖，單位 mg/dL"
     )
-    triglyceride: Optional[confloat(ge=0, le=2000)] = Field(
+    triglyceride: Optional[confloat(ge=0)] = Field(
         None, description="三酸甘油酯，單位 mg/dL"
     )
     hypertension_medication: bool = Field(
@@ -174,8 +168,11 @@ class RiskAssessmentRequest(BaseModel):
     lipid_medication: bool = Field(
         False, description="是否正在使用調脂藥物"
     )
-    egfr: Optional[confloat(ge=0, le=200)] = Field(
+    egfr: Optional[confloat(ge=0)] = Field(
         None, description="估算腎絲球過濾率 eGFR，單位 mL/min/1.73m²"
+    )
+    uacr: Optional[confloat(ge=0)] = Field(
+        None, description="尿白蛋白與肌酸酐比值 (UACR)，單位 mg/g"
     )
 
     @validator(
@@ -191,6 +188,7 @@ class RiskAssessmentRequest(BaseModel):
         "fasting_glucose",
         "triglyceride",
         "egfr",
+        "uacr",
         pre=True,
         allow_reuse=True,
     )

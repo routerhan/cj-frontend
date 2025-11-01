@@ -89,24 +89,24 @@ EXTREME_RULES: List[Rule] = [
         lambda p: p.has_cad and p.has_multivessel_obstruction,
     ),
     Rule(
-        "cad_acs_with_diabetes",
-        "冠狀動脈疾病且曾有急性冠心症合併糖尿病",
-        lambda p: p.has_cad and p.has_acs_with_diabetes,
+        "cad_with_diabetes",
+        "冠狀動脈疾病且合併糖尿病",
+        lambda p: p.has_cad and p.has_diabetes,
     ),
     Rule(
-        "cad_with_pad_or_carotid",
-        "冠狀動脈疾病且合併周邊動脈疾病或頸動脈狹窄",
-        lambda p: p.has_cad and (p.has_pad or p.has_carotid_stenosis),
+        "cad_with_pad",
+        "冠狀動脈疾病且合併周邊動脈疾病",
+        lambda p: p.has_cad and p.has_pad,
+    ),
+    Rule(
+        "cad_with_carotid",
+        "冠狀動脈疾病且合併頸動脈狹窄",
+        lambda p: p.has_cad and p.has_carotid_stenosis,
     ),
     Rule(
         "pad_with_carotid",
         "周邊動脈疾病且合併頸動脈狹窄",
         lambda p: p.has_pad and p.has_carotid_stenosis,
-    ),
-    Rule(
-        "stroke_with_atherosclerosis",
-        "缺血性中風 / TIA 並伴隨動脈硬化病史",
-        lambda p: bool(p.has_stroke_with_atherosclerosis),
     ),
 ]
 

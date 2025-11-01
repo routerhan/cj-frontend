@@ -1,11 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '../components/ui/Button.jsx'
-import { InstantResult } from '../components/ui/InstantResult.jsx'
-import { Tooltip } from '../components/ui/Tooltip.jsx'
 import { useFormContext } from '../context/FormContext.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
-import { calculateAge, calculateBMI, getBMICategory } from '../utils/calculations.js'
 import styles from './Step1_BasicInfo.module.css'
+
+const parsePositiveNumber = (value) => {
+  if (value === null || value === undefined || value === '') {
+    return null
+  }
+  const parsed = Number.parseFloat(value)
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return null
+  }
+  return parsed
+}
 
 export const Step1_BasicInfo = () => {
   const {
@@ -17,121 +25,111 @@ export const Step1_BasicInfo = () => {
     stepStatus,
     StepStatus,
     steps,
+    getStepIndex,
+    getAge,
+    getBmi,
   } = useFormContext()
 
   const { dictionary } = useLanguage()
-  const copy = dictionary.basicInfo
+  const copy = dictionary.basic ?? dictionary.basicInfo ?? {}
   const general = dictionary.general
 
-  const genderOptions = Object.entries(copy.genderOptions).map(([value, label]) => ({
-    value,
-    label,
-  }))
+  const basic = formData.basic
+  const [errors, setErrors] = useState({})
 
+  const sexOptions = Object.entries(copy.sexOptions ?? { male: '男', female: '女' }).map(
+    ([value, label]) => ({ value, label }),
+  )
   const smokingOptions = [
     { value: 'yes', label: copy.smokingOptions?.yes ?? general.yes },
     { value: 'no', label: copy.smokingOptions?.no ?? general.no },
-    { value: 'quit', label: copy.smokingOptions?.quit ?? general.quit },
   ]
-
   const familyHistoryOptions = [
     { value: 'yes', label: general.yes },
     { value: 'no', label: general.no },
-    { value: 'unknown', label: general.unknown },
   ]
 
-  const { basicInfo } = formData
-  const [errors, setErrors] = useState({})
-
-  const age = useMemo(() => calculateAge(basicInfo.birthDate), [basicInfo.birthDate])
-  const bmi = useMemo(
-    () => calculateBMI(basicInfo.heightCm, basicInfo.weightKg),
-    [basicInfo.heightCm, basicInfo.weightKg],
-  )
-  const bmiCategory = useMemo(() => getBMICategory(bmi), [bmi])
-
-  useEffect(() => {
-    const normalizedAge = Number.isFinite(age) ? age : null
-    if ((basicInfo.ageYears ?? null) !== (normalizedAge ?? null)) {
-      updateFormField(['basicInfo', 'ageYears'], normalizedAge)
-    }
-  }, [age, basicInfo.ageYears, updateFormField])
-
-  useEffect(() => {
-    const normalizedBMI = Number.isFinite(bmi) ? bmi : null
-    if ((basicInfo.bmi ?? null) !== (normalizedBMI ?? null)) {
-      updateFormField(['basicInfo', 'bmi'], normalizedBMI)
-    }
-  }, [bmi, basicInfo.bmi, updateFormField])
-
-  useEffect(() => {
-    if ((basicInfo.bmiCategory ?? '') !== (bmiCategory ?? '')) {
-      updateFormField(['basicInfo', 'bmiCategory'], bmiCategory)
-    }
-  }, [bmiCategory, basicInfo.bmiCategory, updateFormField])
-
   const markStepInProgressIfNeeded = () => {
-    if (stepStatus.basicInfo === StepStatus.COMPLETED) {
-      setStepStatus('basicInfo', StepStatus.IN_PROGRESS)
+    if (stepStatus.basic === StepStatus.COMPLETED || stepStatus.basicInfo === StepStatus.COMPLETED) {
+      setStepStatus('basic', StepStatus.IN_PROGRESS)
     }
+  }
+
+  const clearError = (key) => {
+    setErrors((prev) => {
+      if (!prev[key]) return prev
+      const next = { ...prev }
+      delete next[key]
+      return next
+    })
   }
 
   const handleFieldChange = (field) => (event) => {
     const { value } = event.target
-    updateFormField(['basicInfo', field], value)
-    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev))
+    updateFormField(['basic', field], value)
+    clearError(field)
     markStepInProgressIfNeeded()
   }
 
-  const handleGenderChange = (event) => {
+  const handleSexChange = (event) => {
     const { value } = event.target
-    updateFormField(['basicInfo', 'gender'], value)
-    if (value !== 'other' && basicInfo.genderOther) {
-      updateFormField(['basicInfo', 'genderOther'], '')
-    }
-    setErrors((prev) => {
-      const next = { ...prev }
-      delete next.gender
-      delete next.genderOther
-      return next
-    })
+    updateFormField(['basic', 'sex'], value)
+    clearError('sex')
+    markStepInProgressIfNeeded()
+  }
+
+  const handleSmokingChange = (event) => {
+    const { value } = event.target
+    updateFormField(['basic', 'currentSmoker'], value)
+    clearError('currentSmoker')
+    markStepInProgressIfNeeded()
+  }
+
+  const handleFamilyHistoryChange = (event) => {
+    const { value } = event.target
+    updateFormField(['basic', 'familyHistoryEarlyChd'], value)
+    clearError('familyHistoryEarlyChd')
     markStepInProgressIfNeeded()
   }
 
   const validate = () => {
     const nextErrors = {}
+    const ageYears = getAge()
+    const bmi = getBmi()
 
-    if (!basicInfo.gender) {
-      nextErrors.gender = copy.errors.gender
-    } else if (basicInfo.gender === 'other' && !basicInfo.genderOther) {
-      nextErrors.genderOther = copy.errors.genderOther
+    if (!basic.sex) {
+      nextErrors.sex = copy.errors?.sex ?? '請選擇生理性別'
     }
 
-    if (!basicInfo.birthDate) {
-      nextErrors.birthDate = copy.errors.birthDate
-    } else if (age === null) {
-      nextErrors.birthDate = copy.errors.birthDateFuture
+    if (!basic.birthDate) {
+      nextErrors.birthDate = copy.errors?.birthDate ?? '請輸入出生年月日'
+    } else if (ageYears === null) {
+      nextErrors.birthDate = copy.errors?.birthDateFuture ?? '請確認日期格式是否正確'
     }
 
-    const hasHeightValue = basicInfo.heightCm !== ''
-    const hasWeightValue = basicInfo.weightKg !== ''
+    const height = parsePositiveNumber(basic.heightCm)
+    const weight = parsePositiveNumber(basic.weightKg)
+    const waistValue = parsePositiveNumber(basic.waistCm)
 
-    if (!hasHeightValue) {
-      nextErrors.heightCm = copy.errors.height
+    if (height === null) {
+      nextErrors.heightCm = copy.errors?.height ?? '請輸入身高'
     }
-    if (!hasWeightValue) {
-      nextErrors.weightKg = copy.errors.weight
+    if (weight === null) {
+      nextErrors.weightKg = copy.errors?.weight ?? '請輸入體重'
     }
-    if (hasHeightValue && hasWeightValue && bmi === null) {
-      nextErrors.weightKg = copy.errors.bmi
+    if (height !== null && weight !== null && bmi === null) {
+      nextErrors.weightKg = copy.errors?.bmi ?? '請確認身高與體重數值是否正確'
+    }
+    if (waistValue === null) {
+      nextErrors.waistCm = copy.errors?.waist ?? '請輸入腰圍'
     }
 
-    if (!basicInfo.smokingStatus) {
-      nextErrors.smokingStatus = copy.errors.smoking
+    if (!basic.currentSmoker) {
+      nextErrors.currentSmoker = copy.errors?.smoking ?? '請選擇是否抽菸'
     }
 
-    if (!basicInfo.familyHistory) {
-      nextErrors.familyHistory = copy.errors.familyHistory
+    if (!basic.familyHistoryEarlyChd) {
+      nextErrors.familyHistoryEarlyChd = copy.errors?.familyHistory ?? '請選擇家族史情況'
     }
 
     return nextErrors
@@ -148,221 +146,170 @@ export const Step1_BasicInfo = () => {
     }
   }
 
-  const ageDisplay = Number.isFinite(age) ? `${age} ${general.yearsOldSuffix}` : '--'
-  const bmiDisplay = Number.isFinite(bmi) ? bmi.toFixed(1) : '--'
-  const bmiDescription = (() => {
-    if (!basicInfo.heightCm || !basicInfo.weightKg) return copy.instant.bmiMissing
-    if (!Number.isFinite(bmi)) return copy.instant.bmiInvalid
-    const suggestion = copy.instant.bmiSuggestions[bmiCategory] ?? copy.instant.bmiDefault
-    const label = copy.instant.bmiLabels[bmiCategory]
-    return label ? `${label} · ${suggestion}` : suggestion
-  })()
-
-  const ageDescription = (() => {
-    if (!basicInfo.birthDate) return copy.instant.ageDesc
-    if (!Number.isFinite(age)) return copy.instant.ageInvalid
-    return copy.instant.ageDesc
-  })()
-
-  const currentStepIndex = steps.findIndex((step) => step.key === 'basicInfo')
-  const stepLabel = `Step ${currentStepIndex + 1}`
-  const nextStepKey = steps[currentStepIndex + 1]?.key
-  const nextStepLabel = nextStepKey ? dictionary.steps[nextStepKey] : ''
+  const stepIndex = getStepIndex('basic')
+  const stepLabel = stepIndex >= 0 ? `Step ${stepIndex + 1}` : ''
+  const nextStepKey = steps[stepIndex + 1]?.key
+  const nextStepLabel = nextStepKey ? dictionary.steps[nextStepKey] ?? '' : ''
+  const stepTitle = dictionary.steps.basic ?? dictionary.steps.basicInfo ?? '基本資料'
 
   return (
     <section className={styles.container}>
       <header className={styles.header}>
         <div>
           <p className={styles.kicker}>{stepLabel}</p>
-          <h2>{dictionary.steps.basicInfo}</h2>
+          <h2>{stepTitle}</h2>
         </div>
         <p className={styles.lead}>{copy.lead}</p>
       </header>
 
-      <div className={styles.body}>
-        <form className={styles.form} onSubmit={handleSubmit} noValidate>
-          <section className={styles.fieldset}>
-            <h3 className={styles.sectionTitle}>{copy.sections.personal}</h3>
-            <div className={styles.fieldGrid}>
-              <div className={styles.field}>
-                <span className={styles.label}>{copy.fields.gender}</span>
-                <div className={styles.optionGroup} role="radiogroup" aria-label={copy.fields.gender}>
-                  {genderOptions.map((option) => (
-                    <label key={option.value} className={styles.radioLabel}>
-                      <input
-                        type="radio"
-                        name="gender"
-                        value={option.value}
-                        checked={basicInfo.gender === option.value}
-                        onChange={handleGenderChange}
-                        className={styles.radioInput}
-                        aria-invalid={Boolean(errors.gender)}
-                      />
-                      <span>{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {basicInfo.gender === 'other' ? (
-                  <input
-                    type="text"
-                    className={styles.input}
-                    placeholder={copy.fields.genderOtherPlaceholder}
-                    value={basicInfo.genderOther}
-                    onChange={handleFieldChange('genderOther')}
-                    aria-invalid={Boolean(errors.genderOther)}
-                  />
-                ) : null}
-                {errors.gender ? <p className={styles.error}>{errors.gender}</p> : null}
-                {errors.genderOther ? <p className={styles.error}>{errors.genderOther}</p> : null}
+      <form className={styles.form} onSubmit={handleSubmit} noValidate>
+        <section className={styles.fieldset}>
+          <h3 className={styles.sectionTitle}>{copy.sections?.personal ?? '個人資料'}</h3>
+          <div className={styles.fieldGrid}>
+            <div className={styles.field}>
+              <span className={styles.label}>{copy.fields?.sex ?? '生理性別'}</span>
+              <div className={styles.optionGroup} role="radiogroup" aria-label={copy.fields?.sex ?? '生理性別'}>
+                {sexOptions.map((option) => (
+                  <label key={option.value} className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      name="sex"
+                      value={option.value}
+                      checked={basic.sex === option.value}
+                      onChange={handleSexChange}
+                      className={styles.radioInput}
+                      aria-invalid={Boolean(errors.sex)}
+                    />
+                    <span>{option.label}</span>
+                  </label>
+                ))}
               </div>
-
-              <label className={styles.field} htmlFor="birthDate">
-                <span className={styles.label}>{copy.fields.birthDate}</span>
-                <input
-                  id="birthDate"
-                  type="date"
-                  value={basicInfo.birthDate}
-                  onChange={handleFieldChange('birthDate')}
-                  className={styles.input}
-                  aria-invalid={Boolean(errors.birthDate)}
-                />
-                {errors.birthDate ? <p className={styles.error}>{errors.birthDate}</p> : null}
-              </label>
-
-              <label className={styles.field} htmlFor="nationality">
-                <span className={styles.label}>{copy.fields.nationality}</span>
-                <input
-                  id="nationality"
-                  type="text"
-                  placeholder=""
-                  value={basicInfo.nationality}
-                  onChange={handleFieldChange('nationality')}
-                  className={styles.input}
-                />
-              </label>
+              {errors.sex ? <p className={styles.error}>{errors.sex}</p> : null}
             </div>
-          </section>
 
-          <section className={styles.fieldset}>
-            <h3 className={styles.sectionTitle}>{copy.sections.measurements}</h3>
-            <div className={styles.fieldGrid}>
-              <label className={styles.field} htmlFor="heightCm">
-                <span className={styles.label}>{copy.fields.height}</span>
-                <input
-                  id="heightCm"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.1"
-                  min="0"
-                  value={basicInfo.heightCm}
-                  onChange={handleFieldChange('heightCm')}
-                  className={styles.input}
-                  aria-invalid={Boolean(errors.heightCm)}
-                />
-                {errors.heightCm ? <p className={styles.error}>{errors.heightCm}</p> : null}
-              </label>
-
-              <label className={styles.field} htmlFor="weightKg">
-                <span className={styles.label}>{copy.fields.weight}</span>
-                <input
-                  id="weightKg"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.1"
-                  min="0"
-                  value={basicInfo.weightKg}
-                  onChange={handleFieldChange('weightKg')}
-                  className={styles.input}
-                  aria-invalid={Boolean(errors.weightKg)}
-                />
-                {errors.weightKg ? <p className={styles.error}>{errors.weightKg}</p> : null}
-              </label>
-
-              <label className={styles.field} htmlFor="waistCm">
-                <span className={styles.label}>{copy.fields.waist}</span>
-                <input
-                  id="waistCm"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.1"
-                  min="0"
-                  value={basicInfo.waistCm}
-                  onChange={handleFieldChange('waistCm')}
-                  className={styles.input}
-                />
-              </label>
-            </div>
-          </section>
-
-          <section className={styles.fieldset}>
-            <h3 className={styles.sectionTitle}>{copy.sections.lifestyle}</h3>
-            <div className={styles.fieldGrid}>
-              <div className={styles.field}>
-                <span className={styles.label}>{copy.fields.smoking}</span>
-                <div className={styles.optionGroup} role="radiogroup" aria-label={copy.fields.smoking}>
-                  {smokingOptions.map((option) => (
-                    <label key={option.value} className={styles.radioLabel}>
-                      <input
-                        type="radio"
-                        name="smokingStatus"
-                        value={option.value}
-                        checked={basicInfo.smokingStatus === option.value}
-                        onChange={handleFieldChange('smokingStatus')}
-                        className={styles.radioInput}
-                        aria-invalid={Boolean(errors.smokingStatus)}
-                      />
-                      <span>{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {errors.smokingStatus ? (
-                  <p className={styles.error}>{errors.smokingStatus}</p>
-                ) : null}
-              </div>
-
-              <div className={styles.field}>
-                <span className={styles.labelWithTooltip}>
-                  {copy.fields.familyHistory}
-                  <Tooltip
-                    label={copy.familyHistoryHint}
-                    triggerLabel={copy.tooltips.family}
-                  />
-                </span>
-                <div className={styles.optionGroup} role="radiogroup" aria-label="家族史">
-                  {familyHistoryOptions.map((option) => (
-                    <label key={option.value} className={styles.radioLabel}>
-                      <input
-                        type="radio"
-                        name="familyHistory"
-                        value={option.value}
-                        checked={basicInfo.familyHistory === option.value}
-                        onChange={handleFieldChange('familyHistory')}
-                        className={styles.radioInput}
-                        aria-invalid={Boolean(errors.familyHistory)}
-                      />
-                      <span>{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {errors.familyHistory ? (
-                  <p className={styles.error}>{errors.familyHistory}</p>
-                ) : null}
-              </div>
-            </div>
-          </section>
-
-          <div className={styles.actions}>
-            <Button type="submit">
-              {nextStepLabel ? `下一步：${nextStepLabel}` : copy.buttonNext ?? '下一步'}
-            </Button>
+            <label className={styles.field} htmlFor="birthDate">
+              <span className={styles.label}>{copy.fields?.birthDate ?? '出生年月日'}</span>
+              <input
+                id="birthDate"
+                type="date"
+                value={basic.birthDate}
+                onChange={handleFieldChange('birthDate')}
+                className={styles.input}
+                aria-invalid={Boolean(errors.birthDate)}
+              />
+              {errors.birthDate ? <p className={styles.error}>{errors.birthDate}</p> : null}
+            </label>
           </div>
-        </form>
+        </section>
 
-        <aside className={styles.results}>
-          <InstantResult label={copy.instant.age} value={ageDisplay} description={ageDescription} />
-          <InstantResult label={copy.instant.bmi} value={bmiDisplay} description={bmiDescription} />
-        </aside>
-      </div>
+        <section className={styles.fieldset}>
+          <h3 className={styles.sectionTitle}>{copy.sections?.measurements ?? '身體測量'}</h3>
+          <div className={styles.fieldGrid}>
+            <label className={styles.field} htmlFor="heightCm">
+              <span className={styles.label}>{copy.fields?.height ?? '身高 (cm)'}</span>
+              <input
+                id="heightCm"
+                type="number"
+                inputMode="decimal"
+                min="0"
+                value={basic.heightCm}
+                onChange={handleFieldChange('heightCm')}
+                className={styles.input}
+                aria-invalid={Boolean(errors.heightCm)}
+              />
+              {errors.heightCm ? <p className={styles.error}>{errors.heightCm}</p> : null}
+            </label>
+
+            <label className={styles.field} htmlFor="weightKg">
+              <span className={styles.label}>{copy.fields?.weight ?? '體重 (kg)'}</span>
+              <input
+                id="weightKg"
+                type="number"
+                inputMode="decimal"
+                min="0"
+                value={basic.weightKg}
+                onChange={handleFieldChange('weightKg')}
+                className={styles.input}
+                aria-invalid={Boolean(errors.weightKg)}
+              />
+              {errors.weightKg ? <p className={styles.error}>{errors.weightKg}</p> : null}
+            </label>
+
+            <label className={styles.field} htmlFor="waistCm">
+              <span className={styles.label}>{copy.fields?.waist ?? '腰圍 (cm)'}</span>
+              <input
+                id="waistCm"
+                type="number"
+                inputMode="decimal"
+                min="0"
+                value={basic.waistCm}
+                onChange={handleFieldChange('waistCm')}
+                className={styles.input}
+                aria-invalid={Boolean(errors.waistCm)}
+              />
+              {errors.waistCm ? <p className={styles.error}>{errors.waistCm}</p> : null}
+            </label>
+          </div>
+        </section>
+
+        <section className={styles.fieldset}>
+          <h3 className={styles.sectionTitle}>{copy.sections?.lifestyle ?? '生活習慣與家族史'}</h3>
+          <div className={styles.fieldGrid}>
+            <div className={styles.field}>
+              <span className={styles.label}>{copy.fields?.smoking ?? '目前是否抽菸'}</span>
+              <div className={styles.optionGroup} role="radiogroup" aria-label={copy.fields?.smoking ?? '目前是否抽菸'}>
+                {smokingOptions.map((option) => (
+                  <label key={option.value} className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      name="currentSmoker"
+                      value={option.value}
+                      checked={basic.currentSmoker === option.value}
+                      onChange={handleSmokingChange}
+                      className={styles.radioInput}
+                      aria-invalid={Boolean(errors.currentSmoker)}
+                    />
+                    <span>{option.label}</span>
+                  </label>
+                ))}
+              </div>
+              {errors.currentSmoker ? <p className={styles.error}>{errors.currentSmoker}</p> : null}
+            </div>
+
+            <div className={styles.field}>
+              <span className={styles.label}>
+                {copy.fields?.familyHistory ?? '早發性冠心病家族史'}
+              </span>
+              <div className={styles.optionGroup} role="radiogroup" aria-label={copy.fields?.familyHistory ?? '早發性冠心病家族史'}>
+                {familyHistoryOptions.map((option) => (
+                  <label key={option.value} className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      name="familyHistoryEarlyChd"
+                      value={option.value}
+                      checked={basic.familyHistoryEarlyChd === option.value}
+                      onChange={handleFamilyHistoryChange}
+                      className={styles.radioInput}
+                      aria-invalid={Boolean(errors.familyHistoryEarlyChd)}
+                    />
+                    <span>{option.label}</span>
+                  </label>
+                ))}
+              </div>
+              <p className={styles.hint}>{copy.familyHistoryHint ?? ''}</p>
+              {errors.familyHistoryEarlyChd ? (
+                <p className={styles.error}>{errors.familyHistoryEarlyChd}</p>
+              ) : null}
+            </div>
+          </div>
+        </section>
+
+        <div className={styles.actions}>
+          <Button type="submit" variant="primary">
+            {copy.buttonNext ?? `下一步：${nextStepLabel}`}
+          </Button>
+        </div>
+      </form>
     </section>
   )
 }

@@ -33,10 +33,8 @@ def test_api_returns_medium_level_when_two_risk_factors(client: TestClient, db_s
         "mi_within_1_year": False,
         "mi_history_count": 0,
         "has_multivessel_obstruction": False,
-        "has_acs_with_diabetes": False,
         "has_pad": False,
         "has_carotid_stenosis": False,
-        "has_stroke_with_atherosclerosis": False,
         "waist_cm": 88,
         "systolic": 128,
         "diastolic": 82,
@@ -46,6 +44,7 @@ def test_api_returns_medium_level_when_two_risk_factors(client: TestClient, db_s
         "diabetes_medication": False,
         "lipid_medication": False,
         "egfr": 98,
+        "uacr": 12,
     }
 
     response = client.post("/api/risk-assessment", json=payload)
@@ -88,10 +87,8 @@ def test_api_validation_error_for_invalid_age(client: TestClient):
         "mi_within_1_year": False,
         "mi_history_count": 0,
         "has_multivessel_obstruction": False,
-        "has_acs_with_diabetes": False,
         "has_pad": False,
         "has_carotid_stenosis": False,
-        "has_stroke_with_atherosclerosis": False,
         "waist_cm": 80,
         "systolic": 120,
         "diastolic": 80,
@@ -101,6 +98,7 @@ def test_api_validation_error_for_invalid_age(client: TestClient):
         "diabetes_medication": False,
         "lipid_medication": False,
         "egfr": 100,
+        "uacr": 15,
     }
 
     response = client.post("/api/risk-assessment", json=payload)
@@ -136,10 +134,8 @@ def test_admin_dashboard_lists_recent_assessments(
         "mi_within_1_year": False,
         "mi_history_count": 0,
         "has_multivessel_obstruction": False,
-        "has_acs_with_diabetes": False,
         "has_pad": False,
         "has_carotid_stenosis": False,
-        "has_stroke_with_atherosclerosis": False,
         "waist_cm": 88,
         "systolic": 135,
         "diastolic": 86,
@@ -149,6 +145,7 @@ def test_admin_dashboard_lists_recent_assessments(
         "diabetes_medication": False,
         "lipid_medication": True,
         "egfr": 95,
+        "uacr": 20,
     }
 
     client.post("/api/risk-assessment", json=base_payload)

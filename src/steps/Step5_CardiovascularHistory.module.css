@@ -27,10 +27,10 @@
 }
 
 .lead {
-  max-width: 480px;
+  max-width: 520px;
   color: var(--color-muted);
   font-size: 1rem;
-  line-height: 1.65;
+  line-height: 1.6;
 }
 
 .form {
@@ -38,84 +38,35 @@
   gap: 2rem;
 }
 
-.cards {
+.fieldset {
   display: grid;
-  gap: 1.75rem;
+  gap: 1rem;
+  padding: 1.75rem;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: linear-gradient(180deg, rgba(143, 198, 199, 0.12) 0%, var(--color-surface) 100%);
+  box-shadow: 0 12px 28px var(--color-shadow);
 }
 
-.section {
-  display: grid;
-  gap: 1.25rem;
-  padding: 1.5rem 0 0;
-}
-
-.fieldLabel {
-  font-size: 1rem;
+.sectionTitle {
+  margin: 0;
+  font-size: 1.15rem;
   font-weight: 600;
   color: var(--color-text);
-  display: inline-flex;
-  gap: 0.5rem;
-  align-items: baseline;
 }
 
-.fieldHint {
-  font-size: 0.85rem;
+.description {
+  margin: 0;
+  font-size: 0.9rem;
   color: var(--color-muted);
 }
 
-.subSection {
-  display: grid;
-  gap: 1rem;
-}
-
-.disabled {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.disabled input {
-  cursor: not-allowed;
-}
-
-.optionRow {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.radioOption {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  border: 1px solid rgba(47, 79, 102, 0.25);
-  background: rgba(143, 198, 199, 0.16);
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-}
-
-.radioOption input {
-  appearance: none;
-  width: 1px;
-  height: 1px;
-  position: absolute;
-  opacity: 0;
-}
-
-.radioOption:has(input:checked) {
-  border-color: var(--color-primary);
-  background: rgba(111, 168, 179, 0.28);
-  box-shadow: 0 8px 18px rgba(35, 55, 74, 0.18);
-  color: var(--color-primary-dark);
-}
-
-.inlineGroup {
+.inputGroup {
   display: grid;
   gap: 0.75rem;
 }
 
-.inlineLabel {
+.label {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-text);
@@ -127,28 +78,74 @@
   gap: 0.5rem;
 }
 
-.inlineInput input {
-  width: 110px;
-  padding: 0.65rem 0.9rem;
-  border-radius: 12px;
-  border: 1px solid rgba(47, 79, 102, 0.22);
-  font-size: 0.95rem;
+.input {
+  width: 200px;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(47, 79, 102, 0.2);
+  font-size: 1rem;
   background: var(--color-surface);
 }
 
-.bloodPressureInputs {
+.input:focus,
+.input:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(111, 168, 179, 0.35);
+}
+
+.optionSection {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.optionGroup {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.radioLabel {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(47, 79, 102, 0.24);
+  background: rgba(143, 198, 199, 0.14);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
-.bloodPressureInputs input {
-  width: 90px;
-  padding: 0.65rem 0.9rem;
+.radioInput {
+  accent-color: var(--color-primary);
+}
+
+.radioLabel:has(.radioInput:checked) {
+  border-color: var(--color-primary);
+  background: rgba(111, 168, 179, 0.28);
+  box-shadow: 0 8px 18px rgba(35, 55, 74, 0.18);
+  color: var(--color-primary-dark);
+}
+
+.checkboxGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.checkboxLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 12px;
-  border: 1px solid rgba(47, 79, 102, 0.22);
-  font-size: 0.95rem;
-  background: var(--color-surface);
+  border: 1px solid rgba(47, 79, 102, 0.2);
+  background: rgba(143, 198, 199, 0.08);
+}
+
+.checkboxLabel input {
+  width: 18px;
+  height: 18px;
 }
 
 .unit {
@@ -158,18 +155,13 @@
 
 .error {
   margin: 0;
-  color: #dc2626;
   font-size: 0.85rem;
+  color: #dc2626;
 }
 
 .actions {
   display: flex;
   justify-content: flex-end;
-}
-
-.actions button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 @media (max-width: 1024px) {
@@ -185,5 +177,9 @@
 
   .header {
     flex-direction: column;
+  }
+
+  .fieldset {
+    padding: 1.35rem;
   }
 }

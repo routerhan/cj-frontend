@@ -38,24 +38,24 @@ const EXTREME_RULES = [
     check: (input) => input.has_cad && input.has_multivessel_obstruction,
   },
   {
-    code: 'cad_acs_with_diabetes',
-    label: '冠狀動脈疾病且曾有急性冠心症合併糖尿病',
-    check: (input) => input.has_cad && input.has_acs_with_diabetes,
+    code: 'cad_with_diabetes',
+    label: '冠狀動脈疾病且合併糖尿病',
+    check: (input) => input.has_cad && input.has_diabetes,
   },
   {
-    code: 'cad_with_pad_or_carotid',
-    label: '冠狀動脈疾病且合併周邊動脈疾病或頸動脈狹窄',
-    check: (input) => input.has_cad && (input.has_pad || input.has_carotid_stenosis),
+    code: 'cad_with_pad',
+    label: '冠狀動脈疾病且合併周邊動脈疾病',
+    check: (input) => input.has_cad && input.has_pad,
+  },
+  {
+    code: 'cad_with_carotid',
+    label: '冠狀動脈疾病且合併頸動脈狹窄',
+    check: (input) => input.has_cad && input.has_carotid_stenosis,
   },
   {
     code: 'pad_with_carotid',
     label: '周邊動脈疾病且合併頸動脈狹窄',
     check: (input) => input.has_pad && input.has_carotid_stenosis,
-  },
-  {
-    code: 'stroke_with_atherosclerosis',
-    label: '缺血性中風 / TIA 並伴隨動脈硬化病史',
-    check: (input) => Boolean(input.has_stroke_with_atherosclerosis),
   },
 ]
 

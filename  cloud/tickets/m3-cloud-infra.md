@@ -29,6 +29,18 @@
 ## Implementation Steps
 1. **共用變數設定**
    - 在 `docs/cloud-infra.md` 新增共用變數區塊：`PROJECT_ID`, `REGION`, `ARTIFACT_REPO`, `CLOUD_SQL_INSTANCE`, `DB_NAME`, `DB_USER`, `RUN_SERVICE_BACKEND`, `RUN_SERVICE_FRONTEND`。
+   ```
+   export PROJECT_ID="cj-demo-123"
+   export REGION="asia-east1"
+   export ARTIFACT_REPO="cj-repo"
+   export CLOUD_SQL_INSTANCE="cj-sql"
+   export DB_NAME="cj_app"
+   export DB_USER="cj_user"
+   export RUN_SERVICE_BACKEND="cj-backend"
+   export RUN_SERVICE_FRONTEND="cj-frontend"
+   export RUN_SA="cj-cloudrun-sa"
+
+   ```
    - 建議使用 `asia-east1` 或 `asia-northeast1` 做為單一區域，以減少延遲與成本。
 2. **啟用 API 與 Artifact Registry**
    - 執行：
@@ -38,10 +50,10 @@
      ```
    - 建立儲存庫（Docker 格式）：
      ```bash
-     gcloud artifacts repositories create cj-repo \
-       --repository-format=docker \
-       --location=${REGION} \
-       --description="CJ container images"
+     gcloud artifacts repositories create ${ARTIFACT_REPO} \
+      --repository-format=docker \
+      --location=${REGION} \
+      --description="Commjet container images"
      ```
 3. **建立 Cloud SQL（Postgres）**
    - 建立 instance（最小硬體）：
@@ -54,7 +66,9 @@
    - 建立資料庫與使用者：
      ```bash
      gcloud sql databases create ${DB_NAME} --instance=${CLOUD_SQL_INSTANCE}
-     gcloud sql users create ${DB_USER} --instance=${CLOUD_SQL_INSTANCE} --password=<GENERATED_PASSWORD>
+     gcloud sql users create ${DB_USER} \
+      --instance=${CLOUD_SQL_INSTANCE} \
+      --password='TempPass#2025'
      ```
    - 將連線字串記錄於 `docs/cloud-infra.md`，並提示日後以 Cloud Run 連線時使用 `postgresql+psycopg://...` 格式。
 4. **建立專用服務帳號與權限**
