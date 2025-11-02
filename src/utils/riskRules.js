@@ -94,10 +94,7 @@ const HIGH_RULES = [
   {
     code: 'cac_400',
     label: '冠狀動脈鈣化分數 (CAC) ≥ 400',
-    check: (input) => {
-      const cac = toInteger(input.cac_score)
-      return cac !== null && cac >= 400
-    },
+    check: (input) => input.cac_ge_400 === true,
   },
 ]
 
@@ -230,7 +227,12 @@ export const evaluateRiskAssessment = (rawInput = {}) => {
     age: toNumber(rawInput.age),
     hdl_c: toNumber(rawInput.hdl_c),
     ldl_c: toNumber(rawInput.ldl_c),
-    cac_score: toInteger(rawInput.cac_score),
+    cac_ge_400:
+      rawInput.cac_ge_400 === true
+        ? true
+        : rawInput.cac_ge_400 === false
+        ? false
+        : null,
     mi_history_count: toInteger(rawInput.mi_history_count) ?? 0,
     metabolic_syndrome_factors: toNumber(rawInput.metabolic_syndrome_factors),
   }

@@ -234,12 +234,14 @@ export const translations = {
         cadAdvanced: '若符合以下任一情況，請勾選所有適用項目。',
       },
       questions: {
-        cac: '冠狀動脈鈣化分數 (CAC)',
+        cac: '最近一次冠狀動脈鈣化分數 (CAC) 是否 ≥ 400？',
         plaque: '影像檢查是否顯示顯著斑塊負擔 (≥50%)？',
         ascvd: '您是否被臨床診斷為動脈硬化心血管疾病 (ASCVD)？',
       },
-      placeholders: {
-        cac: '未檢查可留空',
+      options: {
+        yes: '是',
+        no: '否',
+        unknown: '不知道',
       },
       vascularDiseases: {
         cad: '冠狀動脈疾病 (CAD)',
@@ -252,7 +254,7 @@ export const translations = {
         hasMultiVesselObstruction: '檢查顯示多支冠狀動脈阻塞',
       },
       errors: {
-        cacScore: '請輸入有效的 CAC 分數',
+        cacScore: '請選擇是否 ≥ 400 或勾選不知道',
         hasSignificantPlaque: '請選擇是否存在顯著斑塊',
         hasAscvdDiagnosis: '請選擇是否被診斷 ASCVD',
       },
@@ -640,12 +642,14 @@ export const translations = {
         cadAdvanced: 'Check every statement that applies to your coronary artery disease history.',
       },
       questions: {
-        cac: 'Coronary artery calcium (CAC) score',
+        cac: 'Is your most recent coronary artery calcium (CAC) score ≥ 400?',
         plaque: 'Have imaging studies shown significant plaque burden (≥50%)?',
         ascvd: 'Have you been clinically diagnosed with atherosclerotic cardiovascular disease (ASCVD)?',
       },
-      placeholders: {
-        cac: 'Leave blank if not tested',
+      options: {
+        yes: 'Yes',
+        no: 'No',
+        unknown: 'Not sure',
       },
       vascularDiseases: {
         cad: 'Coronary artery disease (CAD)',
@@ -658,7 +662,7 @@ export const translations = {
         hasMultiVesselObstruction: 'Confirmed multi-vessel coronary obstruction',
       },
       errors: {
-        cacScore: 'Enter a valid CAC score',
+        cacScore: 'Choose Yes, No, or Not sure',
         hasSignificantPlaque: 'Confirm whether significant plaque is present',
         hasAscvdDiagnosis: 'Confirm whether ASCVD has been diagnosed',
       },

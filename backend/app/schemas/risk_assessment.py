@@ -125,8 +125,8 @@ class RiskAssessmentRequest(BaseModel):
     ldl_c: Optional[confloat(ge=0)] = Field(
         None, description="LDL-C 數值，單位 mg/dL"
     )
-    cac_score: Optional[conint(ge=0)] = Field(
-        None, description="冠狀動脈鈣化分數 (CAC)"
+    cac_ge_400: Optional[bool] = Field(
+        None, description="最近一次 CAC 是否 ≥ 400"
     )
     has_ascvd_history: bool = Field(False, description="是否臨床確診 ASCVD")
     has_significant_plaque: bool = Field(
@@ -179,7 +179,6 @@ class RiskAssessmentRequest(BaseModel):
         "age",
         "hdl_c",
         "ldl_c",
-        "cac_score",
         "mi_history_count",
         "metabolic_syndrome_factors",
         "waist_cm",
@@ -198,6 +197,20 @@ class RiskAssessmentRequest(BaseModel):
         if value == "":
             return None
         return value
+
+    @validator("cac_ge_400", pre=True, allow_reuse=True)
+    def normalize_cac_flag(cls, value):
+        if value is None or value == "":
+            return None
+        if isinstance(value, str):
+            lowered = value.lower()
+            if lowered in {"yes", "true", "1"}:
+                return True
+            if lowered in {"no", "false", "0"}:
+                return False
+        if isinstance(value, bool):
+            return value
+        return None
 
     @validator("gender", pre=True, allow_reuse=True)
     def normalize_gender(cls, value):

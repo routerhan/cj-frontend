@@ -27,8 +27,15 @@ export const buildRiskAssessmentPayload = (formData = {}) => {
   const ldl = toNumber(bpAndLipids.ldlMgDl)
   const hdl = toNumber(bpAndLipids.hdlMgDl)
   const triglyceride = toNumber(bpAndLipids.triglycerideMgDl)
-  const cacScoreValue = toNumber(history.cacScore)
-  const cacScore = cacScoreValue !== null ? Math.round(cacScoreValue) : null
+  const cacScoreCategory = history.cacScoreCategory
+  let cacGe400 = null
+  if (cacScoreCategory === 'yes') {
+    cacGe400 = true
+  } else if (cacScoreCategory === 'no') {
+    cacGe400 = false
+  } else {
+    cacGe400 = null
+  }
 
   const hypertensionMedication = bpAndLipids.usesHypertensionMedication === 'yes'
   const lipidMedication = bpAndLipids.usesTriglycerideMedication === 'yes'
@@ -75,7 +82,7 @@ export const buildRiskAssessmentPayload = (formData = {}) => {
     has_diabetes: hasDiabetes,
     has_ckd: hasCkd,
     ldl_c: ldl,
-    cac_score: cacScore,
+    cac_ge_400: cacGe400,
     has_ascvd_history: history.hasAscvdDiagnosis === 'yes',
     has_significant_plaque: history.hasSignificantPlaque === 'yes',
     has_cad: Boolean(vascularDiseases.cad),

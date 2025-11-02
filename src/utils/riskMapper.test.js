@@ -34,7 +34,7 @@ describe('buildRiskAssessmentPayload', () => {
         uacr: '35',
       },
       history: {
-        cacScore: '200',
+        cacScoreCategory: 'no',
         hasSignificantPlaque: 'yes',
         hasAscvdDiagnosis: 'yes',
         vascularDiseases: {
@@ -71,7 +71,7 @@ describe('buildRiskAssessmentPayload', () => {
     expect(payload.mi_within_1_year).toBe(true)
     expect(payload.mi_history_count).toBe(2)
     expect(payload.has_multivessel_obstruction).toBe(false)
-    expect(payload.cac_score).toBe(200)
+    expect(payload.cac_ge_400).toBe(false)
     expect(payload.has_significant_plaque).toBe(true)
     expect(payload.has_ascvd_history).toBe(true)
 

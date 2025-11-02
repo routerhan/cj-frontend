@@ -13,7 +13,7 @@ const makeInput = (overrides = {}) => ({
   has_diabetes: false,
   has_ckd: false,
   ldl_c: 110,
-  cac_score: 0,
+  cac_ge_400: null,
   has_ascvd_history: false,
   has_significant_plaque: false,
   has_cad: false,
@@ -61,6 +61,17 @@ describe('evaluateRiskAssessment', () => {
 
     expect(result.levelCode).toBe('high')
     expect(extractCodes(result.matchedRules)).toEqual(['ckd'])
+  })
+
+  it('回傳高風險當 CAC ≥ 400', () => {
+    const result = evaluateRiskAssessment(
+      makeInput({
+        cac_ge_400: true,
+      }),
+    )
+
+    expect(result.levelCode).toBe('high')
+    expect(extractCodes(result.matchedRules)).toEqual(['cac_400'])
   })
 
   it('以危險因子數計算中風險', () => {

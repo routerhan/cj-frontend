@@ -31,8 +31,9 @@ describe('Step5_CardiovascularHistory', () => {
   it('填寫心血管病史並顯示 CAD 進階問題', async () => {
     renderWithProvider(<Harness />)
 
-    // Optional CAC score and required yes/no fields
-    fireEvent.change(screen.getByLabelText(/CAC/), { target: { value: '120' } })
+    // 回答 CAC 問題與必要的 yes/no 欄位
+    const cacGroup = screen.getByRole('radiogroup', { name: /CAC/ })
+    fireEvent.click(within(cacGroup).getByText('否'))
     const plaqueGroup = screen.getByRole('radiogroup', { name: /斑塊負擔/ })
     fireEvent.click(within(plaqueGroup).getByText('有'))
     const ascvdGroup = screen.getByRole('radiogroup', { name: /ASCVD/ })
@@ -62,10 +63,9 @@ describe('Step5_CardiovascularHistory', () => {
   it('驗證必填欄位與數值格式', () => {
     renderWithProvider(<Harness />)
 
-    fireEvent.change(screen.getByLabelText(/CAC/), { target: { value: '-1' } })
     fireEvent.click(screen.getByRole('button', { name: /下一步/ }))
 
-    expect(screen.getByText('請輸入有效的 CAC 分數')).toBeInTheDocument()
+    expect(screen.getByText('請選擇是否 ≥ 400 或勾選不知道')).toBeInTheDocument()
     expect(screen.getByText('請選擇是否存在顯著斑塊')).toBeInTheDocument()
     expect(screen.getByText('請選擇是否被診斷 ASCVD')).toBeInTheDocument()
   })

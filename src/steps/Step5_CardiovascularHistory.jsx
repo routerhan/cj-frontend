@@ -1,16 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '../components/ui/Button.jsx'
 import { useFormContext } from '../context/FormContext.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import styles from './Step5_CardiovascularHistory.module.css'
-
-const parseNonNegativeNumber = (value) => {
-  if (value === null || value === undefined || value === '') {
-    return null
-  }
-  const parsed = Number.parseFloat(value)
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null
-}
 
 export const Step5_CardiovascularHistory = () => {
   const {
@@ -53,9 +45,9 @@ export const Step5_CardiovascularHistory = () => {
     markInProgressIfNeeded()
   }
 
-  const handleCacScoreChange = (event) => {
-    updateFormField(['history', 'cacScore'], event.target.value)
-    clearError('cacScore')
+  const handleCacCategoryChange = (event) => {
+    updateFormField(['history', 'cacScoreCategory'], event.target.value)
+    clearError('cacScoreCategory')
     markInProgressIfNeeded()
   }
 
@@ -80,11 +72,8 @@ export const Step5_CardiovascularHistory = () => {
   const validate = () => {
     const nextErrors = {}
 
-    if (history.cacScore !== '') {
-      const parsed = parseNonNegativeNumber(history.cacScore)
-      if (parsed === null) {
-        nextErrors.cacScore = copy.errors?.cacScore ?? '請輸入有效的 CAC 分數'
-      }
+    if (!history.cacScoreCategory) {
+      nextErrors.cacScoreCategory = copy.errors?.cacScore ?? '請選擇是否 ≥ 400'
     }
 
     if (!history.hasSignificantPlaque) {
@@ -127,6 +116,12 @@ export const Step5_CardiovascularHistory = () => {
     },
   ]
 
+  const cacOptions = [
+    { value: 'yes', label: copy.options?.yes ?? '是' },
+    { value: 'no', label: copy.options?.no ?? '否' },
+    { value: 'unknown', label: copy.options?.unknown ?? general.unknown ?? '不知道' },
+  ]
+
   useEffect(() => {
     if (!vascularDiseases.cad) {
       if (cadDetails.miWithin1Year || cadDetails.miHistoryCountTwoOrMore || cadDetails.hasMultiVesselObstruction) {
@@ -157,25 +152,31 @@ export const Step5_CardiovascularHistory = () => {
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         <section className={styles.fieldset}>
           <h3 className={styles.sectionTitle}>{copy.sections?.screening ?? '鈣化檢查'}</h3>
-          <label className={styles.inputGroup} htmlFor="cacScore">
+          <div className={styles.optionSection}>
             <span className={styles.label}>
-              {copy.questions?.cac ?? '冠狀動脈鈣化分數 (CAC)'}
+              {copy.questions?.cac ?? '最近一次冠狀動脈鈣化分數 (CAC) 是否 ≥ 400？'}
             </span>
-            <div className={styles.inlineInput}>
-              <input
-                id="cacScore"
-                type="number"
-                inputMode="decimal"
-                min="0"
-                step="1"
-                value={history.cacScore}
-                onChange={handleCacScoreChange}
-                className={styles.input}
-                placeholder={copy.placeholders?.cac ?? '未檢查可留空'}
-              />
+            <div
+              className={styles.optionGroup}
+              role="radiogroup"
+              aria-label={copy.questions?.cac ?? '最近一次冠狀動脈鈣化分數 (CAC) 是否 ≥ 400？'}
+            >
+              {cacOptions.map((option) => (
+                <label key={option.value} className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="cacScoreCategory"
+                    value={option.value}
+                    checked={history.cacScoreCategory === option.value}
+                    onChange={handleCacCategoryChange}
+                    className={styles.radioInput}
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
             </div>
-          </label>
-          {errors.cacScore ? <p className={styles.error}>{errors.cacScore}</p> : null}
+            {errors.cacScoreCategory ? <p className={styles.error}>{errors.cacScoreCategory}</p> : null}
+          </div>
         </section>
 
         <section className={styles.fieldset}>

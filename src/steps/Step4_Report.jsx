@@ -49,6 +49,13 @@ const formatSex = (value) => {
   return '未填'
 }
 
+const formatCacCategory = (value) => {
+  if (value === 'yes') return '是 (≥ 400)'
+  if (value === 'no') return '否 (< 400)'
+  if (value === 'unknown') return '不知道'
+  return '未填'
+}
+
 const formatNumberWithUnit = (value, unit) => {
   if (!hasData(value)) return '未填'
   return unit ? `${value} ${unit}` : String(value)
@@ -255,7 +262,7 @@ export const Step4_Report = () => {
         key: 'history',
         title: '心血管病史',
         items: [
-          { label: 'CAC 分數', value: hasData(history.cacScore) ? history.cacScore : '未填' },
+          { label: '最近 CAC 是否 ≥ 400', value: formatCacCategory(history.cacScoreCategory) },
           { label: '影像顯示顯著斑塊 (≥50%)', value: formatBooleanChoice(history.hasSignificantPlaque) },
           { label: '是否臨床診斷 ASCVD', value: formatBooleanChoice(history.hasAscvdDiagnosis) },
           { label: '冠狀動脈疾病 (CAD)', value: formatBooleanChoice(vascular.cad) },

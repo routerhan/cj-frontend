@@ -82,7 +82,7 @@ const createInitialFormData = () => ({
     uacr: '',
   },
   history: {
-    cacScore: '',
+    cacScoreCategory: '',
     hasSignificantPlaque: '',
     hasAscvdDiagnosis: '',
     vascularDiseases: {
@@ -136,7 +136,7 @@ const createInitialFormData = () => ({
       hasCarotidStenosis: '',
       hasStrokeWithAtherosclerosis: '',
       hasSignificantPlaque: '',
-      cacScore: '',
+      cacScoreCategory: '',
     },
   },
   report: {

@@ -69,7 +69,7 @@ const Harness = () => {
     updateFormField(['kidney', 'egfr'], '92')
     updateFormField(['kidney', 'uacr'], '18')
 
-    updateFormField(['history', 'cacScore'], '120')
+    updateFormField(['history', 'cacScoreCategory'], 'unknown')
     updateFormField(['history', 'hasSignificantPlaque'], 'no')
     updateFormField(['history', 'hasAscvdDiagnosis'], 'no')
     updateFormField(['history', 'vascularDiseases', 'cad'], false)

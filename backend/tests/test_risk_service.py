@@ -21,7 +21,7 @@ def _build_request(**overrides) -> RiskAssessmentRequest:
         "has_diabetes": False,
         "has_ckd": False,
         "ldl_c": 100,
-        "cac_score": 0,
+        "cac_ge_400": None,
         "has_ascvd_history": False,
         "has_significant_plaque": False,
         "has_cad": False,
@@ -121,7 +121,7 @@ def test_high_risk_for_ckd_rule(risk_service: RiskAssessmentService):
 def test_high_risk_for_cac_score_rule(risk_service: RiskAssessmentService):
     payload = _build_request(
         age=42,
-        cac_score=420,
+        cac_ge_400=True,
         has_hypertension=False,
         metabolic_syndrome_factors=0,
     )

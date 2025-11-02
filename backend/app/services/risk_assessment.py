@@ -136,7 +136,7 @@ HIGH_RULES: List[Rule] = [
     Rule(
         "cac_400",
         "冠狀動脈鈣化分數 (CAC) ≥ 400",
-        lambda p: (cac := _to_int(p.cac_score)) is not None and cac >= 400,
+        lambda p: bool(p.cac_ge_400),
     ),
 ]
 
