@@ -1,0 +1,22 @@
+substitutions:
+  _SERVICE_IMAGE: "asia-east1-docker.pkg.dev/${PROJECT_ID}/cj-app/service:${SHORT_SHA}"
+
+options:
+  substitutionOption: ALLOW_LOOSE
+
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - build
+      - "-t"
+      - "${_SERVICE_IMAGE}"
+      - "-f"
+      - Dockerfile
+      - "."
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - push
+      - "${_SERVICE_IMAGE}"
+
+images:
+  - "${_SERVICE_IMAGE}"

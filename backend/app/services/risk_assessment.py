@@ -8,9 +8,9 @@ from typing import Callable, Dict, Iterable, List, Optional, Protocol
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from ..db.session import get_session
-from ..repositories import AssessmentRepository
-from ..schemas import (
+from app.db.session import get_session
+from app.repositories import AssessmentRepository
+from app.schemas import (
     MetabolicSyndromeResult,
     RiskAssessmentRequest,
     RiskAssessmentResponse,

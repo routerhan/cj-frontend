@@ -5,10 +5,11 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from ..db.session import get_session
-from ..models import AdminAccount, Assessment, AssessmentFactor
-from ..repositories import AssessmentRepository
-from ..schemas import (
+from app.api.dependencies import get_current_admin
+from app.db.session import get_session
+from app.models import AdminAccount, Assessment, AssessmentFactor
+from app.repositories import AssessmentRepository
+from app.schemas import (
     AssessmentListResponse,
     AssessmentRecord,
     AssessmentStats,
@@ -16,8 +17,10 @@ from ..schemas import (
     RiskAssessmentResponse,
     RiskLevelCodeEnum,
 )
-from ..services import RiskAssessmentServiceProtocol, get_risk_assessment_service
-from .dependencies import get_current_admin
+from app.services import (
+    RiskAssessmentServiceProtocol,
+    get_risk_assessment_service,
+)
 
 router = APIRouter(prefix="/api", tags=["risk-assessment"])
 

@@ -25,3 +25,10 @@ dist-ssr
 
 # Backend environment configuration
 backend/.env
+
+# Backend frontend build artifacts
+backend/app/frontend/*
+!backend/app/frontend/.gitkeep
+
+# Local container volumes
+.data/

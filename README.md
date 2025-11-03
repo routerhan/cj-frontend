@@ -20,8 +20,9 @@ pip install -r requirements.txt
 export DATABASE_URL=sqlite:///./dev.db
 alembic upgrade head
 
-# 啟動後端 (http://127.0.0.1:8000)
-uvicorn app.main:app --reload
+# 回到專案根目錄啟動後端 (http://127.0.0.1:8000)
+cd ..
+uvicorn backend.app.main:app --reload
 ```
 
 > Windows PowerShell 可使用 `setx DATABASE_URL "sqlite:///./dev.db"` 後重新開啟終端。
@@ -43,7 +44,8 @@ pip install -r requirements-dev.txt
 # 2. 建立資料表並啟動後端
 export DATABASE_URL=sqlite:///./dev.db
 alembic upgrade head
-uvicorn app.main:app --reload
+cd ..
+uvicorn backend.app.main:app --reload
 
 # 3. 新開一個終端啟動前端
 cd /path/to/cj-frontend
@@ -81,61 +83,69 @@ npm run test -- Step4_LipidProfile
 | 變數 | 預設值 | 說明 | 部署時注意 |
 |------|--------|------|-------------|
 | `DATABASE_URL` | `sqlite:///./dev.db` | SQLAlchemy 連線字串 | 改成正式資料庫，如 `postgresql+psycopg://user:password@host/db` |
-| `VITE_API_BASE_URL` (選用) | 空字串 | 若未設定會由 Vite proxy 轉送；部署在同網域外時用於指定 API 來源 | 部署到不同網域時要設為 API 實際 URL |
 | `ADMIN_JWT_SECRET` | 無預設（必填） | 管理者登入使用的 JWT 金鑰 | 各環境請使用不同的高熵字串並妥善保護 |
 | `ADMIN_TOKEN_TTL_MINUTES` | `60` | 管理者登入 token 有效時間（分鐘） | 可依安全需求調整；更換後舊 token 會失效 |
 
 ---
 
-## 使用 Podman 啟動整合環境
+## 單一容器建置與部署
 
-專案提供 `podman-compose.yml` 與範例環境檔協助在本地模擬 Cloud Run 佈署：
+整合後的服務使用 repo 根目錄的 `Dockerfile`。容器在啟動時會同時供應 React 靜態檔與 FastAPI API。
 
-### 第一次使用
-
-1. 複製環境檔並調整需要的設定（只需做一次）：
-   ```bash
-   cp .env.podman.example .podmanenv
-   ```
-2. 啟動所有服務（前端、後端、PostgreSQL）：
-   ```bash
-   podman compose -f podman-compose.yml --env-file .podmanenv up --build
-   ```
-3. 服務啟動後可造訪：
-   - 前端問卷：<http://localhost:5173>
-   - API/Swagger：<http://localhost:8000/docs>
-   - 醫師儀表板：<http://localhost:8000/api/admin/dashboard>
-4. 建立第一個管理者帳號（僅首次需要）：
-   ```bash
-   podman compose -f podman-compose.yml exec backend \
-     python -m scripts.create_admin admin@example.com --password 'StrongPass123!'
-   ```
-   後續如需新增或重設帳號，可重複這個指令。
-
-更多細節與排錯指南見 `docs/container-local.md`。
-
-### 常用 Podman 指令
+### 本地測試驗證（Podman）
 
 ```bash
-# 以 .podmanenv 啟動整個 stack（前端 / 後端 / PostgreSQL）
-podman compose -f podman-compose.yml --env-file .podmanenv up --build -d
+# 1. 建置映像（同部署使用的 Dockerfile）
+podman build -t cj-app:local .
 
-# 查看服務狀態
-podman compose -f podman-compose.yml ps
+# 2. 建立 pod，對外暴露 8080
+podman pod create --name cj-stack -p 8080:8080
 
-# 進入後端容器建立管理者帳號
-podman compose -f podman-compose.yml exec backend \
-  python -m scripts.create_admin admin@example.com --password 'StrongPass123!'
+# 3. 啟動 PostgreSQL（模擬 Cloud SQL）
+podman run --rm --pod cj-stack --name cj-db \
+  -e POSTGRES_DB=cjdb \
+  -e POSTGRES_USER=cjapp \
+  -e POSTGRES_PASSWORD='ChangeMe123!' \
+  docker.io/library/postgres:16-alpine
 
-# 在後端容器內執行測試
-podman compose -f podman-compose.yml exec backend pytest
-
-# 停止並移除服務（保留資料卷）
-podman compose -f podman-compose.yml down
-
-# 停止服務並刪除 volume / 映像
-podman compose -f podman-compose.yml down --volumes --rmi all
+# 4. 啟動應用容器，連線到 cj-db
+podman run --rm --pod cj-stack --name cj-app \
+  -e PORT=8080 \
+  -e DATABASE_URL='postgresql+psycopg://cjapp:ChangeMe123!@cj-db:5432/cjdb' \
+  -e ADMIN_JWT_SECRET='local-secret' \
+  cj-app:local
 ```
+
+> 若僅需 SQLite，可將 `DATABASE_URL` 改為 `sqlite:////data/app.db`，並加入 `-v "$(pwd)/.data":/data` 以保留資料。
+
+在應用容器啟動後，執行下列命令完成資料庫設定與管理者建立：
+
+```bash
+# 套用 Alembic 遷移
+podman exec cj-app alembic upgrade head
+
+# 建立或重設管理者帳號
+podman exec -it cj-app python -m scripts.create_admin admin@example.com --password 'StrongPass123!'
+```
+
+測試完成後，可停用並移除 pod：
+
+```bash
+podman pod stop cj-stack
+podman pod rm cj-stack
+```
+
+### 使用 Cloud Build
+
+`cloud/cloudbuild.yaml` 已設定單一路徑服務建置：
+
+```bash
+gcloud builds submit \
+  --config cloud/cloudbuild.yaml \
+  --substitutions=_SERVICE_IMAGE=asia-east1-docker.pkg.dev/<PROJECT>/<REPO>/cj-app:$(date +%Y%m%d-%H%M%S)
+```
+
+建置完成後即可使用該映像部署 Cloud Run，並設定必要環境變數（`DATABASE_URL`、`ADMIN_JWT_SECRET` 等）與 Cloud SQL 連線。
 
 ---
 
@@ -163,7 +173,7 @@ podman compose -f podman-compose.yml down --volumes --rmi all
    },
    ```
 2. 送出表單後會呼叫 `src/utils/riskApi.js` 的 `requestRiskAssessment`，自動使用 proxy 指到後端。
-3. 若需要在不同環境指定 API，於 `.env` 設定 `VITE_API_BASE_URL`，並在 `riskApi.js` 讀取。
+3. 若需指向不同 API（例如測試環境），仍可於 `.env` 設定 `VITE_API_BASE_URL`；單一容器部署時不需設定此值。
 
 ### 前端測試
 
@@ -242,11 +252,10 @@ sqlite3 dev.db "SELECT code, present FROM assessment_factors WHERE assessment_id
 
 ## 部署注意事項
 
-- 調整 `DATABASE_URL`、`VITE_API_BASE_URL` 以符合雲端環境。
-- 確認 Alembic 遷移已套用至正式資料庫。
-- 若前後端分開部署，前端需移除開發用 proxy，並透過環境變數指向後端 URL。
-- FastAPI 建議使用 `uvicorn --host 0.0.0.0 --port 8000` 搭配 `gunicorn` 或容器化進行部署，並配置 SSL / 反向代理。
-- 記錄重複請求防護：`Step4_Report.jsx` 透過 `hasRequestedRef` 避免重複呼叫，若改動該步驟需維持相同保護。
+- 透過 `cloud/cloudbuild.yaml` 建置單一映像後部署 Cloud Run，並設定 `DATABASE_URL`、`ADMIN_JWT_SECRET` 等必要環境變數。
+- Cloud Run 若需連線 Cloud SQL，請記得啟用 `--add-cloudsql-instances` 並提供對應的 Service Account 權限。
+- 部署前務必執行 `alembic upgrade head`（或在啟動腳本中保留 migrations 流程）。
+- `Step4_Report.jsx` 內的 `hasRequestedRef` 仍負責避免重複送出 API，後續調整請確保同樣的保護機制存在。
 
 ---
 

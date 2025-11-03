@@ -1,12 +1,12 @@
 """Service layer interfaces and implementations."""
 
-from .auth import AdminAuthService, get_admin_auth_service
-from .risk_assessment import (
+from app.services.auth import AdminAuthService, get_admin_auth_service
+from app.services.risk_assessment import (
     RiskAssessmentService,
     RiskAssessmentServiceProtocol,
     get_risk_assessment_service,
 )
-from .security import (
+from app.services.security import (
     JWT_ALGORITHM,
     create_access_token,
     decode_access_token,

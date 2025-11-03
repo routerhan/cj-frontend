@@ -2,8 +2,8 @@
 
 from fastapi import APIRouter
 
-from .admin_auth import router as admin_auth_router
-from .risk_assessment import router as risk_assessment_router
+from app.api.admin_auth import router as admin_auth_router
+from app.api.risk_assessment import router as risk_assessment_router
 
 api_router = APIRouter()
 api_router.include_router(admin_auth_router)

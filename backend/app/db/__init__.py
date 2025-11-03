@@ -1,6 +1,5 @@
 """Database utilities and session management."""
 
-from .session import Base, SessionLocal, get_session, engine
+from app.db.session import Base, SessionLocal, engine, get_session
 
 __all__ = ["Base", "engine", "SessionLocal", "get_session"]
-

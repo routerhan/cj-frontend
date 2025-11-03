@@ -5,8 +5,7 @@ from fastapi import APIRouter, Depends, status
 from app.models import AdminAccount
 from app.schemas import AdminLoginRequest, AdminLoginResponse, AdminProfile
 from app.services import AdminAuthService, get_admin_auth_service
-
-from .dependencies import get_current_admin
+from app.api.dependencies import get_current_admin
 
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])

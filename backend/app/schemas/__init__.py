@@ -1,7 +1,7 @@
 """Pydantic schema definitions for the API."""
 
-from .admin import AdminLoginRequest, AdminLoginResponse, AdminProfile
-from .risk_assessment import (
+from app.schemas.admin import AdminLoginRequest, AdminLoginResponse, AdminProfile
+from app.schemas.risk_assessment import (
     AssessmentListResponse,
     AssessmentRecord,
     AssessmentStats,
