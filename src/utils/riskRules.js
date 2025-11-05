@@ -39,8 +39,9 @@ const EXTREME_RULES = [
   },
   {
     code: 'cad_with_diabetes',
-    label: '冠狀動脈疾病且合併糖尿病',
-    check: (input) => input.has_cad && input.has_diabetes,
+    label: '冠狀動脈疾病且急性冠心症合併糖尿病',
+    check: (input) =>
+      input.has_cad && input.has_acute_coronary_syndrome && input.has_diabetes,
   },
   {
     code: 'cad_with_pad',
@@ -227,6 +228,7 @@ export const evaluateRiskAssessment = (rawInput = {}) => {
     age: toNumber(rawInput.age),
     hdl_c: toNumber(rawInput.hdl_c),
     ldl_c: toNumber(rawInput.ldl_c),
+    has_acute_coronary_syndrome: Boolean(rawInput.has_acute_coronary_syndrome),
     cac_ge_400:
       rawInput.cac_ge_400 === true
         ? true

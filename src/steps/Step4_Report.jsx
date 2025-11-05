@@ -3,6 +3,8 @@ import { Button } from '../components/ui/Button.jsx'
 import { LoadingSpinner } from '../components/ui/LoadingSpinner.jsx'
 import { InstantResult } from '../components/ui/InstantResult.jsx'
 import { useFormContext } from '../context/FormContext.jsx'
+import { useLanguage } from '../context/LanguageContext.jsx'
+import { MEDICAL_HISTORY_GROUPS } from '../config/medicalHistorySchema.js'
 import { requestRiskAssessment } from '../utils/riskApi.js'
 import styles from './Step4_Report.module.css'
 
@@ -39,6 +41,7 @@ const hasData = (value) => value !== null && value !== undefined && value !== ''
 const formatBooleanChoice = (value) => {
   if (value === true || value === 'yes') return '是'
   if (value === false || value === 'no') return '否'
+  if (value === 'unknown') return '不知道'
   return '未填'
 }
 
@@ -85,6 +88,17 @@ const formatHdlStatus = (threshold, isLow) => {
   return `${isLow ? '是' : '否'}（門檻 ${threshold} mg/dL）`
 }
 
+const getNested = (object, path) =>
+  path.reduce((accumulator, key) => (accumulator && accumulator[key] !== undefined ? accumulator[key] : undefined), object)
+
+const ensureGroupState = (groupConfig, rawGroup) => {
+  const state = {}
+  groupConfig.options.forEach(({ key }) => {
+    state[key] = Boolean(rawGroup?.[key])
+  })
+  return state
+}
+
 export const Step4_Report = () => {
   const {
     formData,
@@ -97,6 +111,9 @@ export const Step4_Report = () => {
     steps,
     derivedMetrics,
   } = useFormContext()
+
+  const { dictionary } = useLanguage()
+  const medicalCopy = dictionary.medicalHistoryStep ?? dictionary.cardioHistoryStep ?? {}
 
   const report = formData.report ?? {}
   const hasRequestedRef = useRef(false)
@@ -200,8 +217,32 @@ export const Step4_Report = () => {
     const diabetes = formData.diabetes ?? {}
     const kidney = formData.kidney ?? {}
     const history = formData.history ?? {}
-    const vascular = history.vascularDiseases ?? {}
-    const cadDetails = history.cadDetails ?? {}
+
+    const historyItems = MEDICAL_HISTORY_GROUPS.flatMap((group) => {
+      const prompt = getNested(medicalCopy, group.promptPath) ?? group.fallbackPrompt ?? ''
+      const groupState = ensureGroupState(group, history[group.groupKey])
+      const noneOption = group.options.find((option) => option.isNone)
+      const selectedNonNone = group.options.filter((option) => groupState[option.key] && !option.isNone)
+
+      let value = '未填'
+      if (selectedNonNone.length > 0) {
+        const labels = selectedNonNone.map((option) =>
+          getNested(medicalCopy, option.labelPath) ?? option.fallbackLabel ?? option.key,
+        )
+        value = `已勾選：${labels.join('、')}`
+      } else if (noneOption && groupState[noneOption.key]) {
+        const noneLabel =
+          getNested(medicalCopy, noneOption.labelPath) ?? noneOption.fallbackLabel ?? noneOption.key
+        value = `已勾選：${noneLabel}`
+      } else if (group.options.some((option) => groupState[option.key])) {
+        const labels = group.options
+          .filter((option) => groupState[option.key])
+          .map((option) => getNested(medicalCopy, option.labelPath) ?? option.fallbackLabel ?? option.key)
+        value = `已勾選：${labels.join('、')}`
+      }
+
+      return [{ label: prompt, value }]
+    })
 
     return [
       {
@@ -260,30 +301,11 @@ export const Step4_Report = () => {
       },
       {
         key: 'history',
-        title: '心血管病史',
-        items: [
-          { label: '最近 CAC 是否 ≥ 400', value: formatCacCategory(history.cacScoreCategory) },
-          { label: '影像顯示顯著斑塊 (≥50%)', value: formatBooleanChoice(history.hasSignificantPlaque) },
-          { label: '是否臨床診斷 ASCVD', value: formatBooleanChoice(history.hasAscvdDiagnosis) },
-          { label: '冠狀動脈疾病 (CAD)', value: formatBooleanChoice(vascular.cad) },
-          {
-            label: 'CAD 詳細 - 一年內心肌梗塞',
-            value: formatBooleanChoice(cadDetails.miWithin1Year),
-          },
-          {
-            label: 'CAD 詳細 - 累積兩次以上心肌梗塞',
-            value: formatBooleanChoice(cadDetails.miHistoryCountTwoOrMore),
-          },
-          {
-            label: 'CAD 詳細 - 多支血管阻塞',
-            value: formatBooleanChoice(cadDetails.hasMultiVesselObstruction),
-          },
-          { label: '周邊動脈疾病 (PAD)', value: formatBooleanChoice(vascular.pad) },
-          { label: '頸動脈狹窄', value: formatBooleanChoice(vascular.carotidStenosis) },
-        ],
+        title: '醫療病史',
+        items: historyItems,
       },
     ]
-  }, [derivedMetrics, formData, metabolicInfo.count])
+  }, [derivedMetrics, formData, medicalCopy, metabolicInfo.count])
 
   const evaluatedAtDisplay = report.evaluatedAt ? new Date(report.evaluatedAt).toLocaleString() : ''
 

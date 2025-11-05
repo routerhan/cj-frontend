@@ -90,8 +90,8 @@ EXTREME_RULES: List[Rule] = [
     ),
     Rule(
         "cad_with_diabetes",
-        "冠狀動脈疾病且合併糖尿病",
-        lambda p: p.has_cad and p.has_diabetes,
+        "冠狀動脈疾病且急性冠心症合併糖尿病",
+        lambda p: p.has_cad and p.has_acute_coronary_syndrome and p.has_diabetes,
     ),
     Rule(
         "cad_with_pad",
@@ -115,12 +115,24 @@ VERY_HIGH_RULES: List[Rule] = [
     Rule(
         "ascvd_history",
         "臨床確診動脈硬化心血管疾病 (ASCVD)",
-        lambda p: bool(p.has_ascvd_history),
+        lambda p: bool(
+            p.has_ascvd_history
+            or p.has_acute_coronary_syndrome_history
+            or p.has_revascularization_history
+            or p.has_ischemic_stroke_with_atherosclerosis
+            or p.has_peripheral_arterial_disease_history
+            or p.has_pad
+        ),
     ),
     Rule(
         "significant_plaque",
         "影像顯示顯著斑塊狹窄（≥50%）",
-        lambda p: bool(p.has_significant_plaque),
+        lambda p: bool(
+            p.has_significant_plaque
+            or p.has_coronary_angiography_stenosis
+            or p.has_coronary_ct_stenosis
+            or p.has_vascular_ultrasound_stenosis
+        ),
     ),
 ]
 

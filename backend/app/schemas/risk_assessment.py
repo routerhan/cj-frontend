@@ -132,7 +132,31 @@ class RiskAssessmentRequest(BaseModel):
     has_significant_plaque: bool = Field(
         False, description="是否有顯著血管斑塊狹窄"
     )
+    has_acute_coronary_syndrome_history: bool = Field(
+        False, description="是否曾有急性冠心症病史"
+    )
+    has_revascularization_history: bool = Field(
+        False, description="是否接受過血管再通術 (PCI 或 CABG)"
+    )
+    has_ischemic_stroke_with_atherosclerosis: bool = Field(
+        False, description="缺血性中風或 TIA 並確認與動脈硬化相關"
+    )
+    has_peripheral_arterial_disease_history: bool = Field(
+        False, description="周邊動脈疾病（再通術、跛行或截肢）病史"
+    )
+    has_coronary_angiography_stenosis: bool = Field(
+        False, description="冠狀動脈血管攝影是否顯示 ≥ 50% 狹窄"
+    )
+    has_coronary_ct_stenosis: bool = Field(
+        False, description="冠狀或周邊動脈 CT 是否顯示 ≥ 50% 狹窄"
+    )
+    has_vascular_ultrasound_stenosis: bool = Field(
+        False, description="頸動脈或周邊動脈超音波是否顯示 ≥ 50% 狹窄"
+    )
     has_cad: bool = Field(False, description="是否已診斷冠狀動脈疾病")
+    has_acute_coronary_syndrome: bool = Field(
+        False, description="冠狀動脈病人是否曾診斷急性冠心症 (ACS)"
+    )
     mi_within_1_year: bool = Field(False, description="是否於一年內發生心肌梗塞")
     mi_history_count: conint(ge=0) = Field(
         0, description="累積心肌梗塞次數"

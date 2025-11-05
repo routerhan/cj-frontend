@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { useEffect } from 'react'
 import { FormProvider, useFormContext } from '../context/FormContext.jsx'
@@ -27,31 +27,32 @@ const Harness = () => {
   )
 }
 
+const normalizeWhitespace = (value) => value.replace(/\s+/g, ' ').trim()
+
+const clickOption = (textSnippet) => {
+  const expected = normalizeWhitespace(textSnippet)
+  const target = screen.getByText(
+    (content) => normalizeWhitespace(content).includes(expected),
+  )
+  fireEvent.click(target)
+}
+
 describe('Step5_CardiovascularHistory', () => {
-  it('填寫心血管病史並顯示 CAD 進階問題', async () => {
+  it('填寫醫療病史的多重選項並前往下一步', async () => {
     renderWithProvider(<Harness />)
 
-    // 回答 CAC 問題與必要的 yes/no 欄位
-    const cacGroup = screen.getByRole('radiogroup', { name: /CAC/ })
-    fireEvent.click(within(cacGroup).getByText('否'))
-    const plaqueGroup = screen.getByRole('radiogroup', { name: /斑塊負擔/ })
-    fireEvent.click(within(plaqueGroup).getByText('有'))
-    const ascvdGroup = screen.getByRole('radiogroup', { name: /ASCVD/ })
-    fireEvent.click(within(ascvdGroup).getByText('有'))
+    clickOption('1)  急性冠心症病史')
+    clickOption('4)  周邊動脈疾病 (曾接受血管再通術、有間歇性跛行相關症狀或截肢)')
 
-    // Select vascular diseases, including CAD to reveal advanced options
-    fireEvent.click(screen.getByLabelText(/冠狀動脈疾病/))
-    fireEvent.click(screen.getByLabelText(/周邊動脈疾病/))
-    fireEvent.click(screen.getByLabelText(/頸動脈狹窄/))
+    clickOption('1)  冠狀動脈血管攝影')
 
-    // CAD advanced options should be visible once CAD is checked
-    const miWithinYear = screen.getByLabelText(/一年內曾經歷心肌梗塞/)
-    const miCountTwoPlus = screen.getByLabelText(/心肌梗塞次數 ≥ 2/)
-    const multiVessel = screen.getByLabelText(/多支冠狀動脈阻塞/)
+    clickOption('1)  一年內曾歷經心肌梗塞')
+    clickOption('2)  ≥兩次心肌梗塞病史')
+    clickOption('4)  急性冠心症合併糖尿病')
+    clickOption('5)  周邊動脈疾病或頸動脈狹窄')
 
-    fireEvent.click(miWithinYear)
-    fireEvent.click(miCountTwoPlus)
-    fireEvent.click(multiVessel)
+    clickOption('1)  冠狀動脈疾病')
+    clickOption('2)  頸動脈狹窄')
 
     fireEvent.click(screen.getByRole('button', { name: /下一步/ }))
 
@@ -65,8 +66,7 @@ describe('Step5_CardiovascularHistory', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /下一步/ }))
 
-    expect(screen.getByText('請選擇是否 ≥ 400 或勾選不知道')).toBeInTheDocument()
-    expect(screen.getByText('請選擇是否存在顯著斑塊')).toBeInTheDocument()
-    expect(screen.getByText('請選擇是否被診斷 ASCVD')).toBeInTheDocument()
+    const messages = screen.getAllByText('請至少勾選一項或選擇「以上皆無」')
+    expect(messages).toHaveLength(4)
   })
 })

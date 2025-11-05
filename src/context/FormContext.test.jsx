@@ -24,7 +24,7 @@ describe('FormContext', () => {
     expect(result.current.stepStatus.basicInfo).toBe(StepStatus.PENDING)
     expect(result.current.formData.basic.sex).toBe('')
     expect(result.current.formData.bpAndLipids).toBeDefined()
-    expect(result.current.formData.history.vascularDiseases.cad).toBe(false)
+    expect(result.current.formData.history.ascvdDiagnoses.acuteCoronarySyndrome).toBe(false)
   })
 
   it('可深度合併更新表單區塊且保留既有資料', () => {

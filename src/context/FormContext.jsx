@@ -83,17 +83,31 @@ const createInitialFormData = () => ({
   },
   history: {
     cacScoreCategory: '',
-    hasSignificantPlaque: '',
-    hasAscvdDiagnosis: '',
-    vascularDiseases: {
-      cad: false,
-      pad: false,
-      carotidStenosis: false,
+    ascvdDiagnoses: {
+      acuteCoronarySyndrome: false,
+      revascularization: false,
+      ischemicStroke: false,
+      peripheralArteryDisease: false,
+      none: false,
     },
-    cadDetails: {
+    imagingFindings: {
+      coronaryAngiography: false,
+      coronaryCt: false,
+      vascularUltrasound: false,
+      none: false,
+    },
+    cadComplications: {
       miWithin1Year: false,
-      miHistoryCountTwoOrMore: false,
-      hasMultiVesselObstruction: false,
+      miHistoryTwoOrMore: false,
+      multiVesselObstruction: false,
+      acsWithDiabetes: false,
+      padOrCarotid: false,
+      none: false,
+    },
+    padComplications: {
+      cad: false,
+      carotidStenosis: false,
+      none: false,
     },
   },
   // legacy structures for backward compatibility (will be removed after rework tickets)

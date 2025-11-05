@@ -15,8 +15,8 @@ export const translations = {
       hypertensionDiabetes: '血壓與血脂',
       diabetes: '糖尿病',
       kidney: '腎臟功能',
-      history: '心血管病史',
-      cardioHistory: '心血管病史',
+      history: '醫療病史',
+      cardioHistory: '醫療病史',
       report: '風險報告',
     },
     general: {
@@ -205,7 +205,7 @@ export const translations = {
         egfr: '請輸入有效的 eGFR 數值',
         uacr: '請輸入有效的 UACR 數值',
       },
-      buttonNext: '下一步：心血管病史',
+      buttonNext: '下一步：醫療病史',
     },
     hypertensionDiabetes: {
       title: '血壓與血糖監測',
@@ -219,44 +219,54 @@ export const translations = {
       title: '血脂檢驗資訊',
       lead: '請填寫血脂異常的用藥與檢驗數值，協助我們評估膽固醇相關的心血管危險。',
     },
-    cardioHistoryStep: {
-      title: '心血管病史',
-      lead: '請依序回答鈣化檢查、影像與臨床診斷，以及相關病史，我們會將結果交由後端評估風險。',
-      sections: {
-        screening: '鈣化檢查',
-        diagnosis: '影像與臨床診斷',
-        vascular: '臨床病史 (可複選)',
-        cadAdvanced: '冠狀動脈進階紀錄',
-      },
-      descriptions: {
-        diagnosis: '請確認是否曾被臨床診斷為 ASCVD，並提供近期影像結果。',
-        vascular: '勾選您曾被確認的動脈病變；若包含 CAD，還可補充進一步資訊。',
-        cadAdvanced: '若符合以下任一情況，請勾選所有適用項目。',
-      },
+    medicalHistoryStep: {
+      title: '醫療病史',
+      lead: '請逐項填寫臨床診斷與影像檢查狀況，我們會依據結果判定風險等級。',
       questions: {
-        cac: '最近一次冠狀動脈鈣化分數 (CAC) 是否 ≥ 400？',
-        plaque: '影像檢查是否顯示顯著斑塊負擔 (≥50%)？',
-        ascvd: '您是否被臨床診斷為動脈硬化心血管疾病 (ASCVD)？',
-      },
-      options: {
-        yes: '是',
-        no: '否',
-        unknown: '不知道',
-      },
-      vascularDiseases: {
-        cad: '冠狀動脈疾病 (CAD)',
-        pad: '周邊動脈疾病 (PAD)',
-        carotid: '頸動脈狹窄',
-      },
-      cadAdvanced: {
-        miWithin1Year: '一年內曾經歷心肌梗塞',
-        miHistoryCountTwoOrMore: '歷來心肌梗塞次數 ≥ 2 次',
-        hasMultiVesselObstruction: '檢查顯示多支冠狀動脈阻塞',
+        ascvd: {
+          prompt: '請問你是否經臨床檢查確診為 動脈硬化心血管疾病，包含（請勾選，可多選）：',
+          options: {
+            acuteCoronarySyndrome: '1)  急性冠心症病史',
+            revascularization: '2)  接受冠狀動脈血管再通術(心導管介入治療或外科冠狀動脈繞道手術)',
+            ischemicStroke: '3)  缺血性中風/短暫性腦缺血發作合併動脈硬化相關疾病或病史',
+            peripheralArteryDisease: '4)  周邊動脈疾病 (曾接受血管再通術、有間歇性跛行相關症狀或截肢)',
+            none: '5)  以上皆無',
+          },
+        },
+        imaging: {
+          prompt: '請問你是否經影像檢查確認有 顯著斑塊負擔，定義為≥50%直徑狹窄，包含（請勾選，可多選）：',
+          options: {
+            coronaryAngiography: '1)  冠狀動脈血管攝影',
+            coronaryCt: '2)  冠狀動脈或周邊動脈電腦斷層掃描',
+            vascularUltrasound: '3)  頸動脈或周邊動脈血管超音波',
+            none: '4)  以上皆無',
+          },
+        },
+        cad: {
+          prompt: '請問你是否被診斷有 冠狀動脈疾病 合併下列任一臨床狀況（請勾選，可多選）：',
+          options: {
+            miWithin1Year: '1)  一年內曾歷經心肌梗塞',
+            miHistoryTwoOrMore: '2)  ≥兩次心肌梗塞病史',
+            multiVesselObstruction: '3)  多支冠狀動脈阻塞',
+            acsWithDiabetes: '4)  急性冠心症合併糖尿病',
+            padOrCarotid: '5)  周邊動脈疾病或頸動脈狹窄',
+            none: '6)  以上皆無',
+          },
+        },
+        pad: {
+          prompt: '請問你是否被診斷有 周邊動脈疾病 合併有以下任一臨床狀況（請勾選，可多選）：',
+          options: {
+            cad: '1)  冠狀動脈疾病',
+            carotidStenosis: '2)  頸動脈狹窄',
+            none: '3)  以上皆無',
+          },
+        },
       },
       errors: {
-        cacScore: '請選擇是否 ≥ 400 或勾選不知道',
-        hasSignificantPlaque: '請選擇是否存在顯著斑塊',
-        hasAscvdDiagnosis: '請選擇是否被診斷 ASCVD',
+        ascvdDiagnoses: '請至少勾選一項或選擇「以上皆無」',
+        imagingFindings: '請至少勾選一項或選擇「以上皆無」',
+        cadComplications: '請至少勾選一項或選擇「以上皆無」',
+        padComplications: '請至少勾選一項或選擇「以上皆無」',
       },
       buttonNext: '下一步：風險報告',
     },
@@ -421,8 +431,8 @@ export const translations = {
       hypertensionDiabetes: 'Blood Pressure & Lipids',
       diabetes: 'Diabetes',
       kidney: 'Kidney Function',
-      history: 'Cardiovascular History',
-      cardioHistory: 'Cardiovascular History',
+      history: 'Medical History',
+      cardioHistory: 'Medical History',
       report: 'Risk Report',
     },
     general: {
@@ -613,7 +623,7 @@ export const translations = {
         egfr: 'Enter a valid eGFR value',
         uacr: 'Enter a valid UACR value',
       },
-      buttonNext: 'Next: Cardiovascular History',
+      buttonNext: 'Next: Medical History',
     },
     hypertensionDiabetes: {
       title: 'Hypertension & Diabetes',
@@ -627,44 +637,54 @@ export const translations = {
       title: 'Lipid Profile Details',
       lead: 'Enter lipid medication usage and the latest lab values to assess cholesterol-related risks.',
     },
-    cardioHistoryStep: {
-      title: 'Cardiovascular History',
-      lead: 'Tell us about calcium scores, imaging findings, and relevant ASCVD history so the backend can determine risk tiers.',
-      sections: {
-        screening: 'Calcium Screening',
-        diagnosis: 'Imaging & Clinical Diagnosis',
-        vascular: 'Clinical History (Multi-select)',
-        cadAdvanced: 'Coronary Artery Details',
-      },
-      descriptions: {
-        diagnosis: 'Confirm whether imaging has revealed significant plaque and whether ASCVD has been diagnosed.',
-        vascular: 'Select all diagnosed arterial conditions. Additional coronary details will appear if CAD is selected.',
-        cadAdvanced: 'Check every statement that applies to your coronary artery disease history.',
-      },
+    medicalHistoryStep: {
+      title: 'Medical History',
+      lead: 'Review clinical diagnoses and imaging evidence so we can apply the latest risk rules.',
       questions: {
-        cac: 'Is your most recent coronary artery calcium (CAC) score ≥ 400?',
-        plaque: 'Have imaging studies shown significant plaque burden (≥50%)?',
-        ascvd: 'Have you been clinically diagnosed with atherosclerotic cardiovascular disease (ASCVD)?',
-      },
-      options: {
-        yes: 'Yes',
-        no: 'No',
-        unknown: 'Not sure',
-      },
-      vascularDiseases: {
-        cad: 'Coronary artery disease (CAD)',
-        pad: 'Peripheral arterial disease (PAD)',
-        carotid: 'Carotid artery stenosis',
-      },
-      cadAdvanced: {
-        miWithin1Year: 'Experienced myocardial infarction within the past year',
-        miHistoryCountTwoOrMore: 'History of myocardial infarction ≥ 2 events',
-        hasMultiVesselObstruction: 'Confirmed multi-vessel coronary obstruction',
+        ascvd: {
+          prompt: 'Have you been clinically diagnosed with atherosclerotic cardiovascular disease? Select all that apply:',
+          options: {
+            acuteCoronarySyndrome: '1)  Acute coronary syndrome history',
+            revascularization: '2)  Coronary artery revascularization (PCI or coronary artery bypass surgery)',
+            ischemicStroke: '3)  Ischemic stroke/TIA with documented atherosclerotic disease',
+            peripheralArteryDisease: '4)  Peripheral arterial disease (revascularization, intermittent claudication, or amputation)',
+            none: '5)  None of the above',
+          },
+        },
+        imaging: {
+          prompt: 'Have imaging studies confirmed ≥50% luminal stenosis? Select all that apply:',
+          options: {
+            coronaryAngiography: '1)  Coronary angiography',
+            coronaryCt: '2)  Coronary or peripheral CT angiography',
+            vascularUltrasound: '3)  Carotid or peripheral vascular ultrasound',
+            none: '4)  None of the above',
+          },
+        },
+        cad: {
+          prompt: 'Have you been diagnosed with coronary artery disease together with any of the following conditions? Select all that apply:',
+          options: {
+            miWithin1Year: '1)  Myocardial infarction within the past year',
+            miHistoryTwoOrMore: '2)  ≥2 prior myocardial infarctions',
+            multiVesselObstruction: '3)  Multi-vessel coronary obstruction',
+            acsWithDiabetes: '4)  Acute coronary syndrome with diabetes',
+            padOrCarotid: '5)  Peripheral arterial disease or carotid stenosis',
+            none: '6)  None of the above',
+          },
+        },
+        pad: {
+          prompt: 'If you have peripheral arterial disease, which of the following conditions are present? Select all that apply:',
+          options: {
+            cad: '1)  Coronary artery disease',
+            carotidStenosis: '2)  Carotid stenosis',
+            none: '3)  None of the above',
+          },
+        },
       },
       errors: {
-        cacScore: 'Choose Yes, No, or Not sure',
-        hasSignificantPlaque: 'Confirm whether significant plaque is present',
-        hasAscvdDiagnosis: 'Confirm whether ASCVD has been diagnosed',
+        ascvdDiagnoses: 'Select at least one item or choose “None of the above”.',
+        imagingFindings: 'Select at least one item or choose “None of the above”.',
+        cadComplications: 'Select at least one item or choose “None of the above”.',
+        padComplications: 'Select at least one item or choose “None of the above”.',
       },
       buttonNext: 'Next: Risk Report',
     },

@@ -17,6 +17,7 @@ const makeInput = (overrides = {}) => ({
   has_ascvd_history: false,
   has_significant_plaque: false,
   has_cad: false,
+  has_acute_coronary_syndrome: false,
   mi_within_1_year: false,
   mi_history_count: 0,
   has_multivessel_obstruction: false,
@@ -48,6 +49,19 @@ describe('evaluateRiskAssessment', () => {
 
     expect(result.levelCode).toBe('extremely_high')
     expect(extractCodes(result.matchedRules)).toEqual(['pad_with_carotid'])
+  })
+
+  it('回傳極高風險當 CAD 伴隨急性冠心症且合併糖尿病', () => {
+    const result = evaluateRiskAssessment(
+      makeInput({
+        has_cad: true,
+        has_diabetes: true,
+        has_acute_coronary_syndrome: true,
+      }),
+    )
+
+    expect(result.levelCode).toBe('extremely_high')
+    expect(extractCodes(result.matchedRules)).toEqual(['cad_with_diabetes'])
   })
 
   it('回傳高風險當符合 CKD 條件', () => {

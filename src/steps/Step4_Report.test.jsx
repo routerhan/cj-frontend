@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useEffect } from 'react'
 import { FormProvider, useFormContext } from '../context/FormContext.jsx'
+import { LanguageProvider } from '../context/LanguageContext.jsx'
 import { Step4_Report } from './Step4_Report.jsx'
 import { requestRiskAssessment } from '../utils/riskApi.js'
 
@@ -34,7 +35,12 @@ vi.mock('../utils/riskApi.js', () => ({
   }),
 }))
 
-const renderInProvider = (ui) => render(<FormProvider>{ui}</FormProvider>)
+const renderInProvider = (ui) =>
+  render(
+    <LanguageProvider>
+      <FormProvider>{ui}</FormProvider>
+    </LanguageProvider>,
+  )
 
 const StepIndicator = () => {
   const { currentStep } = useFormContext()
@@ -69,12 +75,32 @@ const Harness = () => {
     updateFormField(['kidney', 'egfr'], '92')
     updateFormField(['kidney', 'uacr'], '18')
 
-    updateFormField(['history', 'cacScoreCategory'], 'unknown')
-    updateFormField(['history', 'hasSignificantPlaque'], 'no')
-    updateFormField(['history', 'hasAscvdDiagnosis'], 'no')
-    updateFormField(['history', 'vascularDiseases', 'cad'], false)
-    updateFormField(['history', 'vascularDiseases', 'pad'], false)
-    updateFormField(['history', 'vascularDiseases', 'carotidStenosis'], false)
+    updateFormField(['history', 'ascvdDiagnoses'], {
+      acuteCoronarySyndrome: false,
+      revascularization: false,
+      ischemicStroke: false,
+      peripheralArteryDisease: false,
+      none: true,
+    })
+    updateFormField(['history', 'imagingFindings'], {
+      coronaryAngiography: false,
+      coronaryCt: false,
+      vascularUltrasound: false,
+      none: true,
+    })
+    updateFormField(['history', 'cadComplications'], {
+      miWithin1Year: false,
+      miHistoryTwoOrMore: false,
+      multiVesselObstruction: false,
+      acsWithDiabetes: false,
+      padOrCarotid: false,
+      none: true,
+    })
+    updateFormField(['history', 'padComplications'], {
+      cad: false,
+      carotidStenosis: false,
+      none: true,
+    })
 
     goToStep(6)
   }, [goToStep, updateFormField])

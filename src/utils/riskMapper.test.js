@@ -35,17 +35,31 @@ describe('buildRiskAssessmentPayload', () => {
       },
       history: {
         cacScoreCategory: 'no',
-        hasSignificantPlaque: 'yes',
-        hasAscvdDiagnosis: 'yes',
-        vascularDiseases: {
-          cad: true,
-          pad: true,
-          carotidStenosis: false,
+        ascvdDiagnoses: {
+          acuteCoronarySyndrome: true,
+          revascularization: true,
+          ischemicStroke: false,
+          peripheralArteryDisease: true,
+          none: false,
         },
-        cadDetails: {
+        imagingFindings: {
+          coronaryAngiography: true,
+          coronaryCt: false,
+          vascularUltrasound: false,
+          none: false,
+        },
+        cadComplications: {
           miWithin1Year: true,
-          miHistoryCountTwoOrMore: true,
-          hasMultiVesselObstruction: false,
+          miHistoryTwoOrMore: true,
+          multiVesselObstruction: false,
+          acsWithDiabetes: true,
+          padOrCarotid: false,
+          none: false,
+        },
+        padComplications: {
+          cad: true,
+          carotidStenosis: false,
+          none: false,
         },
       },
     }
@@ -66,6 +80,7 @@ describe('buildRiskAssessmentPayload', () => {
     expect(payload.egfr).toBe(55)
     expect(payload.uacr).toBe(35)
     expect(payload.has_cad).toBe(true)
+    expect(payload.has_acute_coronary_syndrome).toBe(true)
     expect(payload.has_pad).toBe(true)
     expect(payload.has_carotid_stenosis).toBe(false)
     expect(payload.mi_within_1_year).toBe(true)
@@ -74,7 +89,56 @@ describe('buildRiskAssessmentPayload', () => {
     expect(payload.cac_ge_400).toBe(false)
     expect(payload.has_significant_plaque).toBe(true)
     expect(payload.has_ascvd_history).toBe(true)
+    expect(payload.has_acute_coronary_syndrome_history).toBe(true)
+    expect(payload.has_revascularization_history).toBe(true)
+    expect(payload.has_ischemic_stroke_with_atherosclerosis).toBe(false)
+    expect(payload.has_peripheral_arterial_disease_history).toBe(true)
+    expect(payload.has_coronary_angiography_stenosis).toBe(true)
+    expect(payload.has_coronary_ct_stenosis).toBe(false)
+    expect(payload.has_vascular_ultrasound_stenosis).toBe(false)
 
     vi.useRealTimers()
+  })
+
+  it('選擇所有「以上皆無」時不標記 CAD 或 PAD', () => {
+    const formData = {
+      history: {
+        cacScoreCategory: 'unknown',
+        ascvdDiagnoses: {
+          acuteCoronarySyndrome: false,
+          revascularization: false,
+          ischemicStroke: false,
+          peripheralArteryDisease: false,
+          none: true,
+        },
+        imagingFindings: {
+          coronaryAngiography: false,
+          coronaryCt: false,
+          vascularUltrasound: false,
+          none: true,
+        },
+        cadComplications: {
+          miWithin1Year: false,
+          miHistoryTwoOrMore: false,
+          multiVesselObstruction: false,
+          acsWithDiabetes: false,
+          padOrCarotid: false,
+          none: true,
+        },
+        padComplications: {
+          cad: false,
+          carotidStenosis: false,
+          none: true,
+        },
+      },
+    }
+
+    const payload = buildRiskAssessmentPayload(formData)
+
+    expect(payload.has_cad).toBe(false)
+    expect(payload.has_pad).toBe(false)
+    expect(payload.has_carotid_stenosis).toBe(false)
+    expect(payload.has_ascvd_history).toBe(false)
+    expect(payload.has_significant_plaque).toBe(false)
   })
 })

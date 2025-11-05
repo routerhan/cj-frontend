@@ -25,6 +25,7 @@ def _build_request(**overrides) -> RiskAssessmentRequest:
         "has_ascvd_history": False,
         "has_significant_plaque": False,
         "has_cad": False,
+        "has_acute_coronary_syndrome": False,
         "mi_within_1_year": False,
         "mi_history_count": 0,
         "has_multivessel_obstruction": False,
@@ -104,6 +105,42 @@ def test_extremely_high_for_pad_with_carotid(risk_service: RiskAssessmentService
     assert result.levelCode is RiskLevelCodeEnum.EXTREMELY_HIGH
     assert [rule.code for rule in result.matchedRules] == ["pad_with_carotid"]
 
+
+def test_extremely_high_requires_acs_with_diabetes(risk_service: RiskAssessmentService):
+    payload = _build_request(
+        has_cad=True,
+        has_diabetes=True,
+        has_acute_coronary_syndrome=True,
+    )
+
+    result = risk_service.evaluate(payload)
+
+    assert result.levelCode is RiskLevelCodeEnum.EXTREMELY_HIGH
+    assert [rule.code for rule in result.matchedRules] == ["cad_with_diabetes"]
+
+
+def test_very_high_when_revascularization_history(risk_service: RiskAssessmentService):
+    payload = _build_request(
+        has_revascularization_history=True,
+        has_ascvd_history=False,
+    )
+
+    result = risk_service.evaluate(payload)
+
+    assert result.levelCode is RiskLevelCodeEnum.VERY_HIGH
+    assert [rule.code for rule in result.matchedRules] == ["ascvd_history"]
+
+
+def test_very_high_when_ultrasound_detects_plaque(risk_service: RiskAssessmentService):
+    payload = _build_request(
+        has_significant_plaque=False,
+        has_vascular_ultrasound_stenosis=True,
+    )
+
+    result = risk_service.evaluate(payload)
+
+    assert result.levelCode is RiskLevelCodeEnum.VERY_HIGH
+    assert [rule.code for rule in result.matchedRules] == ["significant_plaque"]
 
 def test_high_risk_for_ckd_rule(risk_service: RiskAssessmentService):
     payload = _build_request(

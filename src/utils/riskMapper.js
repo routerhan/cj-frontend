@@ -6,16 +6,16 @@ const toNumber = (value) => {
   return Number.isFinite(number) ? number : null
 }
 
-const isYes = (value) => value === 'yes'
-
 export const buildRiskAssessmentPayload = (formData = {}) => {
   const basic = formData.basic ?? {}
   const bpAndLipids = formData.bpAndLipids ?? {}
   const diabetes = formData.diabetes ?? {}
   const kidney = formData.kidney ?? {}
   const history = formData.history ?? {}
-  const vascularDiseases = history.vascularDiseases ?? {}
-  const cadDetails = history.cadDetails ?? {}
+  const ascvdDiagnoses = history.ascvdDiagnoses ?? {}
+  const imagingFindings = history.imagingFindings ?? {}
+  const cadComplications = history.cadComplications ?? {}
+  const padComplications = history.padComplications ?? {}
 
   const gender = basic.sex ?? null
   const isMale = gender === 'male'
@@ -70,6 +70,48 @@ export const buildRiskAssessmentPayload = (formData = {}) => {
 
   const metabolicSyndromeFactors = Object.values(metabolicComponents).filter(Boolean).length
 
+  const acsHistory = Boolean(ascvdDiagnoses.acuteCoronarySyndrome)
+  const revascularizationHistory = Boolean(ascvdDiagnoses.revascularization)
+  const strokeWithAtherosclerosis = Boolean(ascvdDiagnoses.ischemicStroke)
+  const peripheralArteryDiseaseHistory = Boolean(ascvdDiagnoses.peripheralArteryDisease)
+
+  const hasAscvdHistory =
+    acsHistory ||
+    revascularizationHistory ||
+    strokeWithAtherosclerosis ||
+    peripheralArteryDiseaseHistory
+
+  const angiographyStenosis = Boolean(imagingFindings.coronaryAngiography)
+  const ctStenosis = Boolean(imagingFindings.coronaryCt)
+  const ultrasoundStenosis = Boolean(imagingFindings.vascularUltrasound)
+
+  const hasSignificantPlaque =
+    angiographyStenosis || ctStenosis || ultrasoundStenosis
+
+  const cadMiWithin1Year = Boolean(cadComplications.miWithin1Year)
+  const cadMiHistoryTwoOrMore = Boolean(cadComplications.miHistoryTwoOrMore)
+  const cadMultiVesselObstruction = Boolean(cadComplications.multiVesselObstruction)
+  const cadAcsWithDiabetes = Boolean(cadComplications.acsWithDiabetes)
+  const cadPadOrCarotid = Boolean(cadComplications.padOrCarotid)
+  const padWithCad = Boolean(padComplications.cad)
+  const padWithCarotid = Boolean(padComplications.carotidStenosis)
+
+  const cadPositiveSelections =
+    cadMiWithin1Year ||
+    cadMiHistoryTwoOrMore ||
+    cadMultiVesselObstruction ||
+    cadAcsWithDiabetes ||
+    cadPadOrCarotid
+
+  const padPositiveSelections = padWithCad || padWithCarotid
+
+  const hasPad =
+    padPositiveSelections || cadPadOrCarotid || peripheralArteryDiseaseHistory
+
+  const hasCarotidStenosis = padWithCarotid || cadPadOrCarotid
+
+  const hasCad = cadPositiveSelections || padWithCad
+
   return {
     age,
     gender,
@@ -83,14 +125,22 @@ export const buildRiskAssessmentPayload = (formData = {}) => {
     has_ckd: hasCkd,
     ldl_c: ldl,
     cac_ge_400: cacGe400,
-    has_ascvd_history: history.hasAscvdDiagnosis === 'yes',
-    has_significant_plaque: history.hasSignificantPlaque === 'yes',
-    has_cad: Boolean(vascularDiseases.cad),
-    mi_within_1_year: Boolean(cadDetails.miWithin1Year),
-    mi_history_count: cadDetails.miHistoryCountTwoOrMore ? 2 : 0,
-    has_multivessel_obstruction: Boolean(cadDetails.hasMultiVesselObstruction),
-    has_pad: Boolean(vascularDiseases.pad),
-    has_carotid_stenosis: Boolean(vascularDiseases.carotidStenosis),
+    has_ascvd_history: hasAscvdHistory,
+    has_significant_plaque: hasSignificantPlaque,
+    has_cad: hasCad,
+    has_acute_coronary_syndrome: cadAcsWithDiabetes,
+    has_acute_coronary_syndrome_history: acsHistory,
+    has_revascularization_history: revascularizationHistory,
+    has_ischemic_stroke_with_atherosclerosis: strokeWithAtherosclerosis,
+    has_peripheral_arterial_disease_history: peripheralArteryDiseaseHistory,
+    has_coronary_angiography_stenosis: angiographyStenosis,
+    has_coronary_ct_stenosis: ctStenosis,
+    has_vascular_ultrasound_stenosis: ultrasoundStenosis,
+    mi_within_1_year: cadMiWithin1Year,
+    mi_history_count: cadMiHistoryTwoOrMore ? 2 : 0,
+    has_multivessel_obstruction: cadMultiVesselObstruction,
+    has_pad: hasPad,
+    has_carotid_stenosis: hasCarotidStenosis,
     waist_cm: waist,
     systolic,
     diastolic,
