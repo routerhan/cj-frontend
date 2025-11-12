@@ -4,12 +4,33 @@ from __future__ import annotations
 
 import os
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./app.db")
+BACKEND_DIR = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = BACKEND_DIR.parent
+DEFAULT_SQLITE_PATH = BACKEND_DIR / "app.db"
+
+
+def _normalize_sqlite_url(url: str) -> str:
+    """Convert relative SQLite URLs to absolute paths under the project root."""
+
+    prefix = "sqlite:///"
+    if not url.startswith(prefix):
+        return url
+
+    path_part = url[len(prefix) :]
+    if path_part.startswith("./"):
+        normalized_path = (PROJECT_ROOT / path_part[2:]).resolve()
+        return f"{prefix}{normalized_path}"
+
+    return url
+
+
+DATABASE_URL = _normalize_sqlite_url(os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_SQLITE_PATH}"))
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 

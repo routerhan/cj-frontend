@@ -4,77 +4,39 @@
 
 ---
 
-## 快速啟動指令
-
+## Demo (資料庫和使用者已建置)
 ```bash
-# 安裝前端依賴（首次，在專案根目錄）
-npm install
+# 建置前端 並且 啟動後端聆聽 （/根目錄）
+source ./backend/.env && npm run build && uvicorn backend.app.main:app --port 8000 --reload
 
-# 啟動前端 (http://127.0.0.1:5173)
-npm run dev
-
-# 安裝後端依賴（於 backend/ 目錄內）
-pip install -r requirements.txt
-
-# 建立資料表 (backend/)
-export DATABASE_URL=sqlite:///./dev.db
-alembic upgrade head
-
-# 回到專案根目錄啟動後端 (http://127.0.0.1:8000)
-cd ..
-uvicorn backend.app.main:app --reload
 ```
 
-> Windows PowerShell 可使用 `setx DATABASE_URL "sqlite:///./dev.db"` 後重新開啟終端。
-
-前後端同時啟動後，前端會透過 Vite proxy 轉發 `/api` 請求到後端。
-
----
-
-## Demo 範例流程（開發者操作）
+## 快速啟動指令 (首次)
 
 ```bash
-# 1. 安裝依賴並啟用虛擬環境
-cd /path/to/cj-frontend
-npm install
+# 初始化資料庫 於後端 (backend/)
 cd backend
-python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements-dev.txt
+pip install -r requirements.txt
 
-# 2. 建立資料表並啟動後端
-export DATABASE_URL=sqlite:///./dev.db
-alembic upgrade head
+# 建立資料表 (root/)
 cd ..
-uvicorn backend.app.main:app --reload
+source backend/.env && alembic -c backend/alembic.ini upgrade head
 
-# 3. 新開一個終端啟動前端
-cd /path/to/cj-frontend
-npm run dev
+# 建立儀表板使用者 (backend/)
+cd backend
+python -m scripts.create_admin admin@example.com --password 'pass4admin'
 
-# 4. 走完整個表單流程後，可在 backend/ 終端驗證資料
-sqlite3 backend/dev.db "SELECT id, level_code, risk_factor_count FROM assessments ORDER BY id DESC;"
-sqlite3 backend/dev.db "SELECT code, present FROM assessment_factors WHERE assessment_id = <上一步的 id>;"
+# 建置前端 並且 啟動後端聆聽 （回到根目錄）
+cd ..
+source ./backend/.env && npm run build && uvicorn backend.app.main:app --port 8000 --reload
+
+```
+---
 
 # 5. 打開醫師儀表板檢視資料（新分頁輸入）
 # http://127.0.0.1:8000/api/admin/dashboard
 
 # 6. 選擇性：執行測試
-cd backend && pytest
-npm run test -- Step4_LipidProfile
-```
-
-以上流程示範了從安裝依賴、啟動服務、操作表單到驗證資料庫與執行測試的全套開發 Demo。
-
----
-
-## 依賴管理
-
-- **前端**：使用 `package.json`／`package-lock.json` 管理，執行 `npm install` 會安裝所有依賴。
-- **後端**：
-  - `backend/requirements.txt`：執行環境必備套件（FastAPI、SQLAlchemy、Alembic、Pydantic、Uvicorn、psycopg）。
-  - `backend/requirements-dev.txt`：延伸自 `requirements.txt`，額外加入 `pytest`、`httpx` 等測試套件；開發者可用 `pip install -r requirements-dev.txt` 一次安裝。
-
-> 若日後新增外部套件，請同步更新對應的 requirements 檔案與 README。
 
 ---
 
@@ -82,7 +44,7 @@ npm run test -- Step4_LipidProfile
 
 | 變數 | 預設值 | 說明 | 部署時注意 |
 |------|--------|------|-------------|
-| `DATABASE_URL` | `sqlite:///./dev.db` | SQLAlchemy 連線字串 | 改成正式資料庫，如 `postgresql+psycopg://user:password@host/db` |
+| `DATABASE_URL` | `sqlite:///./backend/app.db` | SQLAlchemy 連線字串 | 改成正式資料庫，如 `postgresql+psycopg://user:password@host/db` |
 | `ADMIN_JWT_SECRET` | 無預設（必填） | 管理者登入使用的 JWT 金鑰 | 各環境請使用不同的高熵字串並妥善保護 |
 | `ADMIN_TOKEN_TTL_MINUTES` | `60` | 管理者登入 token 有效時間（分鐘） | 可依安全需求調整；更換後舊 token 會失效 |
 
@@ -137,15 +99,9 @@ podman pod rm cj-stack
 
 ### 使用 Cloud Build
 
-`cloud/cloudbuild.yaml` 已設定單一路徑服務建置：
+`cloud/cloudbuild.yaml` 已設定單一路徑服務建置
 
-```bash
-gcloud builds submit \
-  --config cloud/cloudbuild.yaml \
-  --substitutions=_SERVICE_IMAGE=asia-east1-docker.pkg.dev/<PROJECT>/<REPO>/cj-app:$(date +%Y%m%d-%H%M%S)
-```
-
-建置完成後即可使用該映像部署 Cloud Run，並設定必要環境變數（`DATABASE_URL`、`ADMIN_JWT_SECRET` 等）與 Cloud SQL 連線。
+請參考 `cloud/command.md` 步驟說明。
 
 ---
 
@@ -210,7 +166,7 @@ Alembic 版本腳本位於 `backend/alembic/versions/`，新增 schema 變更時
 
 ## 資料庫驗證
 
-預設使用 SQLite，資料檔案位置為 `backend/dev.db`。以下為常用查詢：
+預設使用 SQLite，資料檔案位置為 `backend/app.db`。以下為常用查詢：
 
 ```bash
 cd backend
@@ -274,5 +230,3 @@ sqlite3 app.db "SELECT code, present FROM assessment_factors WHERE assessment_id
    - 若觀察到相同時間戳記的多筆資料，檢查前端是否在新版 `Step4_Report` 基礎上修改；`hasRequestedRef` 必須保留。
 
 ---
-
-保持 README 與程式碼同步，新增功能或調整流程後，請更新上述指令與索引。***
