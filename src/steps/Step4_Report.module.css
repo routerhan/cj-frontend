@@ -159,6 +159,48 @@
   gap: 0.6rem;
 }
 
+.highlightCard {
+  margin-top: 1rem;
+  padding: 1.75rem 2rem;
+  border-radius: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(252, 211, 77, 0.28),
+    rgba(249, 115, 22, 0.3)
+  );
+  border: 1px solid rgba(250, 204, 21, 0.65);
+  position: relative;
+  box-shadow: 0 20px 48px rgba(217, 119, 6, 0.18);
+}
+
+.highlightCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.6), rgba(253, 224, 71, 0.6));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.highlightTitle {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 248, 231, 0.9);
+}
+
+.highlightLead {
+  margin: 0.75rem 0 0;
+  font-size: 1.15rem;
+  line-height: 1.75;
+  color: #fffbee;
+  font-weight: 700;
+}
+
 .sectionHeading {
   margin: 0;
   font-size: 1.05rem;
@@ -318,6 +360,10 @@
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   box-shadow: 0 12px 28px var(--color-shadow);
+}
+
+.overviewCardWide {
+  grid-column: span 2;
 }
 
 .overviewTitle {

@@ -127,7 +127,7 @@ describe('Step4_Report', () => {
 
     expect(screen.getByText('您的心血管風險等級為：【中】')).toBeInTheDocument()
     expect(
-      screen.getByText('根據指引，您的 LDL-C (低密度脂蛋白) 建議目標為：【<115 mg/dL】'),
+      screen.getByText('根據指引，您的 LDL-C (低密度脂蛋白膽固醇) 建議目標為：【<115 mg/dL】'),
     ).toBeInTheDocument()
     expect(screen.getByText('您符合 3 項心血管危險因子：')).toBeInTheDocument()
     expect(screen.getByText('高血壓')).toBeInTheDocument()

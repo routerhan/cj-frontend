@@ -115,8 +115,8 @@ export const translations = {
       fields: {
         usesHypertensionMedication: '目前是否使用降血壓藥物？',
         bloodPressure: '請輸入您最近的血壓值',
-        ldlMgDl: '最近一次 低密度脂蛋白 (LDL-C)',
-        hdlMgDl: '最近一次 高密度脂蛋白 (HDL-C)',
+        ldlMgDl: '最近一次 低密度脂蛋白膽固醇 (LDL-C)',
+        hdlMgDl: '最近一次 高密度脂蛋白膽固醇 (HDL-C)',
         triglycerideMgDl: '最近一次三酸甘油酯 (TG)',
         usesTriglycerideMedication: '您是否正在 使用治療高三酸甘油酯 (TG) 的藥物？',
       },
@@ -328,8 +328,8 @@ export const translations = {
       dyslipidemiaTitle: '是否有高脂血症？',
       meds: '目前有無服用降血脂藥',
       fields: {
-        ldl: '最近一次低密度脂蛋白 (LDL)',
-        hdl: '最近一次高密度脂蛋白 (HDL)',
+        ldl: '最近一次低密度脂蛋白膽固醇 (LDL)',
+        hdl: '最近一次高密度脂蛋白膽固醇 (HDL)',
         tg: '最近一次空腹三酸甘油酯 (TG)',
       },
       historyTitle: '是否曾發生心血管疾病？',

@@ -5,15 +5,15 @@ This guide documents the commands and environment variables used to build, deplo
 ## Environment Setup
 
 ```bash
-export PROJECT_ID="cj-demo-123"          # GCP project identifier
-export REGION="asia-east1"               # Deployment region for Cloud Build/Run/SQL
-export ARTIFACT_REPO="cj-repo"           # Artifact Registry repository name
-export CLOUD_SQL_INSTANCE="cj-sql"       # Cloud SQL instance (without project/region prefix)
-export DB_NAME="cj_app"                  # Cloud SQL database name
-export DB_USER="cj_user"                 # Cloud SQL user name
-export DB_PASSWORD="TempPass#2025"       # Cloud SQL user password (consider Secret Manager in production)
-export ADMIN_JWT_SECRET="4cccb9361fbce358e27cc788953c8fe98ace13adf4b4ef79d03ddcdd745be77d"  # JWT signing secret
-export _SERVICE_IMAGE="asia-east1-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/cj-service:latest"  # Fully qualified image tag
+export PROJECT_ID="cj-demo-123"
+export REGION="asia-east1"    
+export ARTIFACT_REPO="cj-repo"
+export CLOUD_SQL_INSTANCE="cj-sql" 
+export DB_NAME="cj_app"
+export DB_USER="cj_user"
+export DB_PASSWORD="TempPass#2025"
+export ADMIN_JWT_SECRET="4cccb9361fbce358e27cc788953c8fe98ace13adf4b4ef79d03ddcdd745be77d"
+export _SERVICE_IMAGE="asia-east1-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/cj-service:latest"
 ```
 
 > 建議將 `DB_PASSWORD`、`ADMIN_JWT_SECRET` 放入 Secret Manager，命令示例使用環境變數以方便快速測試。

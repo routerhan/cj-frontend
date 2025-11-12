@@ -46,12 +46,12 @@ describe('Step4_LipidProfile', () => {
     fireEvent.click(within(lipidMedicationGroup).getByText('無'))
 
     const ldlField = within(
-      screen.getByText('最近一次低密度脂蛋白 (LDL)').closest('label'),
+      screen.getByText('最近一次低密度脂蛋白膽固醇 (LDL)').closest('label'),
     ).getByPlaceholderText('mg/dL')
     fireEvent.change(ldlField, { target: { value: '130' } })
 
     const hdlField = within(
-      screen.getByText('最近一次高密度脂蛋白 (HDL)').closest('label'),
+      screen.getByText('最近一次高密度脂蛋白膽固醇 (HDL)').closest('label'),
     ).getByPlaceholderText('mg/dL')
     fireEvent.change(hdlField, { target: { value: '55' } })
 
@@ -77,7 +77,7 @@ describe('Step4_LipidProfile', () => {
     fireEvent.click(within(lipidMedicationGroup).getByText('無'))
 
     const ldlField = within(
-      screen.getByText('最近一次低密度脂蛋白 (LDL)').closest('label'),
+      screen.getByText('最近一次低密度脂蛋白膽固醇 (LDL)').closest('label'),
     ).getByPlaceholderText('mg/dL')
     fireEvent.change(ldlField, { target: { value: '450' } })
 

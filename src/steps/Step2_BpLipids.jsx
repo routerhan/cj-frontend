@@ -220,7 +220,7 @@ export const Step2_BpLipids = () => {
                 {copy.prompts?.lipids ?? '請輸入您最近的空腹血脂數據。'}
               </p>
               <label className={styles.labelRow} htmlFor="ldlMgDl">
-                {copy.fields?.ldlMgDl ?? '最近一次 低密度脂蛋白 (LDL-C)'}
+                {copy.fields?.ldlMgDl ?? '最近一次 低密度脂蛋白膽固醇 (LDL-C)'}
               </label>
               <div className={styles.inlineInputs}>
                 <input

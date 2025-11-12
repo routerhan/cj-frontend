@@ -335,7 +335,7 @@ export const Step4_Report = () => {
     : levelDescription
 
   const diagnosisMessage = showLdlTarget
-    ? `根據指引，您的 LDL-C (低密度脂蛋白) 建議目標為：【${ldlTarget}】`
+    ? `根據指引，您的 LDL-C (低密度脂蛋白膽固醇) 建議目標為：【${ldlTarget}】`
     : '目前未偵測到心血管風險條件，請持續維持良好作息並定期追蹤基本健康指標。'
 
   const reportStepIndex = steps.findIndex((step) => step.key === 'report')
@@ -378,9 +378,9 @@ export const Step4_Report = () => {
                 </div>
                 <p className={styles.levelDescription}>{levelDescription}</p>
 
-                <div className={styles.summarySection}>
-                  <h4 className={styles.sectionHeading}>診斷建議</h4>
-                  <p className={styles.sectionText}>{diagnosisMessage}</p>
+                <div className={styles.highlightCard}>
+                  <h4 className={styles.highlightTitle}>診斷建議</h4>
+                  <p className={styles.highlightLead}>{diagnosisMessage}</p>
                 </div>
 
                 <div className={styles.summarySection}>
@@ -466,7 +466,14 @@ export const Step4_Report = () => {
                 <h3>數據總覽</h3>
                 <div className={styles.overviewGrid}>
                   {dataOverviewSections.map((section) => (
-                    <article key={section.key} className={styles.overviewCard}>
+                    <article
+                      key={section.key}
+                      className={
+                        section.key === 'history'
+                          ? `${styles.overviewCard} ${styles.overviewCardWide}`
+                          : styles.overviewCard
+                      }
+                    >
                       <h4 className={styles.overviewTitle}>{section.title}</h4>
                       <dl className={styles.dataList}>
                         {section.items.map((item) => (

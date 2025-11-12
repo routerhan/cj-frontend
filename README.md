@@ -214,14 +214,14 @@ Alembic 版本腳本位於 `backend/alembic/versions/`，新增 schema 變更時
 
 ```bash
 cd backend
-sqlite3 dev.db ".tables"
+sqlite3 app.db ".tables"
 # alembic_version  assessment_factors  assessments  users
 
-sqlite3 dev.db "SELECT id, level_code, risk_factor_count, created_at FROM assessments ORDER BY id DESC LIMIT 3;"
+sqlite3 app.db "SELECT id, level_code, risk_factor_count, created_at FROM assessments ORDER BY id DESC LIMIT 3;"
 # 範例輸出
 # 7|high|3|2025-10-26 15:10:42.123456
 
-sqlite3 dev.db "SELECT code, present FROM assessment_factors WHERE assessment_id = 7;"
+sqlite3 app.db "SELECT code, present FROM assessment_factors WHERE assessment_id = 7;"
 # hypertension|1
 # metabolic_syndrome|1
 # ...
