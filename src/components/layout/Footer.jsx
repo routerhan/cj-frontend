@@ -1,6 +1,7 @@
 import styles from './Footer.module.css'
 import nckuhs from '../../assets/nckuhs.svg'
 import laLogo from '../../assets/LA.JPG'
+import wflogo from '../../assets/logo.png'
 import companyLogo from '../../assets/company-logo.png'
 
 const FOOTER_ITEMS = [
@@ -23,10 +24,10 @@ const FOOTER_ITEMS = [
   {
     label: '經費來源：',
     logo: {
-      src: laLogo,
-      alt: '中華民國血脂及動脈硬化學會',
+      src: wflogo,
+      alt: '健康台灣深耕計畫 中華民國血脂及動脈硬化學會',
     },
-    name: '中華民國血脂及動脈硬化學會',
+    name: '健康台灣深耕計畫 中華民國血脂及動脈硬化學會',
   },
   // {
   //   label: 'Powered by:',
