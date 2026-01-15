@@ -1,6 +1,6 @@
 alembic
 fastapi
 pydantic
-psycopg[binary]
+psycopg2-binary
 SQLAlchemy
 uvicorn[standard]
