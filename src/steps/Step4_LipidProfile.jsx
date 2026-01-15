@@ -7,14 +7,14 @@ import { useLanguage } from '../context/LanguageContext.jsx'
 import styles from './Step3_HealthStatus.module.css'
 
 const STATUS_OPTIONS = [
-  { value: 'yes', label: '有' },
-  { value: 'no', label: '無' },
-  { value: 'unknown', label: '不知道' },
+  { value: 'yes', labelKey: 'yes' },
+  { value: 'no', labelKey: 'no' },
+  { value: 'unknown', labelKey: 'unknown' },
 ]
 
 const YES_NO_OPTIONS = [
-  { value: 'yes', label: '有' },
-  { value: 'no', label: '無' },
+  { value: 'yes', labelKey: 'yes' },
+  { value: 'no', labelKey: 'no' },
 ]
 
 const LIPID_LIMITS = {
@@ -36,6 +36,7 @@ export const Step4_LipidProfile = () => {
   } = useFormContext()
 
   const { dictionary } = useLanguage()
+  const general = dictionary.general
   const copy = dictionary.riskFactors
   const stepCopy = dictionary.lipidsStep ?? {}
 
@@ -175,23 +176,22 @@ export const Step4_LipidProfile = () => {
       <header className={styles.header}>
         <div>
           <p className={styles.kicker}>{stepLabel}</p>
-          <h2>{stepCopy.title ?? '血脂檢驗資訊'}</h2>
+          <h2>{stepCopy.title ?? 'Lipid Profile'}</h2>
         </div>
         <p className={styles.lead}>
-          {stepCopy.lead ??
-            '請填寫血脂異常的用藥與檢驗數值，協助我們評估膽固醇相關的心血管危險。'}
+          {stepCopy.lead ?? 'Provide lipid medication and lab values to assess cholesterol-related cardiovascular risk.'}
         </p>
       </header>
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         <ProgressiveCard
           title={copy.dyslipidemiaTitle}
-          summary="掌握降血脂藥物使用與最新血脂檢驗值"
+          summary={stepCopy.cardSummary ?? 'Lipid medication and recent lab values'}
           isExpanded
         >
           <div className={styles.section}>
             <label className={styles.fieldLabel}>{copy.dyslipidemiaTitle}</label>
-            <div role="radiogroup" aria-label="高脂血症狀態" className={styles.optionRow}>
+            <div role="radiogroup" aria-label={copy.dyslipidemiaTitle ?? 'Lipid disorder status'} className={styles.optionRow}>
               {STATUS_OPTIONS.map((option) => (
                 <label key={option.value} className={styles.radioOption}>
                   <input
@@ -201,7 +201,7 @@ export const Step4_LipidProfile = () => {
                     checked={riskFactors.dyslipidemia.status === option.value}
                     onChange={handleLipidsStatusChange}
                   />
-                  <span>{option.label}</span>
+                  <span>{general[option.labelKey] ?? option.value}</span>
                 </label>
               ))}
             </div>
@@ -217,7 +217,7 @@ export const Step4_LipidProfile = () => {
             >
               <div className={styles.inlineGroup}>
                 <span className={styles.inlineLabel}>{copy.meds}</span>
-                <div role="radiogroup" aria-label="降血脂藥" className={styles.optionRow}>
+                <div role="radiogroup" aria-label={copy.meds ?? 'Lipid medication'} className={styles.optionRow}>
                   {YES_NO_OPTIONS.map((option) => (
                     <label key={option.value} className={styles.radioOption}>
                       <input
@@ -228,7 +228,7 @@ export const Step4_LipidProfile = () => {
                         onChange={handleLipidsField('medication')}
                         disabled={riskFactors.dyslipidemia.status !== 'yes'}
                       />
-                      <span>{option.label}</span>
+                      <span>{general[option.labelKey] ?? option.value}</span>
                     </label>
                   ))}
                 </div>
@@ -296,7 +296,7 @@ export const Step4_LipidProfile = () => {
 
         <div className={styles.actions}>
           <Button type="submit" disabled={!isReady}>
-            {nextStepLabel ? `下一步：${nextStepLabel}` : '下一步'}
+            {copy.buttonNext ?? `Next: ${nextStepLabel}`}
           </Button>
         </div>
       </form>

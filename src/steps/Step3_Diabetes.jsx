@@ -147,8 +147,7 @@ export const Step3_Diabetes = () => {
         <section className={styles.fieldset}>
           <h3 className={styles.sectionTitle}>{copy.sections?.diagnosis ?? '糖尿病診斷'}</h3>
           <p className={styles.description}>
-            {copy.descriptions?.diagnosis ?? '選擇「是」時請補充用藥與最近的空腹血糖；選擇「否」可直接前往下一步。'}
-          </p>
+            {copy.descriptions?.diagnosis ?? 'Select "Yes" to provide medication and fasting glucose info; select "No" to proceed.'}           </p>
           <div
             className={styles.optionGroup}
             role="radiogroup"
@@ -229,7 +228,7 @@ export const Step3_Diabetes = () => {
 
         <div className={styles.actions}>
           <Button type="submit" variant="primary">
-            {copy.buttonNext ?? `下一步：${nextStepLabel}`}
+            {copy.buttonNext ?? `Next: ${nextStepLabel}`}
           </Button>
         </div>
       </form>

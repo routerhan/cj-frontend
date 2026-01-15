@@ -25,6 +25,7 @@ dist-ssr
 
 # Backend environment configuration
 backend/.env
+backend/.venv
 
 # Backend frontend build artifacts
 backend/app/frontend/*

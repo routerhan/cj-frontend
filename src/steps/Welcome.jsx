@@ -1,9 +1,12 @@
 import { Button } from '../components/ui/Button.jsx'
 import { useFormContext } from '../context/FormContext.jsx'
+import { useLanguage } from '../context/LanguageContext.jsx'
 import styles from './Welcome.module.css'
 
 export const Welcome = () => {
   const { goToNext, markCurrentStepCompleted } = useFormContext()
+  const { dictionary, toggleLanguage, language } = useLanguage()
+  const t = dictionary.welcome
 
   const handleStart = () => {
     markCurrentStepCompleted()
@@ -12,11 +15,17 @@ export const Welcome = () => {
 
   return (
     <section className={styles.container}>
-      <h2 className={styles.heading}>10 分鐘，預測您未來 10 年的心血管風險</h2>
-      <p className={styles.description}>
-        透過循序漸進的表單流程，我們將協助您了解個人化的健康風險狀態。
-      </p>
-      <Button onClick={handleStart}>立即開始評估</Button>
+      <button
+        type="button"
+        className={styles.langToggle}
+        onClick={toggleLanguage}
+        aria-label="Toggle language"
+      >
+        {language === 'zh' ? 'EN' : '繁中'}
+      </button>
+      <h2 className={styles.heading}>{t.heading}</h2>
+      <p className={styles.description}>{t.description}</p>
+      <Button onClick={handleStart}>{t.start}</Button>
     </section>
   )
 }

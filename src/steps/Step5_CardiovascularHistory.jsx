@@ -90,7 +90,7 @@ export const Step5_CardiovascularHistory = () => {
       const groupState = groupStates[group.groupKey] ?? {}
       if (!hasSelection(groupState)) {
         nextErrors[group.groupKey] =
-          getNested(copy, ['errors', group.groupKey]) ?? '請至少勾選一項或選擇「以上皆無」'
+          getNested(copy, ['errors', group.groupKey]) ?? 'Please select at least one option'
       }
     })
 
@@ -161,7 +161,7 @@ export const Step5_CardiovascularHistory = () => {
 
         <div className={styles.actions}>
           <Button type="submit" variant="primary">
-            {nextStepLabel ? `下一步：${nextStepLabel}` : copy.buttonNext ?? '下一步'}
+            {copy.buttonNext ?? `Next: ${nextStepLabel}`}
           </Button>
         </div>
       </form>

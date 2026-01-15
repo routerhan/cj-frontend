@@ -24,7 +24,7 @@ export const Sidebar = () => {
         <p className={styles.subtitle}>{navigation.subtitle}</p>
       </div>
 
-      <nav aria-label="填寫步驟">
+      <nav aria-label={navigation.stepsLabel}>
         <ol className={styles.stepList}>
           {steps.map((step, index) => {
             const status = stepStatus[step.key]
@@ -55,7 +55,7 @@ export const Sidebar = () => {
                   <span className={styles.stepNumber}>{index + 1}</span>
                   <span className={styles.stepLabel}>{dictionary.steps[step.key]}</span>
                   {status === StepStatus.COMPLETED ? (
-                    <span className={styles.statusBadge} aria-label="已完成">
+                    <span className={styles.statusBadge} aria-label={navigation.completed}>
                       ✓
                     </span>
                   ) : null}

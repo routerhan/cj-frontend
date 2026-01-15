@@ -1,7 +1,12 @@
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { translations } from '../i18n/translations.js'
 
 const LanguageContext = createContext(undefined)
+
+const LANG_MAP = {
+  zh: 'zh-TW',
+  en: 'en',
+}
 
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState('zh')
@@ -9,6 +14,11 @@ export const LanguageProvider = ({ children }) => {
   const toggleLanguage = () => {
     setLanguage((prev) => (prev === 'zh' ? 'en' : 'zh'))
   }
+
+  // Sync html lang attribute for native controls (date picker, etc.)
+  useEffect(() => {
+    document.documentElement.lang = LANG_MAP[language] ?? language
+  }, [language])
 
   const value = useMemo(
     () => ({

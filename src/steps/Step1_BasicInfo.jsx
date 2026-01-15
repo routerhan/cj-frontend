@@ -306,7 +306,7 @@ export const Step1_BasicInfo = () => {
 
         <div className={styles.actions}>
           <Button type="submit" variant="primary">
-            {copy.buttonNext ?? `下一步：${nextStepLabel}`}
+            {copy.buttonNext ?? `Next: ${nextStepLabel}`}
           </Button>
         </div>
       </form>

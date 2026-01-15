@@ -8,85 +8,9 @@ import { MEDICAL_HISTORY_GROUPS } from '../config/medicalHistorySchema.js'
 import { requestRiskAssessment } from '../utils/riskApi.js'
 import styles from './Step4_Report.module.css'
 
-const LEVEL_DESCRIPTION = {
-  extremely_high: '屬於最高優先等級，建議立即與專業醫療團隊討論侵入性治療與用藥策略。',
-  very_high: '已確診 ASCVD 或顯著斑塊負擔，需密集追蹤並調整危險因子。',
-  high: '具備重大慢性病或高危險生化指標，請積極管理血脂、血壓與血糖。',
-  medium: '累積多項心血管危險因子，應加強生活型態並定期追蹤。',
-  low: '目前僅具備單一心血管危險因子，建議持續維護健康習慣。',
-  undefined: '目前未偵測到特定風險條件，請持續維持健康作息與定期追蹤。',
-}
-
-const LDL_TARGETS = {
-  extremely_high: '<55 mg/dL',
-  very_high: '<70 mg/dL',
-  high: '<100 mg/dL',
-  medium: '<115 mg/dL',
-  low: '<130 mg/dL',
-  undefined: '請諮詢專業醫師設定個人化目標',
-}
-
-const METABOLIC_COMPONENT_LABELS = {
-  abdominalObesity: '腹部肥胖（腰圍門檻）',
-  elevatedBloodPressure: '血壓偏高或治療中',
-  elevatedGlucose: '空腹血糖偏高或使用降糖藥',
-  elevatedTriglyceride: '三酸甘油酯偏高或治療中',
-  lowHdl: 'HDL-C 偏低',
-}
-
 const COUNT_ONLY_RULE_CODES = new Set(['risk_factor_count', 'single_risk_factor'])
 
 const hasData = (value) => value !== null && value !== undefined && value !== ''
-
-const formatBooleanChoice = (value) => {
-  if (value === true || value === 'yes') return '是'
-  if (value === false || value === 'no') return '否'
-  if (value === 'unknown') return '不知道'
-  return '未填'
-}
-
-const formatSex = (value) => {
-  if (value === 'male') return '男'
-  if (value === 'female') return '女'
-  if (value === 'other' || value === '其他') return '其他'
-  return '未填'
-}
-
-const formatCacCategory = (value) => {
-  if (value === 'yes') return '是 (≥ 400)'
-  if (value === 'no') return '否 (< 400)'
-  if (value === 'unknown') return '不知道'
-  return '未填'
-}
-
-const formatNumberWithUnit = (value, unit) => {
-  if (!hasData(value)) return '未填'
-  return unit ? `${value} ${unit}` : String(value)
-}
-
-const formatBloodPressure = (systolic, diastolic) => {
-  const hasSystolic = hasData(systolic)
-  const hasDiastolic = hasData(diastolic)
-  if (hasSystolic && hasDiastolic) return `${systolic} / ${diastolic} mmHg`
-  if (hasSystolic) return `${systolic} mmHg`
-  if (hasDiastolic) return `${diastolic} mmHg`
-  return '未填'
-}
-
-const formatDerived = (value, suffix) => {
-  if (value === null || value === undefined || Number.isNaN(value)) return '未計算'
-  return suffix ? `${value}${suffix}` : String(value)
-}
-
-const formatWaistStatus = (waist) => {
-  if (!waist || waist.threshold === null) return '未計算'
-  return `${waist.isObese ? '是' : '否'}（門檻 ${waist.threshold} cm）`
-}
-
-const formatHdlStatus = (threshold, isLow) => {
-  if (threshold === null || threshold === undefined) return '未計算'
-  return `${isLow ? '是' : '否'}（門檻 ${threshold} mg/dL）`
-}
 
 const getNested = (object, path) =>
   path.reduce((accumulator, key) => (accumulator && accumulator[key] !== undefined ? accumulator[key] : undefined), object)
@@ -113,7 +37,55 @@ export const Step4_Report = () => {
   } = useFormContext()
 
   const { dictionary } = useLanguage()
+  const reportCopy = dictionary.report ?? {}
   const medicalCopy = dictionary.medicalHistoryStep ?? dictionary.cardioHistoryStep ?? {}
+  const fmt = reportCopy.formatters ?? {}
+
+  // Formatters using translations
+  const formatBooleanChoice = (value) => {
+    if (value === true || value === 'yes') return fmt.yes ?? 'Yes'
+    if (value === false || value === 'no') return fmt.no ?? 'No'
+    if (value === 'unknown') return fmt.unknown ?? 'Unknown'
+    return fmt.notFilled ?? 'Not filled'
+  }
+
+  const formatSex = (value) => {
+    if (value === 'male') return fmt.male ?? 'Male'
+    if (value === 'female') return fmt.female ?? 'Female'
+    if (value === 'other') return fmt.other ?? 'Other'
+    return fmt.notFilled ?? 'Not filled'
+  }
+
+  const formatNumberWithUnit = (value, unit) => {
+    if (!hasData(value)) return fmt.notFilled ?? 'Not filled'
+    return unit ? `${value} ${unit}` : String(value)
+  }
+
+  const formatBloodPressure = (systolic, diastolic) => {
+    const hasSystolic = hasData(systolic)
+    const hasDiastolic = hasData(diastolic)
+    if (hasSystolic && hasDiastolic) return `${systolic} / ${diastolic} mmHg`
+    if (hasSystolic) return `${systolic} mmHg`
+    if (hasDiastolic) return `${diastolic} mmHg`
+    return fmt.notFilled ?? 'Not filled'
+  }
+
+  const formatDerived = (value, suffix) => {
+    if (value === null || value === undefined || Number.isNaN(value)) return reportCopy.labels?.notCalculated ?? 'Not calculated'
+    return suffix ? `${value}${suffix}` : String(value)
+  }
+
+  const formatWaistStatus = (waist) => {
+    if (!waist || waist.threshold === null) return reportCopy.labels?.notCalculated ?? 'Not calculated'
+    const thresholdText = (fmt.threshold ?? ' (threshold {value})').replace('{value}', `${waist.threshold} cm`)
+    return `${waist.isObese ? (fmt.yes ?? 'Yes') : (fmt.no ?? 'No')}${thresholdText}`
+  }
+
+  const formatHdlStatus = (threshold, isLow) => {
+    if (threshold === null || threshold === undefined) return reportCopy.labels?.notCalculated ?? 'Not calculated'
+    const thresholdText = (fmt.threshold ?? ' (threshold {value})').replace('{value}', `${threshold} mg/dL`)
+    return `${isLow ? (fmt.yes ?? 'Yes') : (fmt.no ?? 'No')}${thresholdText}`
+  }
 
   const report = formData.report ?? {}
   const hasRequestedRef = useRef(false)
@@ -141,7 +113,7 @@ export const Step4_Report = () => {
       setStepStatus('report', StepStatus.COMPLETED)
     } catch (err) {
       hasRequestedRef.current = false
-      setError(err.message || '計算風險時發生問題，請稍後再試。')
+      setError(err.message || (reportCopy.error ?? 'Something went wrong. Please try again later.'))
     } finally {
       setLoading(false)
     }
@@ -159,20 +131,48 @@ export const Step4_Report = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const levelDescription = LEVEL_DESCRIPTION[report.levelCode] ?? LEVEL_DESCRIPTION.undefined
-  const ldlTarget = LDL_TARGETS[report.levelCode] ?? LDL_TARGETS.undefined
+  const levelDescriptions = reportCopy.levelDescription ?? {}
+  const ldlTargets = reportCopy.ldlTargets ?? {}
+  const metabolicLabels = reportCopy.metabolicComponents ?? {}
+  const sectionTitles = reportCopy.sections ?? {}
+  const labels = reportCopy.labels ?? {}
+  const dataLabels = reportCopy.dataLabels ?? {}
+  const dataSections = reportCopy.dataSections ?? {}
+
+  // Translation mappings to override backend Chinese labels
+  const levelLabels = reportCopy.levelLabels ?? {}
+  const riskFactorLabelsMap = reportCopy.riskFactorLabels ?? {}
+  const ruleLabelsMap = reportCopy.ruleLabels ?? {}
+  const recommendationsMap = reportCopy.recommendations ?? {}
+
+  // Translate level from levelCode
+  const translatedLevel = levelLabels[report.levelCode] ?? report.level ?? ''
+
+  // Translate risk factors using code
+  const riskFactorItems = (report.riskFactors ?? []).map((item) => ({
+    ...item,
+    label: riskFactorLabelsMap[item.code] ?? item.label,
+  }))
+
+  // Translate matched rules using code
+  const matchedRules = (report.matchedRules ?? []).map((rule) => ({
+    ...rule,
+    label: ruleLabelsMap[rule.code] ?? rule.label,
+  }))
+
+  // Translate recommendations by levelCode
+  const translatedRecommendations = recommendationsMap[report.levelCode] ?? report.recommendations ?? []
+
+  const levelDescription = levelDescriptions[report.levelCode] ?? levelDescriptions.undefined ?? ''
+  const ldlTarget = ldlTargets[report.levelCode] ?? ldlTargets.undefined ?? ''
   const showLdlTarget = report.levelCode && report.levelCode !== 'undefined'
 
-  const matchedRules = report.matchedRules ?? []
-  const riskFactorItems = report.riskFactors ?? []
   const metabolicInfo = report.metabolicSyndrome ?? { count: 0, components: {} }
 
   const judgement = useMemo(() => {
-    const levelName = report.level ?? '未定義'
-
     if (report.levelCode === 'undefined' || !report.levelCode) {
       return {
-        message: '目前未偵測到符合的心血管風險條件，代表您維持良好狀態，請持續保持健康生活與定期健康檢查。',
+        message: labels.noRiskCondition ?? 'No matching cardiovascular risk conditions detected.',
         items: [],
       }
     }
@@ -180,36 +180,37 @@ export const Step4_Report = () => {
     const meaningfulRules = matchedRules.filter((rule) => !COUNT_ONLY_RULE_CODES.has(rule.code))
 
     if (meaningfulRules.length > 0) {
-      const labels = meaningfulRules.map((rule) => rule.label)
-      const base = `您被歸類為${levelName}風險，因為您符合以下條件`
+      const ruleLabels = meaningfulRules.map((rule) => rule.label)
+      const base = (labels.classifiedAs ?? 'You are classified as {level} risk because you meet the following conditions').replace('{level}', translatedLevel)
       return {
-        message: labels.length > 0 ? `${base}：` : `${base}。`,
-        items: labels,
+        message: ruleLabels.length > 0 ? `${base}:` : `${base}.`,
+        items: ruleLabels,
       }
     }
 
     if (triggeredRiskFactors.length > 0) {
-      const base = `您符合 ${triggeredRiskFactors.length} 項心血管危險因子`
+      const base = (labels.riskFactorCount ?? 'You have {count} cardiovascular risk factor(s)').replace('{count}', triggeredRiskFactors.length)
       return {
-        message: `${base}：`,
+        message: `${base}:`,
         items: triggeredRiskFactors,
       }
     }
 
     return {
-      message: `您被歸類為${levelName}風險，請持續維持健康生活型態並定期追蹤。`,
+      message: (labels.maintainHealthy ?? 'You are classified as {level} risk. Continue maintaining a healthy lifestyle.').replace('{level}', translatedLevel),
       items: [],
     }
-  }, [matchedRules, report.level, report.levelCode, riskFactorItems])
+  }, [labels, matchedRules, report.levelCode, riskFactorItems, translatedLevel])
 
   const metabolicComponents = useMemo(() => {
     const components = metabolicInfo.components ?? {}
-    return Object.entries(METABOLIC_COMPONENT_LABELS).map(([key, label]) => ({
+    const componentKeys = ['abdominalObesity', 'elevatedBloodPressure', 'elevatedGlucose', 'elevatedTriglyceride', 'lowHdl']
+    return componentKeys.map((key) => ({
       key,
-      label,
+      label: metabolicLabels[key] ?? key,
       present: Boolean(components[key]),
     }))
-  }, [metabolicInfo.components])
+  }, [metabolicInfo.components, metabolicLabels])
 
   const dataOverviewSections = useMemo(() => {
     const basic = formData.basic ?? {}
@@ -224,21 +225,21 @@ export const Step4_Report = () => {
       const noneOption = group.options.find((option) => option.isNone)
       const selectedNonNone = group.options.filter((option) => groupState[option.key] && !option.isNone)
 
-      let value = '未填'
+      let value = fmt.notFilled ?? 'Not filled'
       if (selectedNonNone.length > 0) {
-        const labels = selectedNonNone.map((option) =>
+        const optLabels = selectedNonNone.map((option) =>
           getNested(medicalCopy, option.labelPath) ?? option.fallbackLabel ?? option.key,
         )
-        value = `已勾選：${labels.join('、')}`
+        value = `${fmt.checked ?? 'Checked: '}${optLabels.join(', ')}`
       } else if (noneOption && groupState[noneOption.key]) {
         const noneLabel =
           getNested(medicalCopy, noneOption.labelPath) ?? noneOption.fallbackLabel ?? noneOption.key
-        value = `已勾選：${noneLabel}`
+        value = `${fmt.checked ?? 'Checked: '}${noneLabel}`
       } else if (group.options.some((option) => groupState[option.key])) {
-        const labels = group.options
+        const optLabels = group.options
           .filter((option) => groupState[option.key])
           .map((option) => getNested(medicalCopy, option.labelPath) ?? option.fallbackLabel ?? option.key)
-        value = `已勾選：${labels.join('、')}`
+        value = `${fmt.checked ?? 'Checked: '}${optLabels.join(', ')}`
       }
 
       return [{ label: prompt, value }]
@@ -247,65 +248,65 @@ export const Step4_Report = () => {
     return [
       {
         key: 'basic',
-        title: '基本資料',
+        title: dataSections.basic ?? 'Basic Information',
         items: [
-          { label: '生理性別', value: formatSex(basic.sex) },
-          { label: '出生年月日', value: hasData(basic.birthDate) ? basic.birthDate : '未填' },
-          { label: '年齡', value: formatDerived(derivedMetrics.ageYears, ' 歲') },
-          { label: '身高', value: formatNumberWithUnit(basic.heightCm, 'cm') },
-          { label: '體重', value: formatNumberWithUnit(basic.weightKg, 'kg') },
-          { label: 'BMI', value: formatDerived(derivedMetrics.bmi) },
-          { label: '腰圍', value: formatNumberWithUnit(basic.waistCm, 'cm') },
-          { label: '腹部肥胖判定', value: formatWaistStatus(derivedMetrics.waist) },
-          { label: '目前是否抽菸', value: formatBooleanChoice(basic.currentSmoker) },
-          { label: '早發性冠心病家族史', value: formatBooleanChoice(basic.familyHistoryEarlyChd) },
+          { label: dataLabels.sex ?? 'Biological sex', value: formatSex(basic.sex) },
+          { label: dataLabels.birthDate ?? 'Date of birth', value: hasData(basic.birthDate) ? basic.birthDate : (fmt.notFilled ?? 'Not filled') },
+          { label: dataLabels.age ?? 'Age', value: formatDerived(derivedMetrics.ageYears, fmt.yearsOld ?? ' years') },
+          { label: dataLabels.height ?? 'Height', value: formatNumberWithUnit(basic.heightCm, 'cm') },
+          { label: dataLabels.weight ?? 'Weight', value: formatNumberWithUnit(basic.weightKg, 'kg') },
+          { label: dataLabels.bmi ?? 'BMI', value: formatDerived(derivedMetrics.bmi) },
+          { label: dataLabels.waist ?? 'Waist', value: formatNumberWithUnit(basic.waistCm, 'cm') },
+          { label: dataLabels.waistStatus ?? 'Abdominal obesity status', value: formatWaistStatus(derivedMetrics.waist) },
+          { label: dataLabels.smoking ?? 'Current smoker', value: formatBooleanChoice(basic.currentSmoker) },
+          { label: dataLabels.familyHistory ?? 'Family history of premature CHD', value: formatBooleanChoice(basic.familyHistoryEarlyChd) },
         ],
       },
       {
         key: 'bpAndLipids',
-        title: '血壓與血脂',
+        title: dataSections.bpAndLipids ?? 'Blood Pressure & Lipids',
         items: [
-          { label: '是否使用降血壓藥物', value: formatBooleanChoice(bpAndLipids.usesHypertensionMedication) },
-          { label: '最近血壓', value: formatBloodPressure(bpAndLipids.systolic, bpAndLipids.diastolic) },
-          { label: 'LDL-C', value: formatNumberWithUnit(bpAndLipids.ldlMgDl, 'mg/dL') },
-          { label: 'HDL-C', value: formatNumberWithUnit(bpAndLipids.hdlMgDl, 'mg/dL') },
+          { label: dataLabels.hypertensionMed ?? 'Using antihypertensive medication', value: formatBooleanChoice(bpAndLipids.usesHypertensionMedication) },
+          { label: dataLabels.recentBP ?? 'Recent blood pressure', value: formatBloodPressure(bpAndLipids.systolic, bpAndLipids.diastolic) },
+          { label: dataLabels.ldl ?? 'LDL-C', value: formatNumberWithUnit(bpAndLipids.ldlMgDl, 'mg/dL') },
+          { label: dataLabels.hdl ?? 'HDL-C', value: formatNumberWithUnit(bpAndLipids.hdlMgDl, 'mg/dL') },
           {
-            label: 'HDL-C 是否低於門檻',
+            label: dataLabels.hdlLow ?? 'HDL-C below threshold',
             value: formatHdlStatus(derivedMetrics.hdlThreshold, derivedMetrics.isHdlLow),
           },
-          { label: '三酸甘油酯 (TG)', value: formatNumberWithUnit(bpAndLipids.triglycerideMgDl, 'mg/dL') },
-          { label: '是否使用 TG 藥物', value: formatBooleanChoice(bpAndLipids.usesTriglycerideMedication) },
+          { label: dataLabels.triglyceride ?? 'Triglycerides (TG)', value: formatNumberWithUnit(bpAndLipids.triglycerideMgDl, 'mg/dL') },
+          { label: dataLabels.tgMed ?? 'Using TG medication', value: formatBooleanChoice(bpAndLipids.usesTriglycerideMedication) },
           {
-            label: '代謝症候群命中數',
-            value: Number.isFinite(metabolicInfo.count) ? `${metabolicInfo.count} 項` : '未計算',
+            label: dataLabels.metabolicCount ?? 'Metabolic syndrome components met',
+            value: Number.isFinite(metabolicInfo.count) ? (labels.itemCount ?? '{count} item(s)').replace('{count}', metabolicInfo.count) : (labels.notCalculated ?? 'Not calculated'),
           },
         ],
       },
       {
         key: 'diabetes',
-        title: '糖尿病',
+        title: dataSections.diabetes ?? 'Diabetes',
         items: [
-          { label: '是否被醫師診斷糖尿病', value: formatBooleanChoice(diabetes.hasDiagnosis) },
-          { label: '是否使用糖尿病藥物', value: formatBooleanChoice(diabetes.usesMedication) },
-          { label: '最近空腹血糖', value: formatNumberWithUnit(diabetes.fastingGlucoseMgDl, 'mg/dL') },
+          { label: dataLabels.diabetesDiagnosis ?? 'Diagnosed with diabetes', value: formatBooleanChoice(diabetes.hasDiagnosis) },
+          { label: dataLabels.diabetesMed ?? 'Using diabetes medication', value: formatBooleanChoice(diabetes.usesMedication) },
+          { label: dataLabels.fastingGlucose ?? 'Recent fasting glucose', value: formatNumberWithUnit(diabetes.fastingGlucoseMgDl, 'mg/dL') },
         ],
       },
       {
         key: 'kidney',
-        title: '腎臟功能',
+        title: dataSections.kidney ?? 'Kidney Function',
         items: [
-          { label: '是否被診斷慢性腎臟病', value: formatBooleanChoice(kidney.hasCkdDiagnosis) },
-          { label: '最近 eGFR', value: formatNumberWithUnit(kidney.egfr, 'mL/min/1.73m²') },
-          { label: '最近 UACR', value: formatNumberWithUnit(kidney.uacr, 'mg/g') },
+          { label: dataLabels.ckdDiagnosis ?? 'Diagnosed with CKD', value: formatBooleanChoice(kidney.hasCkdDiagnosis) },
+          { label: dataLabels.egfr ?? 'Recent eGFR', value: formatNumberWithUnit(kidney.egfr, 'mL/min/1.73m²') },
+          { label: dataLabels.uacr ?? 'Recent UACR', value: formatNumberWithUnit(kidney.uacr, 'mg/g') },
         ],
       },
       {
         key: 'history',
-        title: '醫療病史',
+        title: dataSections.history ?? 'Medical History',
         items: historyItems,
       },
     ]
-  }, [derivedMetrics, formData, medicalCopy, metabolicInfo.count])
+  }, [dataLabels, dataSections, derivedMetrics, fmt, formData, labels, medicalCopy, metabolicInfo.count])
 
   const evaluatedAtDisplay = report.evaluatedAt ? new Date(report.evaluatedAt).toLocaleString() : ''
 
@@ -326,17 +327,21 @@ export const Step4_Report = () => {
     }
   })()
 
-  const instantValue = loading ? '計算中' : error ? '暫時失敗' : report.level || '--'
+  const instantValue = loading
+    ? (reportCopy.sidebarStatus?.calculating ?? 'Calculating')
+    : error
+      ? (reportCopy.sidebarStatus?.failed ?? 'Temporarily unavailable')
+      : translatedLevel || '--'
 
   const instantDescription = loading
-    ? '我們正在根據最新規則彙整您的資料。'
+    ? (reportCopy.sidebarDescription?.calculating ?? 'Analyzing your data...')
     : error
-    ? '請重新計算或稍後再試。'
-    : levelDescription
+      ? (reportCopy.sidebarDescription?.failed ?? 'Please recalculate or try again later.')
+      : levelDescription
 
   const diagnosisMessage = showLdlTarget
-    ? `根據指引，您的 LDL-C (低密度脂蛋白膽固醇) 建議目標為：【${ldlTarget}】`
-    : '目前未偵測到心血管風險條件，請持續維持良好作息並定期追蹤基本健康指標。'
+    ? (labels.ldlTargetMessage ?? 'Based on guidelines, your LDL-C target is:【{target}】').replace('{target}', ldlTarget)
+    : (labels.noRiskDetected ?? 'No cardiovascular risk conditions detected. Maintain a healthy routine.')
 
   const reportStepIndex = steps.findIndex((step) => step.key === 'report')
   const stepLabel = reportStepIndex >= 0 ? `Step ${reportStepIndex + 1}` : 'Step'
@@ -346,10 +351,10 @@ export const Step4_Report = () => {
       <header className={styles.header}>
         <div>
           <p className={styles.kicker}>{stepLabel}</p>
-          <h2>風險報告</h2>
+          <h2>{reportCopy.title ?? 'Risk Report'}</h2>
         </div>
         <p className={styles.lead}>
-          根據您提供的健康資料，我們已完成心血管風險分級，並整理對應的 LDL-C 目標、判斷依據與完整數據概覽。
+          {reportCopy.lead ?? 'Based on your health data, we have completed cardiovascular risk stratification.'}
         </p>
       </header>
 
@@ -357,8 +362,8 @@ export const Step4_Report = () => {
         <div className={styles.main}>
           {loading ? (
             <div className={styles.loading}>
-              <LoadingSpinner label="正在計算您的風險..." />
-              <p className={styles.loadingHint}>此步驟模擬後端服務回應，約需 1-2 秒。</p>
+              <LoadingSpinner label={reportCopy.loading ?? 'Calculating your risk...'} />
+              <p className={styles.loadingHint}>{reportCopy.loadingHint ?? 'This takes about 1-2 seconds.'}</p>
             </div>
           ) : null}
 
@@ -369,22 +374,22 @@ export const Step4_Report = () => {
               <section className={styles.summaryCard}>
                 <div className={styles.summaryHeader}>
                   <div className={styles.summaryHeaderContent}>
-                    <span className={styles.levelLabel}>主要結果</span>
+                    <span className={styles.levelLabel}>{sectionTitles.mainResult ?? 'Main Result'}</span>
                     <h3 className={styles.summaryTitle}>
-                      您的心血管風險等級為：【{report.level}】
+                      {(labels.resultTitle ?? 'Your cardiovascular risk level is: 【{level}】').replace('{level}', translatedLevel)}
                     </h3>
                   </div>
-                  <span className={`${styles.levelChip} ${summaryHighlight}`}>{report.level}</span>
+                  <span className={`${styles.levelChip} ${summaryHighlight}`}>{translatedLevel}</span>
                 </div>
                 <p className={styles.levelDescription}>{levelDescription}</p>
 
                 <div className={styles.highlightCard}>
-                  <h4 className={styles.highlightTitle}>診斷建議</h4>
+                  <h4 className={styles.highlightTitle}>{sectionTitles.diagnosis ?? 'Diagnosis Recommendation'}</h4>
                   <p className={styles.highlightLead}>{diagnosisMessage}</p>
                 </div>
 
                 <div className={styles.summarySection}>
-                  <h4 className={styles.sectionHeading}>判斷依據</h4>
+                  <h4 className={styles.sectionHeading}>{sectionTitles.judgement ?? 'Assessment Rationale'}</h4>
                   <p className={styles.sectionText}>{judgement.message}</p>
                   {judgement.items.length ? (
                     <div className={styles.tagList}>
@@ -398,16 +403,20 @@ export const Step4_Report = () => {
                 </div>
 
                 {evaluatedAtDisplay ? (
-                  <p className={styles.evaluatedAt}>評估時間：{evaluatedAtDisplay}</p>
+                  <p className={styles.evaluatedAt}>
+                    {(labels.evaluatedAt ?? 'Evaluated at: {time}').replace('{time}', evaluatedAtDisplay)}
+                  </p>
                 ) : null}
               </section>
 
               <section className={styles.detailGrid}>
                 <article className={styles.detailCard}>
                   <header>
-                    <h3>心血管危險因子</h3>
+                    <h3>{sectionTitles.riskFactors ?? 'Cardiovascular Risk Factors'}</h3>
                     {Number.isFinite(report.riskFactorCount) ? (
-                      <span className={styles.countBadge}>{report.riskFactorCount} 項</span>
+                      <span className={styles.countBadge}>
+                        {(labels.itemCount ?? '{count} item(s)').replace('{count}', report.riskFactorCount)}
+                      </span>
                     ) : null}
                   </header>
                   <ul className={styles.factorGrid}>
@@ -425,16 +434,16 @@ export const Step4_Report = () => {
                   </ul>
                   {!riskFactorItems.length ? (
                     <p className={styles.fallbackText}>
-                      未偵測到常見危險因子，請持續維持健康的生活型態。
+                      {labels.noRiskFactors ?? 'No common risk factors detected.'}
                     </p>
                   ) : null}
                 </article>
 
                 <article className={styles.detailCard}>
                   <header>
-                    <h3>代謝症候群構成</h3>
+                    <h3>{sectionTitles.metabolicSyndrome ?? 'Metabolic Syndrome Components'}</h3>
                     <span className={styles.countBadge}>
-                      {Number.isFinite(metabolicInfo.count) ? `${metabolicInfo.count} / 5 項` : '未計算'}
+                      {Number.isFinite(metabolicInfo.count) ? (labels.of5Items ?? '{count} / 5 items').replace('{count}', metabolicInfo.count) : (labels.notCalculated ?? 'Not calculated')}
                     </span>
                   </header>
                   <ul className={styles.factorGrid}>
@@ -452,18 +461,18 @@ export const Step4_Report = () => {
                   </ul>
                   {Number.isFinite(metabolicInfo.count) && metabolicInfo.count >= 3 ? (
                     <p className={styles.emphasisText}>
-                      已符合代謝症候群定義，建議與醫師討論減重、飲食及用藥策略。
+                      {labels.metabolicMet ?? 'Metabolic syndrome criteria met.'}
                     </p>
                   ) : (
                     <p className={styles.fallbackText}>
-                      未達 3 項門檻，請持續追蹤腰圍、血壓與血脂變化。
+                      {labels.metabolicNotMet ?? 'Below 3-item threshold.'}
                     </p>
                   )}
                 </article>
               </section>
 
               <section className={styles.overview}>
-                <h3>數據總覽</h3>
+                <h3>{sectionTitles.dataOverview ?? 'Data Overview'}</h3>
                 <div className={styles.overviewGrid}>
                   {dataOverviewSections.map((section) => (
                     <article
@@ -489,22 +498,22 @@ export const Step4_Report = () => {
               </section>
 
               <section className={styles.recommendations}>
-                <h3>後續建議</h3>
-                {report.recommendations?.length ? (
+                <h3>{sectionTitles.recommendations ?? 'Recommendations'}</h3>
+                {translatedRecommendations?.length ? (
                   <ul>
-                    {report.recommendations.map((item) => (
+                    {translatedRecommendations.map((item) => (
                       <li key={item}>{item}</li>
                     ))}
                   </ul>
                 ) : (
-                  <p className={styles.fallbackText}>目前沒有額外建議。</p>
+                  <p className={styles.fallbackText}>{labels.noRecommendations ?? 'No additional recommendations.'}</p>
                 )}
               </section>
 
               <section className={styles.disclaimer}>
-                <h3>免責聲明</h3>
+                <h3>{sectionTitles.disclaimer ?? 'Disclaimer'}</h3>
                 <p>
-                  本工具僅提供健康資訊參考，無法取代專業醫療建議。若您對自身狀況或治療方案有任何疑慮，請儘速諮詢醫師或專業醫護人員。
+                  {labels.disclaimerText ?? 'This tool provides health information for reference only and cannot replace professional medical advice.'}
                 </p>
               </section>
             </>
@@ -512,13 +521,13 @@ export const Step4_Report = () => {
         </div>
 
         <aside className={styles.sidebar}>
-          <InstantResult label="即時狀態" value={instantValue} description={instantDescription} />
+          <InstantResult label={reportCopy.instantLabel ?? 'Live Status'} value={instantValue} description={instantDescription} />
           <div className={styles.sidebarActions}>
             <Button type="button" variant="ghost" onClick={handleExitReport} disabled={loading}>
-              退出報告
+              {reportCopy.buttons?.exit ?? 'Exit Report'}
             </Button>
             <Button type="button" variant="secondary" onClick={() => runCalculation(true)} disabled={loading}>
-              重新計算
+              {reportCopy.buttons?.recalc ?? 'Recalculate'}
             </Button>
           </div>
         </aside>

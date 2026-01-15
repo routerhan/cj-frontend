@@ -189,19 +189,19 @@ export const Step2_BpLipids = () => {
                   <input
                     type="number"
                     inputMode="decimal"
-                    placeholder="可留空"
+                    placeholder={copy.placeholders?.optional ?? 'Optional'}
                     value={bpAndLipids.systolic}
                     onChange={handleInputChange('systolic')}
-                    aria-label="收縮壓"
+                    aria-label={copy.ariaLabels?.systolic ?? 'Systolic'}
                   />
                   <span>/</span>
                   <input
                     type="number"
                     inputMode="decimal"
-                    placeholder="可留空"
+                    placeholder={copy.placeholders?.optional ?? 'Optional'}
                     value={bpAndLipids.diastolic}
                     onChange={handleInputChange('diastolic')}
-                    aria-label="舒張壓"
+                    aria-label={copy.ariaLabels?.diastolic ?? 'Diastolic'}
                   />
                   <span>mmHg</span>
                 </div>
@@ -229,7 +229,7 @@ export const Step2_BpLipids = () => {
                   inputMode="decimal"
                   value={bpAndLipids.ldlMgDl}
                   onChange={handleInputChange('ldlMgDl')}
-                  placeholder="可留空"
+                  placeholder={copy.placeholders?.optional ?? 'Optional'}
                 />
                 <span>mg/dL</span>
               </div>
@@ -244,7 +244,7 @@ export const Step2_BpLipids = () => {
                   inputMode="decimal"
                   value={bpAndLipids.hdlMgDl}
                   onChange={handleInputChange('hdlMgDl')}
-                  placeholder="可留空"
+                  placeholder={copy.placeholders?.optional ?? 'Optional'}
                 />
                 <span>mg/dL</span>
               </div>
@@ -260,7 +260,7 @@ export const Step2_BpLipids = () => {
                   inputMode="decimal"
                   value={bpAndLipids.triglycerideMgDl}
                   onChange={handleInputChange('triglycerideMgDl')}
-                  placeholder="可留空"
+                  placeholder={copy.placeholders?.optional ?? 'Optional'}
                 />
                 <span>mg/dL</span>
               </div>
@@ -297,7 +297,7 @@ export const Step2_BpLipids = () => {
 
         <div className={styles.actions}>
           <Button type="submit">
-            {copy.buttonNext ?? `下一步：${nextStepLabel}`}
+            {copy.buttonNext ?? `Next: ${nextStepLabel}`}
           </Button>
         </div>
       </form>

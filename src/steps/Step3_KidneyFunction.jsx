@@ -187,7 +187,7 @@ export const Step3_KidneyFunction = () => {
 
         <div className={styles.actions}>
           <Button type="submit" variant="primary">
-            {copy.buttonNext ?? `下一步：${nextStepLabel}`}
+            {copy.buttonNext ?? `Next: ${nextStepLabel}`}
           </Button>
         </div>
       </form>
