@@ -166,7 +166,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .dist-bar>div{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;transition:width .4s}
 .dist-legend{display:flex;flex-wrap:wrap;gap:14px}
 .dist-legend span{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary)}
-.dist-legend span::before{content:'';width:10px;height:10px;border-radius:3px;display:inline-block}
+
 
 /* ---------- filter row ---------- */
 .filter-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
@@ -286,7 +286,6 @@ pre.payload{max-height:240px;overflow:auto;background:#0f172a;color:#e2e8f0;padd
           <option value="20">20 筆</option>
           <option value="50" selected>50 筆</option>
           <option value="100">100 筆</option>
-          <option value="200">200 筆</option>
         </select>
         <button class="btn-action" id="refresh" type="button">\u21BB 重新整理</button>
       </div>
@@ -437,16 +436,19 @@ function renderStats(stats) {
     '<div class="stat-card">' +
       '<div class="label">總評估次數</div>' +
       '<div class="value">' + total + '</div>' +
+      '<div class="meta">最新：' + (stats.latestAssessmentAt ? new Date(stats.latestAssessmentAt).toLocaleString() : '—') + '</div>' +
       sparklineHTML([30,50,40,70,55,80,65], 'var(--accent-light)') +
     '</div>' +
     '<div class="stat-card">' +
       '<div class="label">平均危險因子</div>' +
       '<div class="value">' + avg + '</div>' +
+      '<div class="meta">含所有風險層級</div>' +
       sparklineHTML([40,35,60,45,70,50,55], 'var(--accent-light)') +
     '</div>' +
     '<div class="stat-card">' +
       '<div class="label">高風險佔比</div>' +
       '<div class="value">' + highPct + '%</div>' +
+      '<div class="meta">極高 + 非常高 + 高</div>' +
       sparklineHTML([60,75,50,80,65,70,55], 'var(--red-bg)') +
     '</div>' +
     '<div class="stat-card">' +
@@ -467,7 +469,7 @@ function renderStats(stats) {
     var pct = (count / total) * 100;
     var showLabel = pct >= 4;
     barHTML += '<div style="width:' + pct.toFixed(2) + '%;background:' + colors[code] + '">' + (showLabel ? count : '') + '</div>';
-    legendHTML += '<span style="--dot:' + colors[code] + '"><i style="background:' + colors[code] + ';width:10px;height:10px;border-radius:3px;display:inline-block"></i> ' + LEVEL_LABELS[code] + ' ' + count + '</span>';
+    legendHTML += '<span style="--dot:' + colors[code] + '"><i style="background:' + colors[code] + ';width:10px;height:10px;border-radius:3px;display:inline-block"></i> ' + LEVEL_LABELS[code] + ' ' + count + ' (' + pct.toFixed(1) + '%)</span>';
   }
   distBar.innerHTML = barHTML;
   distLegend.innerHTML = legendHTML;
