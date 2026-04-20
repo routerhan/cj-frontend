@@ -171,7 +171,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 /* ---------- filter row ---------- */
 .filter-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
 .filter-chips{display:flex;gap:6px;flex-wrap:wrap}
-.filter-chip{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 14px;font-size:12px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:all .15s}
+.filter-chip{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 14px;font-family:inherit;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:all .15s}
 .filter-chip:hover{border-color:var(--accent);color:var(--accent)}
 .filter-chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .controls-right{display:flex;align-items:center;gap:10px}
@@ -263,7 +263,7 @@ pre.payload{max-height:240px;overflow:auto;background:#0f172a;color:#e2e8f0;padd
   <!-- overview tab -->
   <div class="tab-content active" id="tab-overview">
     <div class="stats-grid" id="stats-grid"></div>
-    <div class="dist-section" id="dist-section">
+    <div class="dist-section" id="dist-section" style="display:none">
       <h3>風險層級分佈</h3>
       <div class="dist-bar" id="dist-bar"></div>
       <div class="dist-legend" id="dist-legend"></div>
@@ -274,12 +274,12 @@ pre.payload{max-height:240px;overflow:auto;background:#0f172a;color:#e2e8f0;padd
   <div class="tab-content" id="tab-records">
     <div class="filter-row">
       <div class="filter-chips" id="filter-chips">
-        <span class="filter-chip active" data-level="all">全部</span>
-        <span class="filter-chip" data-level="extremely_high">極高</span>
-        <span class="filter-chip" data-level="very_high">非常高</span>
-        <span class="filter-chip" data-level="high">高</span>
-        <span class="filter-chip" data-level="medium">中</span>
-        <span class="filter-chip" data-level="low">低</span>
+        <button class="filter-chip active" data-level="all">全部</button>
+        <button class="filter-chip" data-level="extremely_high">極高</button>
+        <button class="filter-chip" data-level="very_high">非常高</button>
+        <button class="filter-chip" data-level="high">高</button>
+        <button class="filter-chip" data-level="medium">中</button>
+        <button class="filter-chip" data-level="low">低</button>
       </div>
       <div class="controls-right">
         <select id="limit">
@@ -342,6 +342,12 @@ var METABOLIC_LABELS = {
   lowHdl: 'HDL-C 偏低'
 };
 
+function esc(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
 /* ---- auth helpers ---- */
 function updateAuthMeta(admin) {
   var el = document.getElementById('auth-meta');
@@ -351,9 +357,9 @@ function updateAuthMeta(admin) {
   }
   var lastLogin = admin.lastLoginAt ? new Date(admin.lastLoginAt).toLocaleString() : '—';
   el.innerHTML =
-    '<div class="avatar">' + admin.email.charAt(0).toUpperCase() + '</div>' +
+    '<div class="avatar">' + esc(admin.email.charAt(0).toUpperCase()) + '</div>' +
     '<div style="font-size:12px;line-height:1.4">' +
-      '<div style="font-weight:600;color:var(--text-primary)">' + admin.email + '</div>' +
+      '<div style="font-weight:600;color:var(--text-primary)">' + esc(admin.email) + '</div>' +
       '<div style="color:var(--text-muted)">上次登入 ' + lastLogin + '</div>' +
     '</div>' +
     '<button class="logout-btn" id="logout-btn" type="button">登出</button>';
@@ -410,11 +416,13 @@ function renderStats(stats) {
   var grid = document.getElementById('stats-grid');
   var distBar = document.getElementById('dist-bar');
   var distLegend = document.getElementById('dist-legend');
+  var distSection = document.getElementById('dist-section');
 
   if (!stats || !stats.totalAssessments) {
     grid.innerHTML = '<div class="stat-card"><div class="label">尚無資料</div><div class="value">—</div><div class="meta">等待新評估紀錄</div></div>';
     distBar.innerHTML = '';
     distLegend.innerHTML = '';
+    distSection.style.display = 'none';
     return;
   }
 
@@ -436,7 +444,7 @@ function renderStats(stats) {
     '<div class="stat-card">' +
       '<div class="label">總評估次數</div>' +
       '<div class="value">' + total + '</div>' +
-      '<div class="meta">最新：' + (stats.latestAssessmentAt ? new Date(stats.latestAssessmentAt).toLocaleString() : '—') + '</div>' +
+      '<div class="meta">最新：' + esc(stats.latestAssessmentAt ? new Date(stats.latestAssessmentAt).toLocaleString() : '—') + '</div>' +
       sparklineHTML([30,50,40,70,55,80,65], 'var(--accent-light)') +
     '</div>' +
     '<div class="stat-card">' +
@@ -459,7 +467,6 @@ function renderStats(stats) {
 
   /* distribution bar */
   var order = ['extremely_high','very_high','high','medium','low','undefined'];
-  var colors = {extremely_high:'var(--red)',very_high:'var(--orange)',high:'var(--amber)',medium:'var(--blue)',low:'var(--green)',undefined:'var(--gray)'};
   var barHTML = '';
   var legendHTML = '';
   for (var i = 0; i < order.length; i++) {
@@ -468,11 +475,12 @@ function renderStats(stats) {
     if (count === 0) continue;
     var pct = (count / total) * 100;
     var showLabel = pct >= 4;
-    barHTML += '<div style="width:' + pct.toFixed(2) + '%;background:' + colors[code] + '">' + (showLabel ? count : '') + '</div>';
-    legendHTML += '<span style="--dot:' + colors[code] + '"><i style="background:' + colors[code] + ';width:10px;height:10px;border-radius:3px;display:inline-block"></i> ' + LEVEL_LABELS[code] + ' ' + count + ' (' + pct.toFixed(1) + '%)</span>';
+    barHTML += '<div style="width:' + pct.toFixed(2) + '%;background:' + LEVEL_COLORS[code] + '">' + (showLabel ? count : '') + '</div>';
+    legendHTML += '<span style="--dot:' + LEVEL_COLORS[code] + '"><i style="background:' + LEVEL_COLORS[code] + ';width:10px;height:10px;border-radius:3px;display:inline-block"></i> ' + LEVEL_LABELS[code] + ' ' + count + ' (' + pct.toFixed(1) + '%)</span>';
   }
   distBar.innerHTML = barHTML;
   distLegend.innerHTML = legendHTML;
+  distSection.style.display = '';
 }
 
 /* ---- render table ---- */
@@ -497,16 +505,16 @@ function renderTable(records) {
 
     var riskFactors = (record.riskFactors || [])
       .filter(function(f) { return f.present; })
-      .map(function(f) { return '<span class="tag">' + f.label + '</span>'; })
+      .map(function(f) { return '<span class="tag">' + esc(f.label) + '</span>'; })
       .join('');
 
     var matchedRules = (record.matchedRules || [])
-      .map(function(r) { return '<span class="tag">' + r.label + '</span>'; })
+      .map(function(r) { return '<span class="tag">' + esc(r.label) + '</span>'; })
       .join('') || '—';
 
     var metabolicTags = Object.keys(record.metabolicSyndrome && record.metabolicSyndrome.components ? record.metabolicSyndrome.components : {})
       .filter(function(k) { return record.metabolicSyndrome.components[k]; })
-      .map(function(k) { return '<span class="tag">' + (METABOLIC_LABELS[k] || k) + '</span>'; })
+      .map(function(k) { return '<span class="tag">' + esc(METABOLIC_LABELS[k] || k) + '</span>'; })
       .join('');
 
     var chipCls = 'chip ' + (LEVEL_LABELS[record.levelCode] ? record.levelCode : 'undefined');
@@ -517,7 +525,7 @@ function renderTable(records) {
       '<td><div><strong>' + record.riskFactorCount + ' 項</strong></div><div class="tags">' + riskFactors + '</div></td>' +
       '<td><div class="tags">' + matchedRules + '</div></td>' +
       '<td><div><strong>' + (record.metabolicSyndrome ? record.metabolicSyndrome.count : 0) + ' / 5</strong></div><div class="tags">' + (metabolicTags || '—') + '</div></td>' +
-      '<td><details><summary style="cursor:pointer;font-size:12px;color:var(--accent)">檢視 JSON</summary><pre class="payload">' + JSON.stringify(record.payload || {}, null, 2) + '</pre></details></td>' +
+      '<td><details><summary style="cursor:pointer;font-size:12px;color:var(--accent)">檢視 JSON</summary><pre class="payload">' + esc(JSON.stringify(record.payload || {}, null, 2)) + '</pre></details></td>' +
     '</tr>';
   }).join('');
 }
