@@ -299,7 +299,7 @@ pre.payload{max-height:240px;overflow:auto;background:#0f172a;color:#e2e8f0;padd
             <th>危險因子</th>
             <th>命中規則</th>
             <th>代謝症候群</th>
-            <th>原始資料</th>
+            <th>問卷資料</th>
           </tr>
         </thead>
         <tbody id="table-body"></tbody>
@@ -346,6 +346,86 @@ function esc(s) {
   var d = document.createElement('div');
   d.textContent = s;
   return d.innerHTML;
+}
+
+var PAYLOAD_SECTIONS = [
+  { title: '基本資料', fields: [
+    ['gender', '性別', function(v){ return v === 'male' ? '男' : v === 'female' ? '女' : v || '未填'; }],
+    ['age', '年齡', function(v){ return v != null ? v + ' 歲' : '未填'; }],
+    ['waist_cm', '腰圍', function(v){ return v != null ? v + ' cm' : '未填'; }],
+    ['is_smoker', '抽菸', null],
+    ['family_history_early_chd', '早發冠心病家族史', null]
+  ]},
+  { title: '血壓與血脂', fields: [
+    ['systolic', '收縮壓', function(v){ return v != null ? v + ' mmHg' : '未填'; }],
+    ['diastolic', '舒張壓', function(v){ return v != null ? v + ' mmHg' : '未填'; }],
+    ['hypertension_medication', '降血壓藥', null],
+    ['ldl_c', 'LDL-C', function(v){ return v != null ? v + ' mg/dL' : '未填'; }],
+    ['hdl_c', 'HDL-C', function(v){ return v != null ? v + ' mg/dL' : '未填'; }],
+    ['triglyceride', '三酸甘油酯', function(v){ return v != null ? v + ' mg/dL' : '未填'; }],
+    ['lipid_medication', '調脂藥', null]
+  ]},
+  { title: '糖尿病', fields: [
+    ['has_diabetes', '糖尿病', null],
+    ['diabetes_medication', '降血糖藥', null],
+    ['fasting_glucose', '空腹血糖', function(v){ return v != null ? v + ' mg/dL' : '未填'; }]
+  ]},
+  { title: '腎臟功能', fields: [
+    ['has_ckd', '慢性腎臟病', null],
+    ['egfr', 'eGFR', function(v){ return v != null ? v + ' mL/min' : '未填'; }],
+    ['uacr', 'UACR', function(v){ return v != null ? v + ' mg/g' : '未填'; }]
+  ]},
+  { title: '病史', fields: [
+    ['has_ascvd_history', 'ASCVD 病史', null],
+    ['has_acute_coronary_syndrome_history', '急性冠心症病史', null],
+    ['has_revascularization_history', '血管再通術', null],
+    ['has_ischemic_stroke_with_atherosclerosis', '缺血性中風/TIA', null],
+    ['has_peripheral_arterial_disease_history', '周邊動脈疾病史', null],
+    ['has_significant_plaque', '顯著斑塊 ≥50%', null],
+    ['has_coronary_angiography_stenosis', '冠狀動脈攝影 ≥50%', null],
+    ['has_coronary_ct_stenosis', 'CT 狹窄 ≥50%', null],
+    ['has_vascular_ultrasound_stenosis', '超音波狹窄 ≥50%', null],
+    ['has_cad', '冠狀動脈疾病', null],
+    ['has_acute_coronary_syndrome', '急性冠心症', null],
+    ['mi_within_1_year', '一年內心肌梗塞', null],
+    ['mi_history_count', '心肌梗塞次數', function(v){ return v != null ? v + ' 次' : '0 次'; }],
+    ['has_multivessel_obstruction', '多支血管阻塞', null],
+    ['has_pad', '周邊動脈疾病', null],
+    ['has_carotid_stenosis', '頸動脈狹窄', null],
+    ['cac_ge_400', 'CAC ≥ 400', null]
+  ]}
+];
+
+function formatPayload(p) {
+  if (!p) return '<span class="td-meta">無資料</span>';
+  var html = '';
+  PAYLOAD_SECTIONS.forEach(function(sec) {
+    var rows = '';
+    sec.fields.forEach(function(f) {
+      var key = f[0], label = f[1], fmt = f[2];
+      var v = p[key];
+      if (v === undefined || v === null || v === '') {
+        if (!fmt) return;
+      }
+      var display;
+      if (fmt) {
+        display = fmt(v);
+      } else if (typeof v === 'boolean') {
+        display = v ? '是' : '否';
+      } else {
+        display = v != null ? String(v) : '未填';
+      }
+      if (display === '否' && typeof v === 'boolean') {
+        rows += '<tr><td style="color:var(--text-muted);padding:2px 8px 2px 0;font-size:11px;white-space:nowrap">' + esc(label) + '</td><td style="padding:2px 0;font-size:11px;color:var(--text-muted)">' + esc(display) + '</td></tr>';
+      } else {
+        rows += '<tr><td style="color:var(--text-secondary);padding:2px 8px 2px 0;font-size:11px;white-space:nowrap">' + esc(label) + '</td><td style="padding:2px 0;font-size:11px">' + esc(display) + '</td></tr>';
+      }
+    });
+    if (rows) {
+      html += '<div style="margin-bottom:6px"><div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">' + esc(sec.title) + '</div><table style="border-collapse:collapse">' + rows + '</table></div>';
+    }
+  });
+  return html;
 }
 
 /* ---- auth helpers ---- */
@@ -525,7 +605,7 @@ function renderTable(records) {
       '<td><div><strong>' + record.riskFactorCount + ' 項</strong></div><div class="tags">' + riskFactors + '</div></td>' +
       '<td><div class="tags">' + matchedRules + '</div></td>' +
       '<td><div><strong>' + (record.metabolicSyndrome ? record.metabolicSyndrome.count : 0) + ' / 5</strong></div><div class="tags">' + (metabolicTags || '—') + '</div></td>' +
-      '<td><details><summary style="cursor:pointer;font-size:12px;color:var(--accent)">檢視 JSON</summary><pre class="payload">' + esc(JSON.stringify(record.payload || {}, null, 2)) + '</pre></details></td>' +
+      '<td><details><summary style="cursor:pointer;font-size:12px;color:var(--accent)">檢視資料</summary><div style="margin-top:8px">' + formatPayload(record.payload) + '</div></details></td>' +
     '</tr>';
   }).join('');
 }
