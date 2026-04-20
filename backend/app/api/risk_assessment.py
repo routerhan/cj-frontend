@@ -232,8 +232,8 @@ pre.payload{max-height:240px;overflow:auto;background:#0f172a;color:#e2e8f0;padd
     </div>
     <form id="login-form">
       <div class="field">
-        <label for="login-email">電子郵件</label>
-        <input id="login-email" type="email" required placeholder="admin@example.com" />
+        <label for="login-email">帳號</label>
+        <input id="login-email" type="text" required placeholder="admin" />
       </div>
       <div class="field">
         <label for="login-password">密碼</label>

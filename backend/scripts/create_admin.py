@@ -15,7 +15,7 @@ from app.services import get_password_hash
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Create an administrator account.")
-    parser.add_argument("email", help="Administrator email address (will be stored in lowercase).")
+    parser.add_argument("email", help="Administrator account name (will be stored in lowercase).")
     parser.add_argument(
         "--password",
         help="Administrator password. If omitted, you will be prompted securely.",
@@ -31,8 +31,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     email = args.email.strip().lower()
-    if "@" not in email:
-        print("[error] invalid email format", file=sys.stderr)
+    if not email:
+        print("[error] account name cannot be empty", file=sys.stderr)
         return 1
 
     password = args.password or getpass.getpass("Password: ")

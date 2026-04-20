@@ -21,24 +21,24 @@ class AdminProfile(BaseModel):
     )
     @field_validator("email")
     @classmethod
-    def validate_email(cls, value: str) -> str:
+    def normalize_account(cls, value: str) -> str:
         value = value.strip()
-        if "@" not in value:
-            raise ValueError("電子郵件格式不正確")
+        if not value:
+            raise ValueError("帳號不可為空")
         return value.lower()
 
 
 class AdminLoginRequest(BaseModel):
     """登入表單資料。"""
 
-    email: str = Field(description="管理者登入信箱")
+    email: str = Field(description="管理者登入帳號")
     password: str = Field(min_length=8, max_length=128, description="登入密碼")
     @field_validator("email")
     @classmethod
-    def validate_email(cls, value: str) -> str:
+    def normalize_account(cls, value: str) -> str:
         value = value.strip()
-        if "@" not in value:
-            raise ValueError("電子郵件格式不正確")
+        if not value:
+            raise ValueError("帳號不可為空")
         return value.lower()
 
 
