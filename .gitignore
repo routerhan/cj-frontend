@@ -33,3 +33,6 @@ backend/app/frontend/*
 
 # Local container volumes
 .data/
+
+# Superpowers brainstorm files
+.superpowers/
