@@ -605,7 +605,7 @@ function renderTable(records) {
       '<td><div><strong>' + record.riskFactorCount + ' 項</strong></div><div class="tags">' + riskFactors + '</div></td>' +
       '<td><div class="tags">' + matchedRules + '</div></td>' +
       '<td><div><strong>' + (record.metabolicSyndrome ? record.metabolicSyndrome.count : 0) + ' / 5</strong></div><div class="tags">' + (metabolicTags || '—') + '</div></td>' +
-      '<td><details><summary style="cursor:pointer;font-size:12px;color:var(--accent)">檢視資料</summary><div style="margin-top:8px">' + formatPayload(record.payload) + '</div></details></td>' +
+      '<td><details><summary style="cursor:pointer;font-size:12px;color:var(--accent)">檢視資料</summary><div style="max-height:200px;overflow-y:auto;margin-top:8px;padding-right:4px">' + formatPayload(record.payload) + '</div></details></td>' +
     '</tr>';
   }).join('');
 }
