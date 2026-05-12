@@ -122,7 +122,7 @@ describe('evaluateRiskAssessment', () => {
     expect(result.riskFactors.find((factor) => factor.code === 'metabolic_syndrome')?.present).toBe(true)
   })
 
-  it('風險因子為零時回傳未定義層級', () => {
+  it('核心欄位齊全且風險因子為零時回傳 no_risk', () => {
     const result = evaluateRiskAssessment(
       makeInput({
         age: 30,
@@ -132,6 +132,7 @@ describe('evaluateRiskAssessment', () => {
         systolic: 110,
         diastolic: 70,
         hdl_c: 60,
+        ldl_c: 90,
         waist_cm: 70,
         fasting_glucose: 85,
         triglyceride: 90,
@@ -140,9 +141,44 @@ describe('evaluateRiskAssessment', () => {
       }),
     )
 
-    expect(result.levelCode).toBe('undefined')
+    expect(result.levelCode).toBe('no_risk')
+    expect(result.level).toBe('無風險')
     expect(result.matchedRules).toEqual([])
     expect(result.riskFactorCount).toBe(0)
+  })
+
+  it('核心欄位缺漏時回傳 undefined', () => {
+    const result = evaluateRiskAssessment(
+      makeInput({
+        age: 30,
+        is_male: false,
+        gender: 'female',
+        systolic: null,
+        diastolic: 70,
+        hdl_c: 60,
+        ldl_c: 90,
+        triglyceride: 90,
+        metabolic_syndrome_factors: 0,
+      }),
+    )
+
+    expect(result.levelCode).toBe('undefined')
+    expect(result.matchedRules).toEqual([])
+  })
+
+  it('規則命中優先於核心欄位完整性', () => {
+    const result = evaluateRiskAssessment(
+      makeInput({
+        has_ascvd_history: true,
+        systolic: null,
+        ldl_c: null,
+        hdl_c: null,
+        triglyceride: null,
+      }),
+    )
+
+    expect(result.levelCode).toBe('very_high')
+    expect(extractCodes(result.matchedRules)).toEqual(['ascvd_history'])
   })
 
   it('固定回傳六項心血管危險因子', () => {

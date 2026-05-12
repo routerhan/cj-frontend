@@ -4,6 +4,7 @@ const RiskLevels = {
   HIGH: { code: 'high', label: '高' },
   MEDIUM: { code: 'medium', label: '中' },
   LOW: { code: 'low', label: '低' },
+  NO_RISK: { code: 'no_risk', label: '無風險' },
   UNDEFINED: { code: 'undefined', label: '未定義' },
 }
 
@@ -20,6 +21,11 @@ const toInteger = (value) => {
 }
 
 const buildMatch = (code, label) => ({ code, label })
+
+const CORE_FIELDS = ['age', 'gender', 'systolic', 'diastolic', 'ldl_c', 'hdl_c', 'triglyceride']
+
+const hasCoreFields = (input) =>
+  CORE_FIELDS.every((field) => input[field] !== null && input[field] !== undefined && input[field] !== '')
 
 const EXTREME_RULES = [
   {
@@ -214,7 +220,11 @@ const RECOMMENDATIONS = {
     '維持健康生活型態，避免菸酒與過度飲食',
     '每 1-2 年追蹤血壓與基本血液檢查以確保穩定',
   ],
-  undefined: ['資料不足以評估，請補充必要檢測或臨床資訊後再試'],
+  no_risk: [
+    '維持目前健康生活型態，包含規律運動、均衡飲食、不抽菸',
+    '建議每 1-2 年定期回檢血壓、血脂與基本血液檢查',
+  ],
+  undefined: ['評估所需的基本資料尚未填寫完整，請補齊年齡、性別、血壓、血脂後重新評估'],
 }
 
 const evaluateWithRules = (rules, input) => {
@@ -335,14 +345,16 @@ export const evaluateRiskAssessment = (rawInput = {}) => {
     }
   }
 
+  const fallbackLevel = hasCoreFields(input) ? RiskLevels.NO_RISK : RiskLevels.UNDEFINED
+
   return {
-    level: RiskLevels.UNDEFINED.label,
-    levelCode: RiskLevels.UNDEFINED.code,
+    level: fallbackLevel.label,
+    levelCode: fallbackLevel.code,
     matchedRules: [],
     riskFactorCount,
     riskFactors,
     metabolicSyndrome: metabolicDetails,
-    recommendations: RECOMMENDATIONS[RiskLevels.UNDEFINED.code],
+    recommendations: RECOMMENDATIONS[fallbackLevel.code],
     evaluatedAt: new Date().toISOString(),
   }
 }

@@ -36,6 +36,7 @@ def _title_by_code(code: RiskLevelCodeEnum) -> str:
         RiskLevelCodeEnum.HIGH: "高",
         RiskLevelCodeEnum.MEDIUM: "中",
         RiskLevelCodeEnum.LOW: "低",
+        RiskLevelCodeEnum.NO_RISK: "無風險",
         RiskLevelCodeEnum.UNDEFINED: "未定義",
     }
     return mapping[code]
@@ -260,8 +261,12 @@ RECOMMENDATIONS: Dict[RiskLevelCodeEnum, List[str]] = {
         "維持健康生活型態，避免菸酒與過度飲食",
         "每 1-2 年追蹤血壓與基本血液檢查以確保穩定",
     ],
+    RiskLevelCodeEnum.NO_RISK: [
+        "維持目前健康生活型態，包含規律運動、均衡飲食、不抽菸",
+        "建議每 1-2 年定期回檢血壓、血脂與基本血液檢查",
+    ],
     RiskLevelCodeEnum.UNDEFINED: [
-        "資料不足以評估，請補充必要檢測或臨床資訊後再試",
+        "評估所需的基本資料尚未填寫完整，請補齊年齡、性別、血壓、血脂後重新評估",
     ],
 }
 
@@ -270,6 +275,15 @@ def _evaluate_rules(rules: Iterable[Rule], payload: RiskAssessmentRequest) -> Li
     """回傳所有命中的規則。"""
 
     return [rule.to_match() for rule in rules if rule.matches(payload)]
+
+
+_CORE_FIELDS = ("age", "gender", "systolic", "diastolic", "ldl_c", "hdl_c", "triglyceride")
+
+
+def _has_core_fields(payload: RiskAssessmentRequest) -> bool:
+    """七個核心欄位皆有值才視為資料完整。"""
+
+    return all(getattr(payload, name) is not None for name in _CORE_FIELDS)
 
 
 class RiskAssessmentService(RiskAssessmentServiceProtocol):
@@ -327,7 +341,10 @@ class RiskAssessmentService(RiskAssessmentServiceProtocol):
             )
             return self._finalize_response(payload, response)
 
-        level_code = RiskLevelCodeEnum.UNDEFINED
+        if _has_core_fields(payload):
+            level_code = RiskLevelCodeEnum.NO_RISK
+        else:
+            level_code = RiskLevelCodeEnum.UNDEFINED
         response = self._build_response(
             level_code, risk_factor_count, risk_factors, metabolic_result, []
         )

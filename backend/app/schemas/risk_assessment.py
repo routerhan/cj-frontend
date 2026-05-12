@@ -23,6 +23,7 @@ class RiskLevelCodeEnum(str, Enum):
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
+    NO_RISK = "no_risk"
     UNDEFINED = "undefined"
 
 

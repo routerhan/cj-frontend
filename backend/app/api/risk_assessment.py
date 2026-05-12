@@ -125,6 +125,7 @@ DASHBOARD_HTML = """
   --amber:#d97706;--amber-bg:rgba(217,119,6,0.08);
   --blue:#2563eb;--blue-bg:rgba(37,99,235,0.08);
   --green:#059669;--green-bg:rgba(5,150,105,0.08);
+  --teal:#0d9488;--teal-bg:rgba(13,148,136,0.08);
   --gray:#6b7280;--gray-bg:rgba(107,114,128,0.08);
 }
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text-primary);font-size:13px;line-height:1.5}
@@ -195,6 +196,7 @@ tbody tr:hover{background:var(--bg)}
 .chip.high{background:var(--amber-bg);color:var(--amber)}
 .chip.medium{background:var(--blue-bg);color:var(--blue)}
 .chip.low{background:var(--green-bg);color:var(--green)}
+.chip.no_risk{background:var(--teal-bg);color:var(--teal)}
 .chip.undefined{background:var(--gray-bg);color:var(--gray)}
 .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .tag{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:11px;color:var(--text-secondary)}
@@ -280,6 +282,8 @@ pre.payload{max-height:240px;overflow:auto;background:#0f172a;color:#e2e8f0;padd
         <button class="filter-chip" data-level="high">高</button>
         <button class="filter-chip" data-level="medium">中</button>
         <button class="filter-chip" data-level="low">低</button>
+        <button class="filter-chip" data-level="no_risk">無風險</button>
+        <button class="filter-chip" data-level="undefined">未定義</button>
       </div>
       <div class="controls-right">
         <select id="limit">
@@ -322,6 +326,7 @@ var LEVEL_LABELS = {
   high: '高',
   medium: '中',
   low: '低',
+  no_risk: '無風險',
   undefined: '未定義'
 };
 
@@ -331,6 +336,7 @@ var LEVEL_COLORS = {
   high: 'var(--amber)',
   medium: 'var(--blue)',
   low: 'var(--green)',
+  no_risk: 'var(--teal)',
   undefined: 'var(--gray)'
 };
 
@@ -546,7 +552,7 @@ function renderStats(stats) {
     '</div>';
 
   /* distribution bar */
-  var order = ['extremely_high','very_high','high','medium','low','undefined'];
+  var order = ['extremely_high','very_high','high','medium','low','no_risk','undefined'];
   var barHTML = '';
   var legendHTML = '';
   for (var i = 0; i < order.length; i++) {

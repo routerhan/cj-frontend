@@ -2,8 +2,11 @@
 
 from datetime import datetime
 
+import pytest
+
 from app.schemas import RiskAssessmentRequest, RiskLevelCodeEnum
 from app.services import RiskAssessmentService
+from app.services.risk_assessment import _has_core_fields
 
 
 def _build_request(**overrides) -> RiskAssessmentRequest:
@@ -205,7 +208,9 @@ def test_low_risk_when_single_factor(risk_service: RiskAssessmentService):
     assert result.riskFactorCount == 1
 
 
-def test_undefined_when_no_risk_factors(risk_service: RiskAssessmentService):
+def test_no_risk_when_core_fields_complete_and_zero_factors(risk_service: RiskAssessmentService):
+    """All seven core fields present, no rules match, zero factors → no_risk."""
+
     payload = _build_request(
         age=30,
         is_male=False,
@@ -215,11 +220,35 @@ def test_undefined_when_no_risk_factors(risk_service: RiskAssessmentService):
         diastolic=70,
         hdl_c=60,
         ldl_c=90,
+        triglyceride=90,
         waist_cm=70,
         fasting_glucose=85,
-        triglyceride=90,
         metabolic_syndrome_factors=0,
         is_smoker=False,
+    )
+
+    result = risk_service.evaluate(payload)
+
+    assert result.levelCode is RiskLevelCodeEnum.NO_RISK
+    assert result.level == "無風險"
+    assert result.matchedRules == []
+    assert result.riskFactorCount == 0
+    assert result.recommendations  # non-empty
+
+
+def test_undefined_when_core_fields_missing(risk_service: RiskAssessmentService):
+    """Core field missing (systolic), no rules match, zero factors → undefined."""
+
+    payload = _build_request(
+        age=30,
+        is_male=False,
+        gender="female",
+        systolic=None,
+        diastolic=70,
+        hdl_c=60,
+        ldl_c=90,
+        triglyceride=90,
+        metabolic_syndrome_factors=0,
     )
 
     result = risk_service.evaluate(payload)
@@ -227,6 +256,23 @@ def test_undefined_when_no_risk_factors(risk_service: RiskAssessmentService):
     assert result.levelCode is RiskLevelCodeEnum.UNDEFINED
     assert result.matchedRules == []
     assert result.riskFactorCount == 0
+
+
+def test_rule_match_wins_over_missing_core_fields(risk_service: RiskAssessmentService):
+    """Rule still triggers even when a core field is missing."""
+
+    payload = _build_request(
+        has_ascvd_history=True,
+        systolic=None,
+        ldl_c=None,
+        hdl_c=None,
+        triglyceride=None,
+    )
+
+    result = risk_service.evaluate(payload)
+
+    assert result.levelCode is RiskLevelCodeEnum.VERY_HIGH
+    assert [rule.code for rule in result.matchedRules] == ["ascvd_history"]
 
 
 def test_recalculate_metabolic_syndrome_from_measurements(risk_service: RiskAssessmentService):
@@ -275,3 +321,23 @@ def test_risk_factors_list_only_core_items(risk_service: RiskAssessmentService):
     assert {factor.code for factor in result.riskFactors} == expected_codes
     metabolic_factor = next(f for f in result.riskFactors if f.code == "metabolic_syndrome")
     assert metabolic_factor.present is True
+
+
+def test_risk_level_code_enum_contains_no_risk():
+    """NO_RISK enum value must exist with code 'no_risk'."""
+
+    assert RiskLevelCodeEnum.NO_RISK.value == "no_risk"
+
+
+def test_has_core_fields_true_when_all_present():
+    payload = _build_request()  # defaults include all seven core fields
+    assert _has_core_fields(payload) is True
+
+
+@pytest.mark.parametrize(
+    "missing_field",
+    ["age", "gender", "systolic", "diastolic", "ldl_c", "hdl_c", "triglyceride"],
+)
+def test_has_core_fields_false_when_any_core_field_missing(missing_field):
+    payload = _build_request(**{missing_field: None})
+    assert _has_core_fields(payload) is False

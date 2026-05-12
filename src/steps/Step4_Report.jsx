@@ -165,12 +165,19 @@ export const Step4_Report = () => {
 
   const levelDescription = levelDescriptions[report.levelCode] ?? levelDescriptions.undefined ?? ''
   const ldlTarget = ldlTargets[report.levelCode] ?? ldlTargets.undefined ?? ''
-  const showLdlTarget = report.levelCode && report.levelCode !== 'undefined'
+  const showLdlTarget =
+    report.levelCode && report.levelCode !== 'undefined' && report.levelCode !== 'no_risk'
 
   const metabolicInfo = report.metabolicSyndrome ?? { count: 0, components: {} }
 
   const judgement = useMemo(() => {
-    if (report.levelCode === 'undefined' || !report.levelCode) {
+    if (!report.levelCode || report.levelCode === 'undefined') {
+      return {
+        message: labels.incompleteData ?? 'Insufficient data: please complete age, gender, blood pressure, and lipid measurements.',
+        items: [],
+      }
+    }
+    if (report.levelCode === 'no_risk') {
       return {
         message: labels.noRiskCondition ?? 'No matching cardiovascular risk conditions detected.',
         items: [],
@@ -322,6 +329,8 @@ export const Step4_Report = () => {
         return styles.levelChipMedium
       case 'low':
         return styles.levelChipLow
+      case 'no_risk':
+        return styles.levelChipNoRisk
       default:
         return styles.levelChipNeutral
     }
@@ -341,7 +350,9 @@ export const Step4_Report = () => {
 
   const diagnosisMessage = showLdlTarget
     ? (labels.ldlTargetMessage ?? 'Based on guidelines, your LDL-C target is:【{target}】').replace('{target}', ldlTarget)
-    : (labels.noRiskDetected ?? 'No cardiovascular risk conditions detected. Maintain a healthy routine.')
+    : (!report.levelCode || report.levelCode === 'undefined')
+      ? (labels.incompleteData ?? 'Insufficient data: please complete age, gender, blood pressure, and lipid measurements.')
+      : (labels.noRiskDetected ?? 'No cardiovascular risk conditions detected. Maintain a healthy routine.')
 
   const reportStepIndex = steps.findIndex((step) => step.key === 'report')
   const stepLabel = reportStepIndex >= 0 ? `Step ${reportStepIndex + 1}` : 'Step'
