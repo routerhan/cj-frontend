@@ -206,7 +206,9 @@ def test_low_risk_when_single_factor(risk_service: RiskAssessmentService):
     assert result.riskFactorCount == 1
 
 
-def test_undefined_when_no_risk_factors(risk_service: RiskAssessmentService):
+def test_no_risk_when_core_fields_complete_and_zero_factors(risk_service: RiskAssessmentService):
+    """All seven core fields present, no rules match, zero factors → no_risk."""
+
     payload = _build_request(
         age=30,
         is_male=False,
@@ -216,11 +218,35 @@ def test_undefined_when_no_risk_factors(risk_service: RiskAssessmentService):
         diastolic=70,
         hdl_c=60,
         ldl_c=90,
+        triglyceride=90,
         waist_cm=70,
         fasting_glucose=85,
-        triglyceride=90,
         metabolic_syndrome_factors=0,
         is_smoker=False,
+    )
+
+    result = risk_service.evaluate(payload)
+
+    assert result.levelCode is RiskLevelCodeEnum.NO_RISK
+    assert result.level == "無風險"
+    assert result.matchedRules == []
+    assert result.riskFactorCount == 0
+    assert result.recommendations  # non-empty
+
+
+def test_undefined_when_core_fields_missing(risk_service: RiskAssessmentService):
+    """Core field missing (systolic), no rules match, zero factors → undefined."""
+
+    payload = _build_request(
+        age=30,
+        is_male=False,
+        gender="female",
+        systolic=None,
+        diastolic=70,
+        hdl_c=60,
+        ldl_c=90,
+        triglyceride=90,
+        metabolic_syndrome_factors=0,
     )
 
     result = risk_service.evaluate(payload)
@@ -228,6 +254,23 @@ def test_undefined_when_no_risk_factors(risk_service: RiskAssessmentService):
     assert result.levelCode is RiskLevelCodeEnum.UNDEFINED
     assert result.matchedRules == []
     assert result.riskFactorCount == 0
+
+
+def test_rule_match_wins_over_missing_core_fields(risk_service: RiskAssessmentService):
+    """Rule still triggers even when a core field is missing."""
+
+    payload = _build_request(
+        has_ascvd_history=True,
+        systolic=None,
+        ldl_c=None,
+        hdl_c=None,
+        triglyceride=None,
+    )
+
+    result = risk_service.evaluate(payload)
+
+    assert result.levelCode is RiskLevelCodeEnum.VERY_HIGH
+    assert [rule.code for rule in result.matchedRules] == ["ascvd_history"]
 
 
 def test_recalculate_metabolic_syndrome_from_measurements(risk_service: RiskAssessmentService):
