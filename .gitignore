@@ -36,3 +36,7 @@ backend/app/frontend/*
 
 # Superpowers brainstorm files
 .superpowers/
+
+# Playwright MCP verification artifacts
+.playwright-mcp/
+scenario-*.png
