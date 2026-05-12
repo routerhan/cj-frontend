@@ -275,3 +275,9 @@ def test_risk_factors_list_only_core_items(risk_service: RiskAssessmentService):
     assert {factor.code for factor in result.riskFactors} == expected_codes
     metabolic_factor = next(f for f in result.riskFactors if f.code == "metabolic_syndrome")
     assert metabolic_factor.present is True
+
+
+def test_risk_level_code_enum_contains_no_risk():
+    """NO_RISK enum value must exist with code 'no_risk'."""
+
+    assert RiskLevelCodeEnum.NO_RISK.value == "no_risk"
