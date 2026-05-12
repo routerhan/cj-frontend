@@ -4,6 +4,7 @@ from datetime import datetime
 
 from app.schemas import RiskAssessmentRequest, RiskLevelCodeEnum
 from app.services import RiskAssessmentService
+from app.services.risk_assessment import _has_core_fields
 
 
 def _build_request(**overrides) -> RiskAssessmentRequest:
@@ -281,3 +282,28 @@ def test_risk_level_code_enum_contains_no_risk():
     """NO_RISK enum value must exist with code 'no_risk'."""
 
     assert RiskLevelCodeEnum.NO_RISK.value == "no_risk"
+
+
+def test_has_core_fields_true_when_all_present():
+    payload = _build_request()  # defaults include all seven core fields
+    assert _has_core_fields(payload) is True
+
+
+def test_has_core_fields_false_when_age_missing():
+    payload = _build_request(age=None)
+    assert _has_core_fields(payload) is False
+
+
+def test_has_core_fields_false_when_systolic_missing():
+    payload = _build_request(systolic=None)
+    assert _has_core_fields(payload) is False
+
+
+def test_has_core_fields_false_when_ldl_missing():
+    payload = _build_request(ldl_c=None)
+    assert _has_core_fields(payload) is False
+
+
+def test_has_core_fields_false_when_gender_missing():
+    payload = _build_request(gender=None)
+    assert _has_core_fields(payload) is False

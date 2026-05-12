@@ -272,6 +272,15 @@ def _evaluate_rules(rules: Iterable[Rule], payload: RiskAssessmentRequest) -> Li
     return [rule.to_match() for rule in rules if rule.matches(payload)]
 
 
+_CORE_FIELDS = ("age", "gender", "systolic", "diastolic", "ldl_c", "hdl_c", "triglyceride")
+
+
+def _has_core_fields(payload: RiskAssessmentRequest) -> bool:
+    """七個核心欄位皆有值才視為資料完整。"""
+
+    return all(getattr(payload, name) is not None for name in _CORE_FIELDS)
+
+
 class RiskAssessmentService(RiskAssessmentServiceProtocol):
     """根據 `riskRules.js` 重新實作的風險評估服務。"""
 
