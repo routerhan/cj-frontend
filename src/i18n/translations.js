@@ -384,7 +384,8 @@ export const translations = {
         high: '具備重大慢性病或高危險生化指標，請積極管理血脂、血壓與血糖。',
         medium: '累積多項心血管危險因子，應加強生活型態並定期追蹤。',
         low: '目前僅具備單一心血管危險因子，建議持續維護健康習慣。',
-        undefined: '目前未偵測到特定風險條件，請持續維持健康作息與定期追蹤。',
+        no_risk: '目前未偵測到特定心血管風險條件，請持續維持健康作息並定期追蹤。',
+        undefined: '評估所需的基本資料尚未填寫完整，請補齊年齡、性別、血壓與血脂後重新評估。',
       },
       ldlTargets: {
         extremely_high: '<55 mg/dL',
@@ -392,7 +393,8 @@ export const translations = {
         high: '<100 mg/dL',
         medium: '<115 mg/dL',
         low: '<130 mg/dL',
-        undefined: '請諮詢專業醫師設定個人化目標',
+        no_risk: '維持目前範圍即可',
+        undefined: '請補齊基本資料以取得個人化建議',
       },
       metabolicComponents: {
         abdominalObesity: '腹部肥胖（腰圍門檻）',
@@ -415,6 +417,7 @@ export const translations = {
         high: '高',
         medium: '中',
         low: '低',
+        no_risk: '無風險',
         undefined: '未定義',
       },
       ruleLabels: {
@@ -458,8 +461,12 @@ export const translations = {
           '維持健康生活型態，避免菸酒與過度飲食',
           '每 1-2 年追蹤血壓與基本血液檢查以確保穩定',
         ],
+        no_risk: [
+          '維持目前健康生活型態，包含規律運動、均衡飲食、不抽菸',
+          '建議每 1-2 年定期回檢血壓、血脂與基本血液檢查',
+        ],
         undefined: [
-          '資料不足以評估，請補充必要檢測或臨床資訊後再試',
+          '評估所需的基本資料尚未填寫完整，請補齊年齡、性別、血壓、血脂後重新評估',
         ],
       },
       sections: {
@@ -477,6 +484,7 @@ export const translations = {
         ldlTargetMessage: '根據指引，您的 LDL-C (低密度脂蛋白膽固醇) 建議目標為：【{target}】',
         noRiskDetected: '目前未偵測到心血管風險條件，請持續維持良好作息並定期追蹤基本健康指標。',
         noRiskCondition: '目前未偵測到符合的心血管風險條件，代表您維持良好狀態，請持續保持健康生活與定期健康檢查。',
+        incompleteData: '資料不齊全：請補齊年齡、性別、血壓與血脂後重新評估',
         classifiedAs: '您被歸類為{level}風險，因為您符合以下條件',
         riskFactorCount: '您符合 {count} 項心血管危險因子',
         maintainHealthy: '您被歸類為{level}風險，請持續維持健康生活型態並定期追蹤。',
@@ -941,7 +949,8 @@ export const translations = {
         high: 'Major chronic conditions or high-risk biomarkers present. Actively manage lipids, blood pressure, and glucose.',
         medium: 'Multiple cardiovascular risk factors accumulated. Strengthen lifestyle changes and regular monitoring.',
         low: 'Only a single cardiovascular risk factor present. Continue maintaining healthy habits.',
-        undefined: 'No specific risk conditions detected. Maintain a healthy routine and regular check-ups.',
+        no_risk: 'No specific cardiovascular risk conditions detected. Maintain a healthy routine and regular check-ups.',
+        undefined: 'Insufficient data: please complete age, gender, blood pressure, and lipid measurements before re-evaluation.',
       },
       ldlTargets: {
         extremely_high: '<55 mg/dL',
@@ -949,7 +958,8 @@ export const translations = {
         high: '<100 mg/dL',
         medium: '<115 mg/dL',
         low: '<130 mg/dL',
-        undefined: 'Consult a physician to set personalized targets',
+        no_risk: 'Maintain current range',
+        undefined: 'Complete the required information to receive personalized targets',
       },
       metabolicComponents: {
         abdominalObesity: 'Abdominal obesity (waist threshold)',
@@ -972,6 +982,7 @@ export const translations = {
         high: 'High',
         medium: 'Moderate',
         low: 'Low',
+        no_risk: 'No Risk',
         undefined: 'Undefined',
       },
       ruleLabels: {
@@ -1015,8 +1026,12 @@ export const translations = {
           'Maintain healthy lifestyle; avoid tobacco, alcohol, and overeating',
           'Track BP and basic blood tests every 1-2 years for stability',
         ],
+        no_risk: [
+          'Maintain current healthy lifestyle, including regular exercise, balanced diet, and not smoking',
+          'Re-check BP, lipids, and basic blood work every 1-2 years',
+        ],
         undefined: [
-          'Insufficient data for assessment; please provide additional tests or clinical information',
+          'Insufficient data for assessment: please complete age, gender, blood pressure, and lipids before re-evaluation',
         ],
       },
       sections: {
@@ -1034,6 +1049,7 @@ export const translations = {
         ldlTargetMessage: 'Based on guidelines, your LDL-C (low-density lipoprotein cholesterol) target is:【{target}】',
         noRiskDetected: 'No cardiovascular risk conditions detected. Maintain a healthy routine and regular health monitoring.',
         noRiskCondition: 'No matching cardiovascular risk conditions detected. You are in good condition—continue healthy living and regular check-ups.',
+        incompleteData: 'Insufficient data: please complete age, gender, blood pressure, and lipid measurements.',
         classifiedAs: 'You are classified as {level} risk because you meet the following conditions',
         riskFactorCount: 'You have {count} cardiovascular risk factor(s)',
         maintainHealthy: 'You are classified as {level} risk. Continue maintaining a healthy lifestyle and regular monitoring.',
