@@ -350,7 +350,9 @@ export const Step4_Report = () => {
 
   const diagnosisMessage = showLdlTarget
     ? (labels.ldlTargetMessage ?? 'Based on guidelines, your LDL-C target is:【{target}】').replace('{target}', ldlTarget)
-    : (labels.noRiskDetected ?? 'No cardiovascular risk conditions detected. Maintain a healthy routine.')
+    : (!report.levelCode || report.levelCode === 'undefined')
+      ? (labels.incompleteData ?? 'Insufficient data: please complete age, gender, blood pressure, and lipid measurements.')
+      : (labels.noRiskDetected ?? 'No cardiovascular risk conditions detected. Maintain a healthy routine.')
 
   const reportStepIndex = steps.findIndex((step) => step.key === 'report')
   const stepLabel = reportStepIndex >= 0 ? `Step ${reportStepIndex + 1}` : 'Step'
