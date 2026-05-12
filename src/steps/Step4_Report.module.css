@@ -142,6 +142,11 @@
   color: #ecfdf5;
 }
 
+.levelChipNoRisk {
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  color: #ecfeff;
+}
+
 .levelChipNeutral {
   background: rgba(148, 163, 184, 0.25);
   color: #e2e8f0;
