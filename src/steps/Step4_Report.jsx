@@ -165,12 +165,19 @@ export const Step4_Report = () => {
 
   const levelDescription = levelDescriptions[report.levelCode] ?? levelDescriptions.undefined ?? ''
   const ldlTarget = ldlTargets[report.levelCode] ?? ldlTargets.undefined ?? ''
-  const showLdlTarget = report.levelCode && report.levelCode !== 'undefined'
+  const showLdlTarget =
+    report.levelCode && report.levelCode !== 'undefined' && report.levelCode !== 'no_risk'
 
   const metabolicInfo = report.metabolicSyndrome ?? { count: 0, components: {} }
 
   const judgement = useMemo(() => {
-    if (report.levelCode === 'undefined' || !report.levelCode) {
+    if (!report.levelCode || report.levelCode === 'undefined') {
+      return {
+        message: labels.incompleteData ?? 'Insufficient data: please complete age, gender, blood pressure, and lipid measurements.',
+        items: [],
+      }
+    }
+    if (report.levelCode === 'no_risk') {
       return {
         message: labels.noRiskCondition ?? 'No matching cardiovascular risk conditions detected.',
         items: [],
@@ -322,6 +329,8 @@ export const Step4_Report = () => {
         return styles.levelChipMedium
       case 'low':
         return styles.levelChipLow
+      case 'no_risk':
+        return styles.levelChipNoRisk
       default:
         return styles.levelChipNeutral
     }
