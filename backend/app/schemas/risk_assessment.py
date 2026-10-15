@@ -280,6 +280,27 @@ class AssessmentStats(BaseModel):
     model_config = dict(extra="forbid")
 
 
+class MonthlyCount(BaseModel):
+    """單月填寫次數（月份以台灣時間計）。"""
+
+    month: str = Field(..., description="月份，格式 YYYY-MM")
+    count: int = Field(..., ge=0)
+
+    model_config = dict(extra="forbid")
+
+
+class AssessmentReport(BaseModel):
+    """統計報告用資料：總數、層級分佈與每月趨勢。"""
+
+    totalAssessments: int = Field(..., ge=0)
+    byLevel: Dict[RiskLevelCodeEnum, int] = Field(default_factory=dict)
+    monthly: List[MonthlyCount] = Field(default_factory=list)
+    firstAssessmentAt: Optional[datetime] = None
+    latestAssessmentAt: Optional[datetime] = None
+
+    model_config = dict(extra="forbid")
+
+
 class AssessmentListResponse(BaseModel):
     """後端回傳醫師儀表板所需資料。"""
 
