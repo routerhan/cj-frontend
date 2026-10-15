@@ -18,12 +18,10 @@ router = APIRouter(prefix="/api", tags=["admin-report"])
 TAIWAN_TZ = timezone(timedelta(hours=8))
 
 
-def _to_taiwan(value: datetime) -> datetime:
-    """SQLite 回傳的時間不帶時區，視為 UTC 後轉成台灣時間。"""
+def _as_utc(value: datetime) -> datetime:
+    """SQLite 回傳的時間不帶時區，視為 UTC。"""
 
-    if value.tzinfo is None:
-        value = value.replace(tzinfo=timezone.utc)
-    return value.astimezone(TAIWAN_TZ)
+    return value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value
 
 
 def _monthly_counts(timestamps: list[datetime]) -> list[MonthlyCount]:
@@ -31,7 +29,7 @@ def _monthly_counts(timestamps: list[datetime]) -> list[MonthlyCount]:
 
     counts: dict[tuple[int, int], int] = {}
     for ts in timestamps:
-        local = _to_taiwan(ts)
+        local = _as_utc(ts).astimezone(TAIWAN_TZ)
         key = (local.year, local.month)
         counts[key] = counts.get(key, 0) + 1
 
@@ -80,8 +78,8 @@ def get_assessment_report(
             level: by_level_raw.get(level.value, 0) for level in RiskLevelCodeEnum
         },
         monthly=_monthly_counts(timestamps),
-        firstAssessmentAt=timestamps[0] if timestamps else None,
-        latestAssessmentAt=timestamps[-1] if timestamps else None,
+        firstAssessmentAt=_as_utc(timestamps[0]) if timestamps else None,
+        latestAssessmentAt=_as_utc(timestamps[-1]) if timestamps else None,
     )
 
 
@@ -128,7 +126,7 @@ svg text{font-family:inherit}
   body{background:#fff}
   .toolbar{display:none}
   .page{border:none;border-radius:0;margin:0;padding:0;max-width:none}
-  h2,.chart,table{break-inside:avoid}
+  section,table{break-inside:avoid}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
@@ -188,18 +186,20 @@ function levelChartSVG(rows, total) {
 
 /* Line chart of monthly counts with a value label on every point. */
 function monthlyChartSVG(monthly) {
-  var width = 720, height = 260, padL = 44, padR = 20, padT = 24, padB = 44;
+  var width = 720, height = 260, padL = 44, padR = 36, padT = 24, padB = 44;
   var plotW = width - padL - padR, plotH = height - padT - padB;
   var maxCount = Math.max.apply(null, monthly.map(function(m) { return m.count; }).concat([1]));
-  var step = Math.max(1, Math.ceil(maxCount / 4));
-  var yMax = step * 4;
+  var rough = maxCount / 5, mag = Math.pow(10, Math.floor(Math.log10(rough)));
+  var step = Math.max(1, [1, 2, 2.5, 5, 10].map(function(f) { return f * mag; }).filter(function(v) { return v >= rough; })[0]);
+  var ticks = Math.max(1, Math.ceil(maxCount / step));
+  var yMax = step * ticks;
   var n = monthly.length;
   var xAt = function(i) { return padL + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW); };
   var yAt = function(v) { return padT + plotH - (v / yMax) * plotH; };
   var labelEvery = Math.ceil(n / 12);
 
   var svg = '<svg class="chart" viewBox="0 0 ' + width + ' ' + height + '" width="100%" role="img" aria-label="每月填寫次數折線圖">';
-  for (var g = 0; g <= 4; g++) {
+  for (var g = 0; g <= ticks; g++) {
     var gv = step * g, gy = yAt(gv);
     svg += '<line x1="' + padL + '" x2="' + (width - padR) + '" y1="' + gy + '" y2="' + gy + '" stroke="#e2e8f0"></line>';
     svg += '<text x="' + (padL - 8) + '" y="' + (gy + 4) + '" text-anchor="end" font-size="11" fill="#8892a4">' + gv + '</text>';
@@ -234,7 +234,7 @@ function renderReport(data) {
       '</div></div>' +
     '</div>';
 
-  html += '<h2>風險層級分佈</h2>' + levelChartSVG(rows, total);
+  html += '<section><h2>風險層級分佈</h2>' + levelChartSVG(rows, total) + '</section>';
   html += '<table><thead><tr><th>風險層級</th><th class="num">次數</th><th class="num">佔比</th></tr></thead><tbody>';
   rows.forEach(function(r) {
     var pct = total > 0 ? (r.count / total * 100).toFixed(1) : '0.0';
@@ -242,8 +242,8 @@ function renderReport(data) {
   });
   html += '<tr><td><strong>合計</strong></td><td class="num"><strong>' + total + '</strong></td><td class="num">100%</td></tr></tbody></table>';
 
-  html += '<h2>每月填寫次數</h2>';
-  html += data.monthly.length ? monthlyChartSVG(data.monthly) : '<div class="note">尚無資料。</div>';
+  html += '<section><h2>每月填寫次數</h2>' +
+    (data.monthly.length ? monthlyChartSVG(data.monthly) : '<div class="note">尚無資料。</div>') + '</section>';
 
   html +=
     '<ul class="notes">' +

@@ -57,6 +57,8 @@ def test_report_counts_levels_and_fills_empty_months(
         {"month": "2026-02", "count": 0},
         {"month": "2026-03", "count": 1},
     ]
+    assert data["firstAssessmentAt"].startswith("2026-01-10T00:00:00")
+    assert data["firstAssessmentAt"].endswith(("Z", "+00:00"))
 
 
 def test_report_buckets_months_in_taiwan_time(

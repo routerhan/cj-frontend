@@ -143,6 +143,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 /* ---------- tabs ---------- */
 .tabs{max-width:1120px;margin:0 auto;display:flex;gap:4px;padding-top:4px}
 .tab{background:none;border:none;padding:10px 18px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.report-link{margin-left:auto;align-self:center;color:var(--accent);font-size:13px;font-weight:500;text-decoration:none;padding:6px 12px;border:1px solid var(--border);border-radius:8px}
+.report-link:hover{background:var(--accent-light)}
 .tab:hover{color:var(--text-secondary)}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
 
@@ -256,6 +258,7 @@ pre.payload{max-height:240px;overflow:auto;background:#0f172a;color:#e2e8f0;padd
   <div class="tabs">
     <button class="tab active" data-tab="tab-overview">概覽</button>
     <button class="tab" data-tab="tab-records">評估紀錄</button>
+    <a class="report-link" href="/api/admin/report-view" target="_blank" rel="noopener">\u2193 統計報告（PDF）</a>
   </div>
 </div>
 
