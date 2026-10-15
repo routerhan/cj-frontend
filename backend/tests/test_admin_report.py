@@ -104,3 +104,52 @@ def test_report_page_is_served(client: TestClient):
     response = client.get("/api/admin/report-view")
     assert response.status_code == 200
     assert "統計報告" in response.text
+
+
+def test_export_csv_contains_all_records_with_bom(
+    client: TestClient,
+    db_session,
+    admin_account,
+    admin_credentials,
+):
+    """CSV 匯出需含 BOM、表頭與每一筆紀錄，且時間轉為台灣時間。"""
+
+    db_session.add(
+        Assessment(
+            user_id=None,
+            level_code="high",
+            level_label="高",
+            risk_factor_count=1,
+            payload={"age": 60, "is_smoker": True, "is_male": True},
+            result={
+                "riskFactors": [{"code": "smoker", "label": "吸菸", "present": True}],
+                "matchedRules": [],
+                "metabolicSyndrome": {"count": 1, "components": {"lowHdl": True}},
+            },
+            created_at=datetime(2026, 1, 10, 20, 0, tzinfo=timezone.utc),
+        )
+    )
+    _add_assessment(db_session, "low", datetime(2026, 1, 20, tzinfo=timezone.utc))
+    db_session.commit()
+
+    token = _login_and_get_token(client, admin_credentials)
+    response = client.get(
+        "/api/admin/assessments/export.csv",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/csv")
+    assert "attachment" in response.headers["content-disposition"]
+
+    text = response.content.decode("utf-8")
+    assert text.startswith("﻿")
+    lines = text.lstrip("﻿").strip().splitlines()
+    assert len(lines) == 3
+    assert lines[0].startswith("編號,填寫時間（台灣）,風險層級")
+    assert "2026-01-11 04:00" in lines[2]
+    assert "吸菸" in lines[2] and "HDL-C 偏低" in lines[2] and ",是," in lines[2]
+
+
+def test_export_csv_requires_auth(client: TestClient):
+    response = client.get("/api/admin/assessments/export.csv")
+    assert response.status_code == 401

@@ -1,16 +1,23 @@
 """後台統計報告：API 與可列印（另存 PDF）的報告頁面。"""
 
+import csv
+import io
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_admin
 from app.db.session import get_session
 from app.models import AdminAccount, Assessment
-from app.schemas import AssessmentReport, MonthlyCount, RiskLevelCodeEnum
+from app.schemas import (
+    AssessmentReport,
+    MonthlyCount,
+    RiskAssessmentRequest,
+    RiskLevelCodeEnum,
+)
 
 router = APIRouter(prefix="/api", tags=["admin-report"])
 
@@ -80,6 +87,98 @@ def get_assessment_report(
         monthly=_monthly_counts(timestamps),
         firstAssessmentAt=_as_utc(timestamps[0]) if timestamps else None,
         latestAssessmentAt=_as_utc(timestamps[-1]) if timestamps else None,
+    )
+
+
+METABOLIC_LABELS = {
+    "abdominalObesity": "腹部肥胖",
+    "elevatedBloodPressure": "血壓偏高或治療中",
+    "elevatedGlucose": "空腹血糖偏高或使用降糖藥",
+    "elevatedTriglyceride": "三酸甘油酯偏高或治療中",
+    "lowHdl": "HDL-C 偏低",
+}
+
+
+def _payload_header(name: str, description: str | None) -> str:
+    """把欄位說明縮成表頭，例如「年齡，…，單位：歲」→「年齡 (歲)」。"""
+
+    if not description:
+        return name
+    header = description.split("，")[0]
+    if "單位" in description:
+        unit = description.split("單位")[-1].lstrip("：: ")
+        header = f"{header} ({unit})"
+    return header
+
+
+PAYLOAD_COLUMNS = [
+    (name, _payload_header(name, field.description))
+    for name, field in RiskAssessmentRequest.model_fields.items()
+]
+
+
+def _cell(value) -> str | int | float:
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "是" if value else "否"
+    return value
+
+
+@router.get("/admin/assessments/export.csv")
+def export_assessments_csv(
+    session: Session = Depends(get_session),
+    _current_admin: AdminAccount = Depends(get_current_admin),
+) -> Response:
+    """匯出全部評估紀錄為 CSV（UTF-8 BOM，Windows Excel 可直接開啟中文）。"""
+
+    assessments = session.execute(
+        select(Assessment).order_by(Assessment.created_at.desc())
+    ).scalars()
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(
+        [
+            "編號",
+            "填寫時間（台灣）",
+            "風險層級",
+            "危險因子數",
+            "危險因子",
+            "符合規則",
+            "代謝症候群項數",
+            "代謝症候群項目",
+        ]
+        + [header for _, header in PAYLOAD_COLUMNS]
+    )
+
+    for a in assessments:
+        result = a.result or {}
+        payload = a.payload or {}
+        metabolic = result.get("metabolicSyndrome") or {}
+        components = metabolic.get("components") or {}
+        writer.writerow(
+            [
+                a.id,
+                _as_utc(a.created_at).astimezone(TAIWAN_TZ).strftime("%Y-%m-%d %H:%M"),
+                a.level_label,
+                a.risk_factor_count,
+                "、".join(
+                    f["label"] for f in result.get("riskFactors", []) if f.get("present")
+                ),
+                "、".join(r["label"] for r in result.get("matchedRules", [])),
+                metabolic.get("count", ""),
+                "、".join(METABOLIC_LABELS.get(k, k) for k, v in components.items() if v),
+            ]
+            + [_cell(payload.get(name)) for name, _ in PAYLOAD_COLUMNS]
+        )
+
+    filename = f"assessments_{datetime.now(TAIWAN_TZ):%Y%m%d}.csv"
+    return Response(
+        # BOM so Excel on Windows detects UTF-8 instead of Big5.
+        content="\ufeff" + buffer.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
