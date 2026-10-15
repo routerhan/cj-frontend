@@ -145,6 +145,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .tab{background:none;border:none;padding:10px 18px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
 .report-link{margin-left:auto;align-self:center;color:var(--accent);font-size:13px;font-weight:500;text-decoration:none;padding:6px 12px;border:1px solid var(--border);border-radius:8px}
 .report-link:hover{background:var(--accent-light)}
+.csv-link{margin-left:8px;background:none;cursor:pointer;font-family:inherit}
+.csv-link:disabled{opacity:.5;cursor:wait}
 .tab:hover{color:var(--text-secondary)}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
 
@@ -259,6 +261,7 @@ pre.payload{max-height:240px;overflow:auto;background:#0f172a;color:#e2e8f0;padd
     <button class="tab active" data-tab="tab-overview">概覽</button>
     <button class="tab" data-tab="tab-records">評估紀錄</button>
     <a class="report-link" href="/api/admin/report-view" target="_blank" rel="noopener">\u2193 統計報告（PDF）</a>
+    <button class="report-link csv-link" id="export-csv-btn" type="button">\u2193 匯出全部紀錄（CSV）</button>
   </div>
 </div>
 
@@ -489,6 +492,34 @@ function fetchWithAuth(url, options) {
   headers.set('Accept', 'application/json');
   return fetch(url, Object.assign({}, options, { headers: headers }));
 }
+
+/* ---- CSV export ---- */
+function exportCsv() {
+  var btn = document.getElementById('export-csv-btn');
+  btn.disabled = true;
+  fetchWithAuth('/api/admin/assessments/export.csv')
+    .then(function(res) {
+      if (res.status === 401) throw new Error('unauthorized');
+      if (!res.ok) throw new Error('failed');
+      var match = /filename="([^"]+)"/.exec(res.headers.get('Content-Disposition') || '');
+      return res.blob().then(function(blob) { return { blob: blob, name: match ? match[1] : 'assessments.csv' }; });
+    })
+    .then(function(file) {
+      var url = URL.createObjectURL(file.blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    })
+    .catch(function(err) {
+      alert(err.message === 'unauthorized' ? '登入已失效，請重新登入。' : 'CSV 匯出失敗，請稍後再試。');
+    })
+    .then(function() { btn.disabled = false; });
+}
+document.getElementById('export-csv-btn').addEventListener('click', exportCsv);
 
 /* ---- sparkline helper ---- */
 function sparklineHTML(heights, color) {
